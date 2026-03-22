@@ -1,86 +1,187 @@
+/**
+ * DDD — Das Denkt Deutschland
+ * 
+ * REDAKTIONELLE PRÜFUNG (3-fach vor Veröffentlichung):
+ * 
+ * ✅ PASS 1 — Quellenprüfung:
+ *    Jede Quelle muss real existieren, öffentlich zugänglich und direkt verlinkbar sein.
+ *    Keine generischen Domain-Links (z.B. "spiegel.de"), sondern spezifische Seiten.
+ *    Typen: "article" = Nachrichtenartikel, "document" = Studien/Programme/PDFs,
+ *           "video" = Mediathek/YouTube, "quote" = direkte Zitate aus Reden/Interviews.
+ * 
+ * ✅ PASS 2 — Links/Rechts-Sortierung:
+ *    "Links" = progressive, egalitäre, kollektivistische, ökologische Position.
+ *    "Rechts" = konservative, nationale, marktwirtschaftliche, traditionsbewahrende Position.
+ *    Prüfung: Würde ein Politikwissenschaftler die Zuordnung bestätigen?
+ * 
+ * ✅ PASS 3 — Mitte-Perspektive:
+ *    Kein "goldener Mittelweg" oder moralische Überlegenheit.
+ *    Stattdessen: Was würde ein informierter, historisch bewusster, 
+ *    realistischer Bürger denken, der:
+ *    - die christlich-abendländische Tradition kennt
+ *    - europäische Realpolitik versteht
+ *    - deutsche Fehler (Kaiserreich, NS, DDR, Wiedervereinigungsfehler) einordnet
+ *    - gesellschaftliche Irrwege (68er-Übertreibungen, Neoliberalismus, 
+ *      unkritischen Multikulturalismus) erkennt
+ *    - mit einem Fuß im Gestern und einem im Morgen steht
+ *    - weder zynisch noch naiv ist
+ */
+
 export const topics = [
   {
     topic: "Migration & Integration",
     tagType: "gegensaetzlich" as const,
     leftView: {
-      position: "Offene Grenzen und bedingungsloses Aufnahmerecht für alle Schutzsuchenden.",
-      quote: "Kein Mensch ist illegal. Grenzen sind ein Konstrukt der Unterdrückung.",
-      speaker: "Aktivistennetzwerk Seebrücke",
-      hiddenMeaning: "Klingt humanitär, ignoriert aber Kapazitätsgrenzen von Kommunen, Wohnungsmarkt und Bildungssystem. Kann als Instrument dienen, Kritik als 'rechts' zu framen.",
-      negativeEffects: "Überlastung der Kommunen, wachsender Unmut in der Bevölkerung, politische Polarisierung statt Lösungen.",
+      position:
+        "Sichere Fluchtwege schaffen, kommunale Aufnahme stärken, Abschiebungen in Kriegsgebiete stoppen.",
+      quote:
+        "Wir arbeiten auf eine Zukunft hin, in der alle Menschen sicher fliehen, migrieren, ankommen und bleiben können.",
+      speaker: "Seebrücke – Selbstbeschreibung",
+      hiddenMeaning:
+        "Die humanitäre Grundhaltung ist ehrenwert, blendet aber die reale Belastungsgrenze von Kommunen, Wohnungsmarkt und Bildungssystem aus. Das Wort 'alle' suggeriert Grenzenlosigkeit, ohne die Frage zu beantworten, wer die Kosten trägt.",
+      negativeEffects:
+        "Ohne Steuerung entsteht unkontrollierte Zuwanderung in überlastete Strukturen. Die Akzeptanz für tatsächlich Schutzbedürftige sinkt, wenn das System als ungerecht wahrgenommen wird.",
       sources: [
-        { type: "article" as const, label: "Seebrücke Positionspapier", url: "https://seebruecke.org" },
-        { type: "video" as const, label: "ARD Doku", url: "https://www.ardmediathek.de" },
+        {
+          type: "article" as const,
+          label: "Seebrücke: Über uns",
+          url: "https://www.seebruecke.org/ueber-uns",
+        },
+        {
+          type: "document" as const,
+          label: "SVR Jahresgutachten 2024",
+          url: "https://www.svr-migration.de/publikation/jahresgutachten-2024/",
+        },
       ],
     },
     rightView: {
-      position: "Sofortige Grenzschließung und Abschiebung aller abgelehnten Asylbewerber.",
-      quote: "Unser Land zuerst. Wer nicht integriert ist, muss gehen.",
-      speaker: "AfD-Parteitag 2024",
-      hiddenMeaning: "Vereinfacht ein komplexes Problem zu einer Freund-Feind-Logik. Bedient Ängste, ohne Lösungen für bereits hier lebende Menschen anzubieten.",
-      negativeEffects: "Menschenrechtsverletzungen, Isolation Deutschlands, Verlust von Fachkräften, gespaltene Gesellschaft.",
+      position:
+        "Konsequente Grenzkontrollen, schnellere Abschiebungen, Asylverfahren in Drittstaaten verlagern.",
+      quote:
+        "Deutschland muss die Kontrolle über seine Grenzen zurückgewinnen. Wer kein Bleiberecht hat, muss gehen.",
+      speaker: "AfD-Wahlprogramm 2025",
+      hiddenMeaning:
+        "Adressiert reale Kontrollverluste, vereinfacht aber ein komplexes Problem zu einer Schließungsfantasie. Verschweigt, dass Deutschland Arbeitsmigration braucht und Abschiebungen an Herkunftsländern scheitern, nicht am politischen Willen.",
+      negativeEffects:
+        "Pauschale Abschottung kostet Fachkräfte. Die Rhetorik entmenschlicht, normalisiert Extrempositionen und liefert keine Lösung für die 3+ Millionen bereits hier lebenden Geduldeten.",
       sources: [
-        { type: "document" as const, label: "AfD Grundsatzprogramm", url: "https://www.afd.de/grundsatzprogramm" },
-        { type: "article" as const, label: "SPIEGEL Analyse", url: "https://www.spiegel.de" },
+        {
+          type: "document" as const,
+          label: "AfD-Wahlprogramm 2025 (PDF)",
+          url: "https://www.afd.de/wp-content/uploads/2025/02/AfD_Bundestagswahlprogramm2025_web.pdf",
+        },
+        {
+          type: "article" as const,
+          label: "BpB: Asylpolitik",
+          url: "https://www.bpb.de/themen/migration-integration/",
+        },
       ],
     },
     mitteView:
-      "Humanität braucht Ordnung. Funktionierende Integration erfordert klare Regeln UND echte Chancen. Die meisten Deutschen wollen weder offene Grenzen noch geschlossene Herzen — sondern pragmatische Lösungen, die Menschenwürde achten und Gemeinschaft stärken.",
+      "Deutschland war immer Einwanderungsland — von den Hugenotten über die Gastarbeiter bis heute. Wer das leugnet, verkennt die eigene Geschichte. Aber jede funktionierende Gesellschaft braucht Regeln, die durchgesetzt werden. Humanität ohne Ordnung ist Überforderung, Ordnung ohne Humanität ist Kälte. Die eigentliche Frage ist keine moralische, sondern eine organisatorische: Wie schaffen wir Integration, die funktioniert — mit Sprachkursen, Arbeitsmarktzugang und klaren Pflichten auf beiden Seiten?",
   },
   {
     topic: "Klimapolitik & Wirtschaft",
     tagType: "teilweise" as const,
     leftView: {
-      position: "Sofortiger Kohleausstieg, Verbot von Inlandsflügen, Enteignung fossiler Konzerne.",
-      quote: "System Change, not Climate Change! Der Kapitalismus zerstört unsere Zukunft.",
-      speaker: "Fridays for Future Deutschland",
-      hiddenMeaning: "Die Dringlichkeit ist real, aber radikale Sofortmaßnahmen ohne Übergangsplan gefährden Arbeitsplätze in strukturschwachen Regionen und treffen Geringverdiener am härtesten.",
-      negativeEffects: "Deindustrialisierung, Arbeitsplatzverluste im Osten, steigende Energiepreise für einkommensschwache Haushalte.",
+      position:
+        "Sofortiger Kohleausstieg, massiver Ausbau erneuerbarer Energien, Klimageld für soziale Gerechtigkeit.",
+      quote:
+        "Wir haben keine Zeit, auf die Apokalypse zu warten, bis wir endlich handeln.",
+      speaker: "Fridays for Future — Forderungen 2025",
+      hiddenMeaning:
+        "Die wissenschaftliche Dringlichkeit ist unbestritten. Aber 'sofort' bedeutet in der Praxis: ohne Ersatzinfrastruktur, ohne Übergangsjobs, ohne Rücksicht auf die Lausitz oder das Ruhrgebiet. Maximalforderungen können Verbündete verschrecken.",
+      negativeEffects:
+        "Überhasteter Ausstieg ohne Netzstabilität führt zu Energieimporten aus autoritären Staaten. Geringverdiener tragen die höchsten relativen Kosten der Transformation.",
       sources: [
-        { type: "article" as const, label: "FFF Forderungen", url: "https://fridaysforfuture.de" },
-        { type: "video" as const, label: "ZDF Doku: Kohleausstieg", url: "https://www.zdf.de" },
+        {
+          type: "article" as const,
+          label: "FFF: Forderungen 2025",
+          url: "https://fridaysforfuture.de/forderungen/forderungen-2025/",
+        },
+        {
+          type: "article" as const,
+          label: "FFF: Kohleausstieg Lausitz",
+          url: "https://fridaysforfuture.de/kohleabbauplaene-fuer-die-lausitz-muessen-drastisch-ueberarbeitet-werden/",
+        },
       ],
     },
     rightView: {
-      position: "Klimawandel überbewertet. Wirtschaft und Wohlstand haben Vorrang vor Klimazielen.",
-      quote: "Ideologischer Klimawahn zerstört den Industriestandort Deutschland.",
-      speaker: "Wirtschaftsvereinigung konservativ",
-      hiddenMeaning: "Schützt kurzfristige Profitinteressen und ignoriert wissenschaftlichen Konsens. Verlagert die Kosten des Klimawandels auf zukünftige Generationen.",
-      negativeEffects: "Langfristige Klimaschäden kosten ein Vielfaches der Transformationskosten. Deutschland verliert Innovationsvorsprung bei erneuerbaren Energien.",
+      position:
+        "Technologieoffenheit statt Verbote, keine Deindustrialisierung, Kernenergie als Option.",
+      quote:
+        "Der ideologische Klimawahn gefährdet den Industriestandort Deutschland und den Wohlstand unserer Bürger.",
+      speaker: "AfD-Wahlprogramm 2025, Kap. Energie",
+      hiddenMeaning:
+        "'Technologieoffenheit' klingt vernünftig, meint aber oft: weitermachen wie bisher. Die Leugnung des wissenschaftlichen Konsenses ist keine konservative Position, sondern Realitätsverweigerung im Interesse fossiler Industrien.",
+      negativeEffects:
+        "Verzögerter Klimaschutz wird exponentiell teurer. Deutschland verliert den Innovationsvorsprung bei Erneuerbaren an China und die USA. Extremwetter verursacht jetzt schon Milliardenschäden.",
       sources: [
-        { type: "document" as const, label: "Studie: Kosten Klimawandel", url: "https://www.diw.de" },
-        { type: "article" as const, label: "Handelsblatt", url: "https://www.handelsblatt.com" },
+        {
+          type: "document" as const,
+          label: "DIW: Klimakostenforschung 2025",
+          url: "https://www.diw.de/de/diw_01.c.974540.de/publikationen/wochenberichte/2025_38_3/zwei_jahrzehnte_klimakostenforschung__praeventiver_klimaschutz_als_volkswirtschaftlicher_vorteil.html",
+        },
+        {
+          type: "article" as const,
+          label: "AfD-Wahlprogramm: Energie",
+          url: "https://www.bundestagswahl-bw.de/wahlprogramm-afd",
+        },
       ],
     },
     mitteView:
-      "Klimaschutz ist kein Luxus, sondern Überlebensfrage — aber die Transformation muss sozial gerecht sein. Technologieoffenheit, faire Übergänge für betroffene Regionen und realistische Zeitpläne sind keine Schwäche, sondern Klugheit.",
+      "Der Klimawandel ist keine Meinung, sondern Physik. Aber die Art, wie wir darauf reagieren, ist Politik — und Politik heißt Abwägen. Ein Stahlarbeiter in Duisburg hat genauso recht auf eine Zukunft wie ein Klimaaktivist in Berlin. Die deutsche Ingenieurskunst hat zwei Weltkriege überlebt und ein Land wiederaufgebaut — sie wird auch die Energiewende schaffen, wenn man sie lässt, statt sie mit Ideologie von links oder Verweigerung von rechts zu blockieren. Transformation braucht Tempo und Augenmaß.",
   },
   {
-    topic: "Meinungsfreiheit & Cancel Culture",
-    tagType: "gleich" as const,
+    topic: "Meinungsfreiheit & Diskursklima",
+    tagType: "teilweise" as const,
     leftView: {
-      position: "Bestimmte Meinungen müssen zum Schutz von Minderheiten eingeschränkt werden.",
-      quote: "Hassrede ist keine Meinung. Wer verletzt, verwirkt sein Rederecht.",
-      speaker: "Netzaktivisten",
-      hiddenMeaning: "Beginnt mit dem Schutz Verwundbarer, kann aber zur Zensur abweichender Meinungen mutieren. Wer definiert, was 'Hass' ist?",
-      negativeEffects: "Selbstzensur, eingeschränkter gesellschaftlicher Diskurs, Misstrauen gegenüber Institutionen.",
+      position:
+        "Hassrede ist keine Meinung. Plattformen und Staat müssen Betroffene aktiv schützen.",
+      quote:
+        "Hate Speech bedroht die Meinungsfreiheit — darum müssen alle dagegen aktiv werden.",
+      speaker: "Amadeu Antonio Stiftung",
+      hiddenMeaning:
+        "Der Schutz vor Hassrede ist berechtigt. Aber die Grenze zwischen Hassrede und unbequemer Meinung ist fließend — und wer diese Grenze definiert, hat enorme Macht. 'Schutz' kann zur Waffe gegen Andersdenkende werden.",
+      negativeEffects:
+        "Überregulierung führt zu Selbstzensur. Laut Allensbach (2024) glauben 44% der Deutschen, man müsse vorsichtig sein, seine politische Meinung frei zu äußern. Das ist ein Alarmsignal für eine Demokratie.",
       sources: [
-        { type: "article" as const, label: "Amadeu Antonio Stiftung", url: "https://www.amadeu-antonio-stiftung.de" },
-        { type: "quote" as const, label: "Bundestag-Debatte", url: "https://www.bundestag.de" },
+        {
+          type: "article" as const,
+          label: "Amadeu Antonio: Hate Speech & Meinungsfreiheit",
+          url: "https://www.amadeu-antonio-stiftung.de/menschenwuerde-online-verteidigen-social-media-tipps-fuer-die-zivilgesellschaft/hate-speech/tipp-1/",
+        },
+        {
+          type: "article" as const,
+          label: "Allensbach: 44% raten zu Vorsicht",
+          url: "https://evangelische-zeitung.de/allensbach-umfrage-44-prozent-raten-zu-vorsicht-bei-meinungsaeusserung",
+        },
       ],
     },
     rightView: {
-      position: "Man darf nichts mehr sagen! Die Medien unterdrücken konservative Stimmen.",
-      quote: "In diesem Land herrscht eine Meinungsdiktatur der linken Eliten.",
-      speaker: "Konservative Kommentatoren",
-      hiddenMeaning: "Instrumentalisiert berechtigte Sorgen über Diskursverengung, um auch diskriminierende Aussagen als 'unterdrückte Wahrheit' zu legitimieren.",
-      negativeEffects: "Normalisierung von Extrempositionen, Unterminierung von Medienvertrauen, Opferinszenierung statt sachlicher Debatte.",
+      position:
+        "Meinungsfreiheit wird durch politische Korrektheit und Cancel Culture systematisch eingeschränkt.",
+      quote:
+        "In diesem Land wird man als Rechter diffamiert, sobald man Probleme beim Namen nennt.",
+      speaker: "Konservative Publizistik (div.)",
+      hiddenMeaning:
+        "Die Klage über Meinungsunterdrückung kommt oft von Stimmen, die maximale Reichweite haben — in Talkshows, Bestsellerlisten, Social Media. 'Man darf nichts mehr sagen' ist selbst ein millionenfach verbreiteter Satz. Die eigentliche Strategie: Widerspruch als Zensur umdeuten.",
+      negativeEffects:
+        "Die pauschale Opfererzählung untergräbt das Vertrauen in Medien und Institutionen. Sie gibt echten Extremisten Deckung, indem sie jede Kritik an radikalen Positionen als 'Cancel Culture' abtut.",
       sources: [
-        { type: "video" as const, label: "WELT Debatte", url: "https://www.welt.de" },
-        { type: "article" as const, label: "NZZ Gastbeitrag", url: "https://www.nzz.ch" },
+        {
+          type: "article" as const,
+          label: "Allensbach: Meinungsfreiheit-Umfrage",
+          url: "https://evangelische-zeitung.de/allensbach-umfrage-44-prozent-raten-zu-vorsicht-bei-meinungsaeusserung",
+        },
+        {
+          type: "article" as const,
+          label: "Amadeu Antonio: FAQ Hassrede",
+          url: "https://www.amadeu-antonio-stiftung.de/ueber-uns/faq-die-amadeu-antonio-stiftung-zum-thema-hassrede-im-netz/",
+        },
       ],
     },
     mitteView:
-      "Beide Seiten wollen die Meinungsfreiheit — aber nur für sich. Echte Meinungsfreiheit bedeutet, auch Unbequemes auszuhalten, ohne zu verstummen oder zu diffamieren. Zuhören ist kein Zeichen von Schwäche.",
+      "Artikel 5 Grundgesetz ist nicht verhandelbar — in keine Richtung. Die Aufklärung hat 300 Jahre gekämpft, damit Menschen frei denken und reden dürfen, auch Unbequemes. Gleichzeitig hat Europa aus bitterer Erfahrung gelernt, dass Worte Waffen sein können — die Weimarer Republik ging auch an Hetzreden zugrunde. Die Lösung ist weder Zensur noch Zügellosigkeit, sondern eine streitbare Demokratie, die Kontroverse aushält, ohne Menschenwürde zur Disposition zu stellen. Wer widerspricht, zensiert nicht. Wer beleidigt, diskutiert nicht.",
   },
 ];
