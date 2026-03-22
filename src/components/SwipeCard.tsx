@@ -88,13 +88,12 @@ const SwipeCard = ({ topic, tagType, leftView, rightView, mitteView, index, tota
 
       {/* Split Viewpoints */}
       <div className="flex-1 px-5 py-5">
-        <div className="grid grid-cols-2 gap-0 relative">
-          {/* Center divider */}
-          <div className="absolute left-1/2 top-0 bottom-0 -translate-x-1/2 w-px bg-gradient-to-b from-transparent via-accent/40 to-transparent z-10" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-0 relative">
+          {/* Center divider — only on sm+ */}
+          <div className="hidden sm:block absolute left-1/2 top-0 bottom-0 -translate-x-1/2 w-px bg-gradient-to-b from-transparent via-accent/40 to-transparent z-10" />
 
           {/* Left Column */}
-          <div className="pr-4 relative">
-            {/* Label */}
+          <div className="sm:pr-4 relative">
             <div className="flex items-center gap-2 mb-4">
               <span className="w-2 h-2 rounded-full bg-left flex-shrink-0" />
               <span className="text-[10px] font-black tracking-[0.25em] uppercase text-foreground/80">Links</span>
@@ -122,19 +121,22 @@ const SwipeCard = ({ topic, tagType, leftView, rightView, mitteView, index, tota
             <HiddenContent data={leftView} />
           </div>
 
+          {/* Horizontal divider — only on mobile */}
+          <div className="sm:hidden h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+
           {/* Right Column */}
-          <div className="pl-4 relative">
-            {/* Label */}
-            <div className="flex items-center justify-end gap-2 mb-4">
+          <div className="sm:pl-4 relative">
+            <div className="flex items-center gap-2 sm:justify-end mb-4">
+              <span className="sm:hidden w-2 h-2 rounded-full bg-right-red flex-shrink-0" />
               <span className="text-[10px] font-black tracking-[0.25em] uppercase text-right-red">Rechts</span>
-              <span className="w-2 h-2 rounded-full bg-right-red flex-shrink-0" />
+              <span className="hidden sm:block w-2 h-2 rounded-full bg-right-red flex-shrink-0" />
             </div>
 
-            <p className="font-body text-[13px] text-foreground font-semibold leading-snug mb-3 text-right">
+            <p className="font-body text-[13px] text-foreground font-semibold leading-snug mb-3 sm:text-right">
               {rightView.position}
             </p>
 
-            <blockquote className="relative pr-3 mb-3 border-r-2 border-right/8 text-right">
+            <blockquote className="relative pl-3 sm:pl-0 sm:pr-3 mb-3 border-l-2 sm:border-l-0 sm:border-r-2 border-foreground/8 sm:text-right">
               <p className="font-editorial italic text-[12px] text-foreground/65 leading-relaxed">
                 „{rightView.quote}"
               </p>
@@ -143,7 +145,7 @@ const SwipeCard = ({ topic, tagType, leftView, rightView, mitteView, index, tota
               </cite>
             </blockquote>
 
-            <div className="flex flex-wrap gap-1 justify-end">
+            <div className="flex flex-wrap gap-1 sm:justify-end">
               {rightView.sources.map((s, i) => (
                 <SourceBadge key={i} type={s.type} label={s.label} url={s.url} />
               ))}
