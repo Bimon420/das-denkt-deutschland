@@ -129,11 +129,11 @@ const SwipeCard = ({ topic, tagType, leftView, rightView, mitteView, index, tota
         <ViewpointSection data={rightView} side="right" />
 
         {/* Mitte */}
-        <div className="p-5 rounded-xl bg-mitte-light border-2 border-mitte">
-          <div className="text-[10px] font-bold tracking-[0.2em] uppercase text-mitte-gold mb-2 text-center">
-            🤝 Die Mitte spricht
+        <div className="p-5 rounded-xl bg-secondary/50 border border-border">
+          <div className="text-[10px] font-medium tracking-[0.15em] uppercase text-muted-foreground mb-2 text-center">
+            ↔ Irgendwo dazwischen
           </div>
-          <p className="font-body text-sm text-foreground/80 leading-relaxed text-center">
+          <p className="font-body text-sm text-foreground/70 leading-relaxed text-center">
             {mitteView}
           </p>
         </div>

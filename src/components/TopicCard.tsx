@@ -110,16 +110,16 @@ const TopicCard = ({ topic, tagType, leftView, rightView, mitteView, index }: To
 
       {/* Die Mitte spricht */}
       <motion.div
-        className="mt-6 mx-auto max-w-2xl p-6 rounded-xl bg-mitte-light border-2 border-mitte text-center"
+        className="mt-6 mx-auto max-w-2xl p-5 rounded-xl bg-secondary/50 border border-border text-center"
         initial={{ opacity: 0, y: 20, scale: 0.97 }}
         whileInView={{ opacity: 1, y: 0, scale: 1 }}
         viewport={{ once: true, amount: 0.3 }}
         transition={{ delay: 0.4, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       >
-        <div className="text-xs font-bold tracking-widest uppercase text-mitte-gold mb-2">
-          🤝 Die Mitte spricht
+        <div className="text-xs font-medium tracking-wide uppercase text-muted-foreground mb-2">
+          ↔ Irgendwo dazwischen
         </div>
-        <p className="font-body text-sm text-foreground/80 leading-relaxed">{mitteView}</p>
+        <p className="font-body text-sm text-foreground/70 leading-relaxed">{mitteView}</p>
       </motion.div>
     </div>
   );
