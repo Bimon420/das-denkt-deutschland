@@ -11,19 +11,19 @@ const tagConfig: Record<TagType, { label: string; emoji: string; bgClass: string
   gleich: {
     label: "Gleiche Position",
     emoji: "✓",
-    bgClass: "bg-mitte-light border-mitte",
+    bgClass: "bg-mitte-light border-mitte/40",
     textClass: "text-mitte-gold",
   },
   gegensaetzlich: {
     label: "Gegensätzlich",
     emoji: "⚡",
-    bgClass: "bg-destructive/10 border-destructive/30",
+    bgClass: "bg-destructive/8 border-destructive/20",
     textClass: "text-destructive",
   },
   teilweise: {
     label: "Teilweise gleich",
     emoji: "↔",
-    bgClass: "bg-secondary border-border",
+    bgClass: "bg-secondary border-border/60",
     textClass: "text-muted-foreground",
   },
 };
@@ -33,7 +33,7 @@ const TransparencyTag = ({ type, className }: TransparencyTagProps) => {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border tracking-wide uppercase",
+        "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border tracking-wider uppercase shadow-sm",
         config.bgClass,
         config.textClass,
         className

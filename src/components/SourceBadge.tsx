@@ -21,7 +21,7 @@ const SourceBadge = ({ type, label, url }: SourceBadgeProps) => {
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-secondary text-muted-foreground text-xs font-medium hover:bg-accent hover:text-accent-foreground transition-colors duration-150 active:scale-[0.97]"
+      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-secondary/80 text-muted-foreground text-[11px] font-medium shadow-sm hover:shadow-md hover:bg-accent hover:text-accent-foreground transition-all duration-200 active:scale-[0.96]"
     >
       {iconMap[type]}
       {label}
