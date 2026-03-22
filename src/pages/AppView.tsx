@@ -60,7 +60,7 @@ const AppView = () => {
             <div className="w-2 h-4 rounded-sm bg-destructive" />
             <div className="w-2 h-4 rounded-sm bg-accent" />
           </div>
-          <span className="font-editorial text-sm font-bold tracking-tight">DDT</span>
+          <span className="font-editorial text-sm font-bold tracking-tight">DDD</span>
         </div>
         <button
           onClick={() => navigate("/intro")}
