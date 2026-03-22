@@ -65,7 +65,7 @@ const AppView = () => {
       <header className="flex items-center justify-between px-5 py-3 border-b border-border/50 bg-background/90 backdrop-blur-md z-20">
         <div className="flex items-center gap-2.5">
           <img src="/logo.png" alt="DDD" className="h-8 w-auto" />
-          <span className="font-editorial text-sm font-bold tracking-tight">Das Denkt Deutschland</span>
+          <span className="font-body text-sm font-extrabold tracking-tight uppercase">Das Denkt Deutschland</span>
         </div>
         <button
           onClick={() => navigate("/intro")}
