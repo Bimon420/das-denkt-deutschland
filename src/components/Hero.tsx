@@ -75,7 +75,7 @@ const Hero = () => {
             <span className="text-left font-medium text-sm tracking-wide uppercase">Links</span>
           </motion.div>
           <motion.div
-            className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-mitte-light border border-mitte shadow-sm"
+            className="relative flex items-center gap-2 px-4 py-1.5 rounded-full bg-mitte-light border border-mitte shadow-sm"
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 1.3, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
