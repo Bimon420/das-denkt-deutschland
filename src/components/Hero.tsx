@@ -62,7 +62,7 @@ const Hero = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 1.0, duration: 0.6 }}
         >
-          <div className="flex items-center gap-2">
+          <div className="flex-1 flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-left" />
             <span className="text-left font-medium text-sm tracking-wide uppercase">Links</span>
           </div>
@@ -73,7 +73,7 @@ const Hero = () => {
           >
             <span className="text-mitte-gold font-semibold text-sm tracking-wide uppercase">Die Mitte</span>
           </motion.div>
-          <div className="flex items-center gap-2">
+          <div className="flex-1 flex items-center gap-2 justify-end">
             <span className="text-right font-medium text-sm tracking-wide uppercase">Rechts</span>
             <div className="w-3 h-3 rounded-full bg-right-red" />
           </div>
