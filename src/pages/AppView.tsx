@@ -67,13 +67,22 @@ const AppView = () => {
           <img src="/logo.png" alt="DDD" className="w-auto" style={{ height: '1.8rem' }} />
           <span className="font-body text-sm font-extrabold tracking-tight uppercase">Das Denkt Deutschland</span>
         </div>
-        <button
-          onClick={() => navigate("/intro")}
-          className="p-2 rounded-full hover:bg-secondary transition-colors active:scale-95"
-          aria-label="Info"
-        >
-          <Info className="w-4 h-4 text-muted-foreground" />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => navigate("/archiv")}
+            className="p-2 rounded-full hover:bg-secondary transition-colors active:scale-95"
+            aria-label="Archiv"
+          >
+            <Archive className="w-4 h-4 text-muted-foreground" />
+          </button>
+          <button
+            onClick={() => navigate("/intro")}
+            className="p-2 rounded-full hover:bg-secondary transition-colors active:scale-95"
+            aria-label="Info"
+          >
+            <Info className="w-4 h-4 text-muted-foreground" />
+          </button>
+        </div>
       </header>
 
       {/* Card area */}
