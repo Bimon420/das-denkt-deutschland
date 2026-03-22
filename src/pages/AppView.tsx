@@ -29,6 +29,7 @@ const variants = {
 };
 
 const AppView = () => {
+  const { data: topics = [], isLoading } = useTopics();
   const [[current, direction], setCurrent] = useState([0, 0]);
   const navigate = useNavigate();
 
@@ -40,13 +41,21 @@ const AppView = () => {
         return [next, dir];
       });
     },
-    []
+    [topics.length]
   );
 
   const handleDragEnd = (_: any, info: PanInfo) => {
     if (info.offset.y < -SWIPE_THRESHOLD) paginate(1);
     else if (info.offset.y > SWIPE_THRESHOLD) paginate(-1);
   };
+
+  if (isLoading || topics.length === 0) {
+    return (
+      <div className="h-[100dvh] w-full bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   const t = topics[current];
 
