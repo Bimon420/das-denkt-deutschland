@@ -5,8 +5,8 @@ export const topics = [
     leftView: {
       position: "Offene Grenzen und bedingungsloses Aufnahmerecht für alle Schutzsuchenden.",
       quote: "Kein Mensch ist illegal. Grenzen sind ein Konstrukt der Unterdrückung.",
-      speaker: "Aktivistennetzwerk „Seebrücke"",
-      hiddenMeaning: "Klingt humanitär, ignoriert aber Kapazitätsgrenzen von Kommunen, Wohnungsmarkt und Bildungssystem. Kann als Instrument dienen, Kritik als ‚rechts' zu framen.",
+      speaker: "Aktivistennetzwerk "Seebrücke"",
+      hiddenMeaning: "Klingt humanitär, ignoriert aber Kapazitätsgrenzen von Kommunen, Wohnungsmarkt und Bildungssystem. Kann als Instrument dienen, Kritik als 'rechts' zu framen.",
       negativeEffects: "Überlastung der Kommunen, wachsender Unmut in der Bevölkerung, politische Polarisierung statt Lösungen.",
       sources: [
         { type: "article" as const, label: "Seebrücke Positionspapier", url: "https://seebruecke.org" },
@@ -62,7 +62,7 @@ export const topics = [
       position: "Bestimmte Meinungen müssen zum Schutz von Minderheiten eingeschränkt werden.",
       quote: "Hassrede ist keine Meinung. Wer verletzt, verwirkt sein Rederecht.",
       speaker: "Netzaktivisten",
-      hiddenMeaning: "Beginnt mit dem Schutz Verwundbarer, kann aber zur Zensur abweichender Meinungen mutieren. Wer definiert, was ‚Hass' ist?",
+      hiddenMeaning: "Beginnt mit dem Schutz Verwundbarer, kann aber zur Zensur abweichender Meinungen mutieren. Wer definiert, was 'Hass' ist?",
       negativeEffects: "Selbstzensur, eingeschränkter gesellschaftlicher Diskurs, Misstrauen gegenüber Institutionen.",
       sources: [
         { type: "article" as const, label: "Amadeu Antonio Stiftung", url: "https://www.amadeu-antonio-stiftung.de" },
@@ -73,7 +73,7 @@ export const topics = [
       position: "Man darf nichts mehr sagen! Die Medien unterdrücken konservative Stimmen.",
       quote: "In diesem Land herrscht eine Meinungsdiktatur der linken Eliten.",
       speaker: "Konservative Kommentatoren",
-      hiddenMeaning: "Instrumentalisiert berechtigte Sorgen über Diskursverengung, um auch diskriminierende Aussagen als ‚unterdrückte Wahrheit' zu legitimieren.",
+      hiddenMeaning: "Instrumentalisiert berechtigte Sorgen über Diskursverengung, um auch diskriminierende Aussagen als 'unterdrückte Wahrheit' zu legitimieren.",
       negativeEffects: "Normalisierung von Extrempositionen, Unterminierung von Medienvertrauen, Opferinszenierung statt sachlicher Debatte.",
       sources: [
         { type: "video" as const, label: "WELT Debatte", url: "https://www.welt.de" },
