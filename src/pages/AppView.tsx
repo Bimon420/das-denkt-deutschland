@@ -2,6 +2,8 @@ import { useState, useCallback } from "react";
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import { useTopics } from "@/hooks/useTopics";
 import SwipeCard from "@/components/SwipeCard";
+import ShareMenu from "@/components/ShareMenu";
+import ThemeToggle from "@/components/ThemeToggle";
 import { ChevronUp, ChevronDown, Info, Archive, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
