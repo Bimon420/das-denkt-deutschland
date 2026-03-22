@@ -1,8 +1,8 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
-import { topics } from "@/data/topics";
+import { useTopics } from "@/hooks/useTopics";
 import SwipeCard from "@/components/SwipeCard";
-import { ChevronUp, ChevronDown, Info } from "lucide-react";
+import { ChevronUp, ChevronDown, Info, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const SWIPE_THRESHOLD = 60;
@@ -29,6 +29,7 @@ const variants = {
 };
 
 const AppView = () => {
+  const { data: topics = [], isLoading } = useTopics();
   const [[current, direction], setCurrent] = useState([0, 0]);
   const navigate = useNavigate();
 
@@ -40,13 +41,21 @@ const AppView = () => {
         return [next, dir];
       });
     },
-    []
+    [topics.length]
   );
 
   const handleDragEnd = (_: any, info: PanInfo) => {
     if (info.offset.y < -SWIPE_THRESHOLD) paginate(1);
     else if (info.offset.y > SWIPE_THRESHOLD) paginate(-1);
   };
+
+  if (isLoading || topics.length === 0) {
+    return (
+      <div className="h-[100dvh] w-full bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   const t = topics[current];
 
