@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import AppView from "./pages/AppView";
 import Index from "./pages/Index";
+import AdminPage from "./pages/AdminPage";
+import ArchivePage from "./pages/ArchivePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -18,6 +20,8 @@ const App = () => (
         <Routes>
           <Route path="/" element={<AppView />} />
           <Route path="/intro" element={<Index />} />
+          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/archiv" element={<ArchivePage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
