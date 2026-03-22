@@ -11,9 +11,9 @@ const SWIPE_THRESHOLD = 60;
 
 const variants = {
   enter: (dir: number) => ({
-    y: dir > 0 ? 300 : -300,
+    y: dir > 0 ? 200 : -200,
     opacity: 0,
-    scale: 0.95,
+    scale: 0.96,
     filter: "blur(6px)",
   }),
   center: {
@@ -23,9 +23,9 @@ const variants = {
     filter: "blur(0px)",
   },
   exit: (dir: number) => ({
-    y: dir > 0 ? -200 : 200,
+    y: dir > 0 ? -150 : 150,
     opacity: 0,
-    scale: 0.95,
+    scale: 0.97,
     filter: "blur(4px)",
   }),
 };
@@ -53,35 +53,58 @@ const AppView = () => {
 
   if (isLoading || topics.length === 0) {
     return (
-      <div className="h-[100dvh] w-full bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+      <div className="h-[100dvh] w-full bg-background flex flex-col items-center justify-center gap-3">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4 }}
+        >
+          <Loader2 className="w-7 h-7 animate-spin text-accent" />
+        </motion.div>
+        <motion.p
+          className="text-xs text-muted-foreground font-medium"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.4 }}
+        >
+          Themen laden…
+        </motion.p>
       </div>
     );
   }
 
   const t = topics[current];
+  const progress = ((current + 1) / topics.length) * 100;
 
   return (
     <div className="h-[100dvh] w-full bg-background flex flex-col overflow-hidden">
+      {/* Progress bar */}
+      <motion.div
+        className="h-[2px] bg-accent origin-left z-30"
+        initial={{ scaleX: 0 }}
+        animate={{ scaleX: progress / 100 }}
+        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      />
+
       {/* Top bar */}
-      <header className="flex items-center justify-between px-5 py-3 border-b border-border/50 bg-background/90 backdrop-blur-md z-20">
+      <header className="flex items-center justify-between px-5 py-3 border-b border-border/40 bg-background/90 backdrop-blur-xl z-20">
         <div className="flex items-center gap-2.5">
           <img src="/logo.png" alt="DDD" className="w-auto" style={{ height: '1.8rem' }} />
           <span className="font-body text-sm font-extrabold tracking-tight uppercase">Das Denkt Deutschland</span>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
           <ShareMenu topic={t.topic} />
           <ThemeToggle />
           <button
             onClick={() => navigate("/archiv")}
-            className="p-2 rounded-full hover:bg-secondary transition-colors active:scale-95"
+            className="p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95"
             aria-label="Archiv"
           >
             <Archive className="w-4 h-4 text-muted-foreground" />
           </button>
           <button
             onClick={() => navigate("/intro")}
-            className="p-2 rounded-full hover:bg-secondary transition-colors active:scale-95"
+            className="p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95"
             aria-label="Info"
           >
             <Info className="w-4 h-4 text-muted-foreground" />
@@ -99,10 +122,10 @@ const AppView = () => {
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
             drag="y"
             dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={0.15}
+            dragElastic={0.12}
             onDragEnd={handleDragEnd}
             className="absolute inset-0"
           >
@@ -120,35 +143,44 @@ const AppView = () => {
       </div>
 
       {/* Bottom nav */}
-      <nav className="flex items-center justify-between px-5 py-3 border-t border-border/50 bg-background/90 backdrop-blur-md z-20">
+      <nav className="flex items-center justify-between px-5 py-3 border-t border-border/40 bg-background/90 backdrop-blur-xl z-20">
         <button
           onClick={() => paginate(-1)}
           disabled={current === 0}
-          className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground disabled:opacity-30 hover:text-foreground transition-colors active:scale-95"
+          className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground disabled:opacity-20 hover:text-foreground transition-all duration-200 active:scale-95"
         >
           <ChevronUp className="w-4 h-4" />
           Zurück
         </button>
 
         {/* Dot indicators */}
-        <div className="flex gap-2">
+        <div className="flex gap-1.5 items-center">
           {topics.map((_, i) => (
             <button
               key={i}
               onClick={() => setCurrent([i, i > current ? 1 : -1])}
-              className={`w-2 h-2 rounded-full transition-all duration-300 active:scale-90 ${
-                i === current
-                  ? "bg-accent w-6"
-                  : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
-              }`}
-            />
+              className="relative p-0.5 active:scale-90 transition-transform duration-150"
+              aria-label={`Thema ${i + 1}`}
+            >
+              <motion.div
+                className="rounded-full"
+                animate={{
+                  width: i === current ? 20 : 8,
+                  height: 8,
+                  backgroundColor: i === current
+                    ? "hsl(var(--accent))"
+                    : "hsl(var(--muted-foreground) / 0.25)",
+                }}
+                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+              />
+            </button>
           ))}
         </div>
 
         <button
           onClick={() => paginate(1)}
           disabled={current === topics.length - 1}
-          className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground disabled:opacity-30 hover:text-foreground transition-colors active:scale-95"
+          className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground disabled:opacity-20 hover:text-foreground transition-all duration-200 active:scale-95"
         >
           Weiter
           <ChevronDown className="w-4 h-4" />
