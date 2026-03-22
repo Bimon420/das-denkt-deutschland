@@ -70,6 +70,8 @@ const AppView = () => {
           <span className="font-body text-sm font-extrabold tracking-tight uppercase">Das Denkt Deutschland</span>
         </div>
         <div className="flex items-center gap-1">
+          <ShareMenu topic={t.topic} />
+          <ThemeToggle />
           <button
             onClick={() => navigate("/archiv")}
             className="p-2 rounded-full hover:bg-secondary transition-colors active:scale-95"
