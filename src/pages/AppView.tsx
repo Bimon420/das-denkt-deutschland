@@ -1,8 +1,8 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
-import { topics } from "@/data/topics";
+import { useTopics } from "@/hooks/useTopics";
 import SwipeCard from "@/components/SwipeCard";
-import { ChevronUp, ChevronDown, Info } from "lucide-react";
+import { ChevronUp, ChevronDown, Info, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const SWIPE_THRESHOLD = 60;
