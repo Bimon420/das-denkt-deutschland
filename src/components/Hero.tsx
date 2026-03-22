@@ -1,6 +1,9 @@
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 
 const Hero = () => {
+  const navigate = useNavigate();
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Split background */}
@@ -98,25 +101,19 @@ const Hero = () => {
           </motion.div>
         </motion.div>
 
-        {/* Scroll indicator */}
-        <motion.div
-          className="mt-16"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.6, duration: 0.6 }}
+        {/* CTA Button */}
+        <motion.button
+          onClick={() => navigate("/")}
+          className="mt-12 inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-accent text-accent-foreground font-semibold text-sm tracking-wide shadow-[0_2px_8px_hsl(var(--accent)/0.3)] hover:shadow-[0_4px_16px_hsl(var(--accent)/0.4)] transition-shadow duration-300 active:scale-[0.97]"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.4, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
         >
-          <motion.div
-            className="w-6 h-10 rounded-full border-2 border-foreground/15 mx-auto flex justify-center pt-2"
-            animate={{ y: [0, 5, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          >
-            <motion.div
-              className="w-1 h-2 rounded-full bg-accent"
-              animate={{ opacity: [1, 0.4, 1] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            />
-          </motion.div>
-        </motion.div>
+          Themen entdecken
+          <ArrowRight className="w-4 h-4" />
+        </motion.button>
       </div>
     </section>
   );
