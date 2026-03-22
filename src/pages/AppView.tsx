@@ -2,6 +2,8 @@ import { useState, useCallback } from "react";
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import { useTopics } from "@/hooks/useTopics";
 import SwipeCard from "@/components/SwipeCard";
+import ShareMenu from "@/components/ShareMenu";
+import ThemeToggle from "@/components/ThemeToggle";
 import { ChevronUp, ChevronDown, Info, Archive, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -68,6 +70,8 @@ const AppView = () => {
           <span className="font-body text-sm font-extrabold tracking-tight uppercase">Das Denkt Deutschland</span>
         </div>
         <div className="flex items-center gap-1">
+          <ShareMenu topic={t.topic} />
+          <ThemeToggle />
           <button
             onClick={() => navigate("/archiv")}
             className="p-2 rounded-full hover:bg-secondary transition-colors active:scale-95"
