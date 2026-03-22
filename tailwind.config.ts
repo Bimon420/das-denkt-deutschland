@@ -15,7 +15,7 @@ export default {
     extend: {
       fontFamily: {
         editorial: ["'Playfair Display'", "Georgia", "serif"],
-        body: ["'Space Grotesk'", "system-ui", "sans-serif"],
+        body: ["'Nunito Sans'", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

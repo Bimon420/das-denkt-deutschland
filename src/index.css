@@ -79,7 +79,7 @@
     font-family: 'Playfair Display', Georgia, serif;
   }
   .font-body {
-    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-family: 'Nunito Sans', system-ui, sans-serif;
   }
   .text-left-blue {
     color: hsl(var(--left));
