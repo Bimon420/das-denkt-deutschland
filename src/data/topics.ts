@@ -5,7 +5,7 @@ export const topics = [
     leftView: {
       position: "Offene Grenzen und bedingungsloses Aufnahmerecht für alle Schutzsuchenden.",
       quote: "Kein Mensch ist illegal. Grenzen sind ein Konstrukt der Unterdrückung.",
-      speaker: "Aktivistennetzwerk "Seebrücke"",
+      speaker: "Aktivistennetzwerk Seebrücke",
       hiddenMeaning: "Klingt humanitär, ignoriert aber Kapazitätsgrenzen von Kommunen, Wohnungsmarkt und Bildungssystem. Kann als Instrument dienen, Kritik als 'rechts' zu framen.",
       negativeEffects: "Überlastung der Kommunen, wachsender Unmut in der Bevölkerung, politische Polarisierung statt Lösungen.",
       sources: [
