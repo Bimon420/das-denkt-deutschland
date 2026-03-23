@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -27,9 +28,9 @@ const Footer = () => {
         <p className="mt-4 text-xs text-muted-foreground/60">
           © 2026 DAS DENKT DEUTSCHLAND. Alle Quellen öffentlich zugänglich.
         </p>
-        <a href="/impressum" className="mt-2 inline-block text-xs text-muted-foreground/40 hover:text-muted-foreground transition-colors">
+        <Link to="/impressum" className="mt-2 inline-block text-xs text-muted-foreground/40 hover:text-muted-foreground transition-colors">
           Impressum
-        </a>
+        </Link>
       </motion.div>
     </footer>
   );
