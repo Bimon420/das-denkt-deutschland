@@ -53,10 +53,13 @@ export function useTopics() {
   return useQuery({
     queryKey: ["topics"],
     queryFn: async (): Promise<Topic[]> => {
+      const today = new Date().toISOString().split("T")[0];
+
       const { data, error } = await supabase
         .from("topics")
         .select("*")
-        .order("published_at", { ascending: false })
+        .eq("published_at", today)
+        .order("created_at", { ascending: true })
         .limit(10);
 
       if (error) {
