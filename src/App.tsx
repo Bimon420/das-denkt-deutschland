@@ -7,6 +7,7 @@ import AppView from "./pages/AppView";
 import Index from "./pages/Index";
 import AdminPage from "./pages/AdminPage";
 import ArchivePage from "./pages/ArchivePage";
+import ImpressumPage from "./pages/ImpressumPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
           <Route path="/intro" element={<Index />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/archiv" element={<ArchivePage />} />
+          <Route path="/impressum" element={<ImpressumPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
