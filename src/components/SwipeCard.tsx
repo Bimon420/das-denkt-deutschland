@@ -184,7 +184,8 @@ const SwipeCard = ({ topic, tagType, category, leftView, rightView, mitteView, i
         <div className="mt-8 relative">
           <div className="flex items-center gap-3 mb-3">
             <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent/25 to-transparent" />
-            <span className="text-[9px] font-bold tracking-[0.3em] uppercase text-accent/60 flex-shrink-0">
+            <span className="flex items-center gap-1.5 text-[9px] font-bold tracking-[0.3em] uppercase text-accent/60 flex-shrink-0">
+              <span className="text-sm">⚖️</span>
               Die Mitte
             </span>
             <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent/25 to-transparent" />
