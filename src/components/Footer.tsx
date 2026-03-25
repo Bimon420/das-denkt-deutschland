@@ -33,7 +33,7 @@ const Footer = () => {
           Impressum
         </Link>
         <div className="mt-4">
-          <ViewCounter />
+          <ViewCounter page="intro" />
         </div>
       </motion.div>
     </footer>

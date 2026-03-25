@@ -3,23 +3,23 @@ import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { Eye } from "lucide-react";
 
-const ViewCounter = () => {
+const ViewCounter = ({ page = "intro" }: { page?: string }) => {
   const [count, setCount] = useState<number | null>(null);
 
   useEffect(() => {
     const trackAndLoad = async () => {
       // Log this view
-      const alreadyCounted = sessionStorage.getItem("intro-viewed");
+      const key = `viewed-${page}`;
+      const alreadyCounted = sessionStorage.getItem(key);
       if (!alreadyCounted) {
-        await supabase.from("page_views").insert({ page: "intro" });
-        sessionStorage.setItem("intro-viewed", "1");
+        await supabase.from("page_views").insert({ page });
+        sessionStorage.setItem(key, "1");
       }
 
-      // Load total count
       const { count: total } = await supabase
         .from("page_views")
         .select("*", { count: "exact", head: true })
-        .eq("page", "intro");
+        .eq("page", page);
 
       if (total !== null) setCount(total);
     };

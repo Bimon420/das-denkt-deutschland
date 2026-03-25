@@ -1,4 +1,5 @@
 import { useState } from "react";
+import ViewCounter from "@/components/ViewCounter";
 import { motion } from "framer-motion";
 import { useTopics } from "@/hooks/useTopics";
 import TopicCard from "@/components/TopicCard";
@@ -98,6 +99,11 @@ const AppView = () => {
           ))}
         </div>
       </section>
+
+      {/* Footer with view counter */}
+      <footer className="py-8 border-t border-border/40 text-center">
+        <ViewCounter page="app" />
+      </footer>
     </div>
   );
 };
