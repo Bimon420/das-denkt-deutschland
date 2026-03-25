@@ -1,4 +1,5 @@
 import { useState } from "react";
+import ViewCounter from "@/components/ViewCounter";
 import { motion } from "framer-motion";
 import { useTopics } from "@/hooks/useTopics";
 import TopicCard from "@/components/TopicCard";
