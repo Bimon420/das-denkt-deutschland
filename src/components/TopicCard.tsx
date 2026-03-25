@@ -92,7 +92,7 @@ const TopicCard = ({ topic, tagType, category = "politik", leftView, rightView, 
     <div ref={ref} className={`mb-20 ${isBoulevard ? "relative" : ""}`}>
       {/* Boulevard accent stripe */}
       {isBoulevard && (
-        <div className="absolute -left-3 top-0 bottom-0 w-1 rounded-full bg-accent/60" />
+        <div className="absolute -left-3 top-0 bottom-0 w-0.5 rounded-full bg-accent/40" />
       )}
 
       {/* Topic header */}
