@@ -48,6 +48,9 @@ Jedes Thema als JSON-Objekt mit dieser Struktur:
   "mitte_view": "Die Mitte-Perspektive (3-5 Sätze)"
 }
 
+WICHTIG: Genau 9 Themen mit "category": "politik" und genau 1 Thema mit "category": "boulevard".
+Das Boulevard-Thema soll ein aktuelles Promi-/Gesellschaftsthema sein (z.B. Medien-Skandale, virale Debatten, Celebrity-Kontroversen).
+
 Antworte NUR mit einem JSON-Array von 10 solchen Objekten.`;
 
 serve(async (req) => {
