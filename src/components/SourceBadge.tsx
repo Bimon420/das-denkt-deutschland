@@ -35,7 +35,6 @@ const SourceBadge = ({ type, label, url }: SourceBadgeProps) => {
 
   return (
     <span className={baseClasses}>
-      {iconMap[type]}
       {label}
     </span>
   );
