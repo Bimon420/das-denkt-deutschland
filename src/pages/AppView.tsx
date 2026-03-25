@@ -100,6 +100,14 @@ const AppView = () => {
           <span className="font-body text-sm font-extrabold tracking-tight uppercase">Das Denkt Deutschland</span>
         </div>
         <div className="flex items-center gap-0.5">
+          <button
+            onClick={handleRefresh}
+            disabled={isFetching}
+            className="p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95 disabled:opacity-50"
+            aria-label="Aktualisieren"
+          >
+            <RefreshCw className={`w-4 h-4 text-muted-foreground ${isFetching ? 'animate-spin' : ''}`} />
+          </button>
           <ShareMenu topic={t.topic} />
           <ThemeToggle />
           <button
