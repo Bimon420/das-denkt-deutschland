@@ -69,13 +69,13 @@ const OpinionSlider = ({ topicId }: OpinionSliderProps) => {
 
   return (
     <motion.div
-      className="mt-5 mx-auto max-w-2xl p-5 rounded-xl bg-secondary/30 border border-border"
+      className="mt-5 mx-auto max-w-2xl p-4 md:p-5 rounded-xl bg-secondary/30 border border-border"
       initial={{ opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.3 }}
       transition={{ delay: 0.5, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
     >
-      <div className="text-xs font-medium tracking-wide uppercase text-muted-foreground mb-3 text-center">
+      <div className="text-[11px] md:text-xs font-medium tracking-wide uppercase text-muted-foreground mb-3 text-center">
         🗳 Wo stehst du?
       </div>
 
@@ -88,20 +88,20 @@ const OpinionSlider = ({ topicId }: OpinionSliderProps) => {
             transition={{ duration: 0.3 }}
           >
             {/* Labels */}
-            <div className="flex justify-between text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 px-1">
+            <div className="flex justify-between text-[9px] md:text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 px-0.5">
               <span className="text-left-blue">← Links</span>
-              <span>{getLabel(value)}</span>
+              <span className="text-center px-1 truncate">{getLabel(value)}</span>
               <span className="text-right-red">Rechts →</span>
             </div>
 
-            {/* Slider */}
+            {/* Slider — larger touch target on mobile */}
             <input
               type="range"
               min={0}
               max={100}
               value={value}
               onChange={(e) => setValue(Number(e.target.value))}
-              className="w-full h-2 rounded-full appearance-none cursor-pointer slider-gradient [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-foreground [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-background [&::-webkit-slider-thumb]:cursor-grab [&::-webkit-slider-thumb]:active:cursor-grabbing [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-foreground [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-background [&::-moz-range-thumb]:cursor-grab"
+              className="w-full h-2.5 md:h-2 rounded-full appearance-none cursor-pointer slider-gradient [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-7 [&::-webkit-slider-thumb]:h-7 md:[&::-webkit-slider-thumb]:w-5 md:[&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-foreground [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-background [&::-webkit-slider-thumb]:cursor-grab [&::-webkit-slider-thumb]:active:cursor-grabbing [&::-moz-range-thumb]:w-7 [&::-moz-range-thumb]:h-7 md:[&::-moz-range-thumb]:w-5 md:[&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-foreground [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-background [&::-moz-range-thumb]:cursor-grab"
             />
 
             {/* Submit */}
@@ -109,7 +109,7 @@ const OpinionSlider = ({ topicId }: OpinionSliderProps) => {
               <button
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="px-5 py-2 rounded-full text-xs font-semibold bg-foreground text-background hover:opacity-90 transition-all active:scale-95 disabled:opacity-50"
+                className="px-6 py-2.5 md:px-5 md:py-2 rounded-full text-xs font-semibold bg-foreground text-background hover:opacity-90 transition-all active:scale-95 disabled:opacity-50"
               >
                 {submitting ? "…" : "Abstimmen"}
               </button>
@@ -123,11 +123,11 @@ const OpinionSlider = ({ topicId }: OpinionSliderProps) => {
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           >
             {/* Distribution bars */}
-            <div className="flex items-end justify-center gap-1.5 h-16 mb-2">
+            <div className="flex items-end justify-center gap-2 md:gap-1.5 h-20 md:h-16 mb-2 px-1">
               {distribution.map((d, i) => (
                 <motion.div
                   key={i}
-                  className="flex-1 rounded-t-sm"
+                  className="flex-1 rounded-t-sm min-w-0"
                   style={{
                     background:
                       i === 0
@@ -148,7 +148,7 @@ const OpinionSlider = ({ topicId }: OpinionSliderProps) => {
             </div>
 
             {/* Bucket labels */}
-            <div className="flex justify-between text-[9px] text-muted-foreground px-1">
+            <div className="flex justify-between text-[8px] md:text-[9px] text-muted-foreground px-1">
               {bucketLabels.map((l, i) => (
                 <span key={i} className="flex-1 text-center">{l}</span>
               ))}

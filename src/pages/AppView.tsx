@@ -45,10 +45,10 @@ const AppView = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Sticky header */}
-      <header className="sticky top-0 z-30 flex items-center justify-between px-5 py-3 border-b border-border/40 bg-background/90 backdrop-blur-xl">
-        <div className="flex items-center gap-2.5">
-          <img src="/logo.png" alt="DDD" className="w-auto" style={{ height: '1.8rem' }} />
-          <span className="font-body text-sm font-extrabold tracking-tight uppercase">Das Denkt Deutschland</span>
+      <header className="sticky top-0 z-30 flex items-center justify-between px-3 md:px-5 py-2.5 md:py-3 border-b border-border/40 bg-background/90 backdrop-blur-xl">
+        <div className="flex items-center gap-2 min-w-0">
+          <img src="/logo.png" alt="DDD" className="w-auto flex-shrink-0" style={{ height: '1.5rem' }} />
+          <span className="font-body text-xs md:text-sm font-extrabold tracking-tight uppercase truncate">Das Denkt Deutschland</span>
         </div>
         <div className="flex items-center gap-0.5">
           <motion.button
