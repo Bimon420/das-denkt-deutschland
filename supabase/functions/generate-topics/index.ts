@@ -129,36 +129,62 @@ serve(async (req) => {
 
     const today = new Date().toISOString().split("T")[0];
 
-    // Strip any URLs the AI may have generated despite instructions
-    const sanitizeSources = (sources: any[]) => {
-      if (!Array.isArray(sources)) return [];
-      return sources.map((s: any) => ({
-        type: s.type || "article",
-        label: s.label || "",
-        url: "", // Always empty — never trust AI-generated URLs
-      }));
+    // Validate a single URL — returns true only if reachable (no 4xx/5xx)
+    const isUrlReachable = async (url: string): Promise<boolean> => {
+      if (!url || url.trim() === "") return false;
+      try {
+        const res = await fetch(url, {
+          method: "HEAD",
+          redirect: "follow",
+          signal: AbortSignal.timeout(5000),
+        });
+        return res.ok; // 2xx only
+      } catch {
+        return false;
+      }
     };
 
-    // Insert topics into database
-    const rows = topicsArray.map((t: any) => ({
-      topic: t.topic,
-      tag_type: t.tag_type,
-      category: t.category || "politik",
-      left_position: t.left_position,
-      left_quote: t.left_quote,
-      left_speaker: t.left_speaker,
-      left_hidden_meaning: t.left_hidden_meaning || null,
-      left_negative_effects: t.left_negative_effects || null,
-      left_sources: sanitizeSources(t.left_sources),
-      right_position: t.right_position,
-      right_quote: t.right_quote,
-      right_speaker: t.right_speaker,
-      right_hidden_meaning: t.right_hidden_meaning || null,
-      right_negative_effects: t.right_negative_effects || null,
-      right_sources: sanitizeSources(t.right_sources),
-      mitte_view: t.mitte_view,
-      published_at: today,
-    }));
+    // Validate all sources: check each URL, remove broken ones
+    const sanitizeSources = async (sources: any[]): Promise<any[]> => {
+      if (!Array.isArray(sources)) return [];
+      const validated = await Promise.all(
+        sources.map(async (s: any) => {
+          const url = s.url?.trim() || "";
+          const reachable = url ? await isUrlReachable(url) : false;
+          return {
+            type: s.type || "article",
+            label: s.label || "",
+            url: reachable ? url : "", // Only keep verified URLs
+          };
+        })
+      );
+      return validated;
+    };
+
+    // Insert topics into database — validate all URLs in parallel
+    console.log("Validating source URLs...");
+    const rows = await Promise.all(
+      topicsArray.map(async (t: any) => ({
+        topic: t.topic,
+        tag_type: t.tag_type,
+        category: t.category || "politik",
+        left_position: t.left_position,
+        left_quote: t.left_quote,
+        left_speaker: t.left_speaker,
+        left_hidden_meaning: t.left_hidden_meaning || null,
+        left_negative_effects: t.left_negative_effects || null,
+        left_sources: await sanitizeSources(t.left_sources),
+        right_position: t.right_position,
+        right_quote: t.right_quote,
+        right_speaker: t.right_speaker,
+        right_hidden_meaning: t.right_hidden_meaning || null,
+        right_negative_effects: t.right_negative_effects || null,
+        right_sources: await sanitizeSources(t.right_sources),
+        mitte_view: t.mitte_view,
+        published_at: today,
+      }))
+    );
+    console.log("URL validation complete.");
 
     const { data, error } = await supabase.from("topics").insert(rows).select();
 
