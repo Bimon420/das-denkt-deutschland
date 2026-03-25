@@ -74,7 +74,9 @@ export function useTopics() {
         return staticTopics;
       }
 
-      return data.map(mapDbToTopic);
+      const mapped = data.map(mapDbToTopic);
+      // Boulevard topics first
+      return mapped.sort((a, b) => (a.category === "boulevard" ? -1 : b.category === "boulevard" ? 1 : 0));
     },
     staleTime: 5 * 60 * 1000, // 5 min
   });
