@@ -37,9 +37,14 @@ const AppView = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const handleRefresh = () => {
-    queryClient.invalidateQueries({ queryKey: ["topics"] });
+  const [spinning, setSpinning] = useState(false);
+
+  const handleRefresh = async () => {
+    setSpinning(true);
+    await queryClient.invalidateQueries({ queryKey: ["topics"] });
     setCurrent([0, 0]);
+    // Keep spinning for at least 700ms so the user sees it
+    setTimeout(() => setSpinning(false), 700);
   };
 
   const paginate = useCallback(
