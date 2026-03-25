@@ -89,12 +89,7 @@ const TopicCard = ({ topic, tagType, category = "politik", leftView, rightView, 
   const isBoulevard = category === "boulevard";
 
   return (
-    <div ref={ref} className={`mb-20 ${isBoulevard ? "relative" : ""}`}>
-      {/* Boulevard accent stripe */}
-      {isBoulevard && (
-        <div className="absolute -left-3 top-0 bottom-0 w-0.5 rounded-full bg-accent/40" />
-      )}
-
+    <div ref={ref} className="mb-20">
       {/* Topic header */}
       <motion.div
         className="text-center mb-8"
@@ -102,12 +97,12 @@ const TopicCard = ({ topic, tagType, category = "politik", leftView, rightView, 
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       >
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex items-center justify-center gap-2.5">
           <span className="text-xs font-bold tracking-widest uppercase text-muted-foreground">
             Thema {String(index + 1).padStart(2, "0")}
           </span>
           {isBoulevard && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider uppercase bg-accent/15 text-accent border border-accent/25">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wide uppercase bg-accent/20 text-accent border border-accent/30">
               ✦ Boulevard
             </span>
           )}
