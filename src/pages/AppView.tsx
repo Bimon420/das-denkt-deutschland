@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import { useTopics } from "@/hooks/useTopics";
 import SwipeCard from "@/components/SwipeCard";
