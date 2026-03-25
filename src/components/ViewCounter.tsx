@@ -3,7 +3,12 @@ import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { Eye } from "lucide-react";
 
-const ViewCounter = ({ page = "intro" }: { page?: string }) => {
+interface ViewCounterProps {
+  page?: string;
+  trackOnly?: boolean;
+}
+
+const ViewCounter = ({ page = "intro", trackOnly = false }: ViewCounterProps) => {
   const [count, setCount] = useState<number | null>(null);
 
   useEffect(() => {
@@ -16,18 +21,20 @@ const ViewCounter = ({ page = "intro" }: { page?: string }) => {
         sessionStorage.setItem(key, "1");
       }
 
+      if (trackOnly) return;
+
+      // Count ALL page views across all pages
       const { count: total } = await supabase
         .from("page_views")
-        .select("*", { count: "exact", head: true })
-        .eq("page", page);
+        .select("*", { count: "exact", head: true });
 
       if (total !== null) setCount(total);
     };
 
     trackAndLoad();
-  }, []);
+  }, [page, trackOnly]);
 
-  if (count === null) return null;
+  if (trackOnly || count === null) return null;
 
   return (
     <motion.div

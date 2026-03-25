@@ -100,10 +100,8 @@ const AppView = () => {
         </div>
       </section>
 
-      {/* Footer with view counter */}
-      <footer className="py-8 border-t border-border/40 text-center">
-        <ViewCounter page="app" />
-      </footer>
+      {/* Track app views silently */}
+      <ViewCounter page="app" trackOnly />
     </div>
   );
 };
