@@ -18,6 +18,7 @@ export interface ViewpointData {
 }
 
 export interface Topic {
+  id?: string;
   topic: string;
   tagType: "gleich" | "gegensaetzlich" | "teilweise";
   category: "politik" | "boulevard";
