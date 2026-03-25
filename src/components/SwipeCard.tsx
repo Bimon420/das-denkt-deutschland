@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import TransparencyTag from "./TransparencyTag";
 import SourceBadge from "./SourceBadge";
-import { AlertTriangle, ChevronDown, ChevronUp, Eye } from "lucide-react";
+import { AlertTriangle, ChevronDown, Eye, Scale } from "lucide-react";
 
 interface ViewpointData {
   position: string;
