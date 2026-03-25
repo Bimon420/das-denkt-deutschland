@@ -32,6 +32,9 @@ const Footer = () => {
         <Link to="/impressum" className="mt-2 inline-block text-xs text-muted-foreground/40 hover:text-muted-foreground transition-colors">
           Impressum
         </Link>
+        <div className="mt-4">
+          <ViewCounter />
+        </div>
       </motion.div>
     </footer>
   );
