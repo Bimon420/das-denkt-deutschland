@@ -152,9 +152,9 @@ const SwipeCard = ({ topic, tagType, category, leftView, rightView, mitteView, i
           {/* Right Column */}
           <div className="sm:pl-5 relative">
             <div className="flex items-center gap-2.5 sm:justify-end mb-4">
-              <span className="sm:hidden flex items-center justify-center w-5 h-5 rounded-full bg-right-red text-primary-foreground text-[10px] flex-shrink-0">🏛</span>
+              <span className="sm:hidden w-2.5 h-2.5 rounded-full bg-right-red ring-2 ring-right/20 flex-shrink-0" />
               <span className="text-[10px] font-black tracking-[0.25em] uppercase text-right-red">Rechts</span>
-              <span className="hidden sm:flex items-center justify-center w-5 h-5 rounded-full bg-right-red text-primary-foreground text-[10px] flex-shrink-0">🏛</span>
+              <span className="hidden sm:block w-2.5 h-2.5 rounded-full bg-right-red ring-2 ring-right/20 flex-shrink-0" />
             </div>
 
             <p className="font-body text-[13px] text-foreground font-semibold leading-snug mb-3 sm:text-right">
