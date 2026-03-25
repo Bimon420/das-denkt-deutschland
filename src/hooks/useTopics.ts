@@ -18,6 +18,7 @@ export interface ViewpointData {
 }
 
 export interface Topic {
+  id?: string;
   topic: string;
   tagType: "gleich" | "gegensaetzlich" | "teilweise";
   category: "politik" | "boulevard";
@@ -28,6 +29,7 @@ export interface Topic {
 
 function mapDbToTopic(row: any): Topic {
   return {
+    id: row.id,
     topic: row.topic,
     tagType: row.tag_type as Topic["tagType"],
     category: (row.category as Topic["category"]) || "politik",

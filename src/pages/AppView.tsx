@@ -85,7 +85,8 @@ const AppView = () => {
         <div className="max-w-5xl mx-auto">
           {topics.map((t, i) => (
             <TopicCard
-              key={`${t.topic}-${i}`}
+              key={t.id || `${t.topic}-${i}`}
+              id={t.id}
               topic={t.topic}
               tagType={t.tagType}
               category={t.category}

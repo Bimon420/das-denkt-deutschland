@@ -1,6 +1,7 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import TransparencyTag from "./TransparencyTag";
+import OpinionSlider from "./OpinionSlider";
 import SourceBadge from "./SourceBadge";
 import { AlertTriangle } from "lucide-react";
 
@@ -14,6 +15,7 @@ interface ViewpointData {
 }
 
 interface TopicCardProps {
+  id?: string;
   topic: string;
   tagType: "gleich" | "gegensaetzlich" | "teilweise";
   category?: "politik" | "boulevard";
@@ -83,7 +85,7 @@ const ViewpointPanel = ({
   );
 };
 
-const TopicCard = ({ topic, tagType, category = "politik", leftView, rightView, mitteView, index }: TopicCardProps) => {
+const TopicCard = ({ id, topic, tagType, category = "politik", leftView, rightView, mitteView, index }: TopicCardProps) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.15 });
   const isBoulevard = category === "boulevard";
@@ -130,6 +132,9 @@ const TopicCard = ({ topic, tagType, category = "politik", leftView, rightView, 
         </div>
         <p className="font-body text-sm text-foreground/70 leading-relaxed">{mitteView}</p>
       </motion.div>
+
+      {/* Opinion slider */}
+      {id && <OpinionSlider topicId={id} />}
     </div>
   );
 };
