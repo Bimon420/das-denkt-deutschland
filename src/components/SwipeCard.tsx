@@ -120,7 +120,7 @@ const SwipeCard = ({ topic, tagType, category, leftView, rightView, mitteView, i
           {/* Left Column */}
           <div className="sm:pr-5 relative">
             <div className="flex items-center gap-2.5 mb-4">
-              <span className="w-2.5 h-2.5 rounded-full bg-left ring-2 ring-left/20 flex-shrink-0" />
+              <span className="flex items-center justify-center w-5 h-5 rounded-full bg-left text-primary-foreground text-[10px] flex-shrink-0">✊</span>
               <span className="text-[10px] font-black tracking-[0.25em] uppercase text-foreground/80">Links</span>
             </div>
 
