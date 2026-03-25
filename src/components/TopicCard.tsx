@@ -16,6 +16,7 @@ interface ViewpointData {
 interface TopicCardProps {
   topic: string;
   tagType: "gleich" | "gegensaetzlich" | "teilweise";
+  category?: "politik" | "boulevard";
   leftView: ViewpointData;
   rightView: ViewpointData;
   mitteView: string;
@@ -82,12 +83,18 @@ const ViewpointPanel = ({
   );
 };
 
-const TopicCard = ({ topic, tagType, leftView, rightView, mitteView, index }: TopicCardProps) => {
+const TopicCard = ({ topic, tagType, category = "politik", leftView, rightView, mitteView, index }: TopicCardProps) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.15 });
+  const isBoulevard = category === "boulevard";
 
   return (
-    <div ref={ref} className="mb-20">
+    <div ref={ref} className={`mb-20 ${isBoulevard ? "relative" : ""}`}>
+      {/* Boulevard accent stripe */}
+      {isBoulevard && (
+        <div className="absolute -left-3 top-0 bottom-0 w-1 rounded-full bg-accent/60" />
+      )}
+
       {/* Topic header */}
       <motion.div
         className="text-center mb-8"
@@ -95,9 +102,16 @@ const TopicCard = ({ topic, tagType, leftView, rightView, mitteView, index }: To
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       >
-        <span className="text-xs font-bold tracking-widest uppercase text-muted-foreground">
-          Thema {String(index + 1).padStart(2, "0")}
-        </span>
+        <div className="flex items-center justify-center gap-2">
+          <span className="text-xs font-bold tracking-widest uppercase text-muted-foreground">
+            Thema {String(index + 1).padStart(2, "0")}
+          </span>
+          {isBoulevard && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider uppercase bg-accent/15 text-accent border border-accent/25">
+              ✦ Boulevard
+            </span>
+          )}
+        </div>
         <h3 className="font-editorial text-3xl md:text-4xl font-bold mt-2 mb-4">{topic}</h3>
         <TransparencyTag type={tagType} />
       </motion.div>
