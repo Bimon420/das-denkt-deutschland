@@ -3,7 +3,7 @@ import { useRef } from "react";
 import TransparencyTag from "./TransparencyTag";
 import OpinionSlider from "./OpinionSlider";
 import SourceBadge from "./SourceBadge";
-import { AlertTriangle, Scale } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 
 interface ViewpointData {
   position: string;
@@ -43,18 +43,8 @@ const ViewpointPanel = ({
       viewport={{ once: true, amount: 0.2 }}
       transition={{ delay, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
     >
-      <div className={`flex items-center gap-2 text-xs font-bold tracking-widest uppercase mb-4 ${isLeft ? "text-left-blue" : "text-right-red"}`}>
-        {isLeft ? (
-          <>
-            <span className="flex items-center justify-center w-5 h-5 rounded-full bg-left text-primary-foreground text-[10px]">✊</span>
-            Links
-          </>
-        ) : (
-          <>
-            Rechts
-            <span className="flex items-center justify-center w-5 h-5 rounded-full bg-right-red text-primary-foreground text-[10px]">🏛</span>
-          </>
-        )}
+      <div className={`text-xs font-bold tracking-widest uppercase mb-4 ${isLeft ? "text-left-blue" : "text-right-red"}`}>
+        {isLeft ? "← Links" : "Rechts →"}
       </div>
 
       <h4 className="font-body font-semibold text-foreground mb-3">{data.position}</h4>
@@ -137,10 +127,8 @@ const TopicCard = ({ id, topic, tagType, category = "politik", leftView, rightVi
         viewport={{ once: true, amount: 0.3 }}
         transition={{ delay: 0.4, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       >
-        <div className="flex items-center justify-center gap-2 text-xs font-medium tracking-wide uppercase text-muted-foreground mb-2">
-          <Scale className="w-3.5 h-3.5 text-mitte-gold" />
-          <span>Irgendwo dazwischen</span>
-          <span className="text-sm">⚖️</span>
+        <div className="text-xs font-medium tracking-wide uppercase text-muted-foreground mb-2">
+          ↔ Irgendwo dazwischen
         </div>
         <p className="font-body text-sm text-foreground/70 leading-relaxed">{mitteView}</p>
       </motion.div>

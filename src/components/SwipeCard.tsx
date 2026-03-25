@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import TransparencyTag from "./TransparencyTag";
 import SourceBadge from "./SourceBadge";
-import { AlertTriangle, ChevronDown, Eye, Scale } from "lucide-react";
+import { AlertTriangle, ChevronDown, Eye } from "lucide-react";
 
 interface ViewpointData {
   position: string;
@@ -120,7 +120,7 @@ const SwipeCard = ({ topic, tagType, category, leftView, rightView, mitteView, i
           {/* Left Column */}
           <div className="sm:pr-5 relative">
             <div className="flex items-center gap-2.5 mb-4">
-              <span className="flex items-center justify-center w-5 h-5 rounded-full bg-left text-primary-foreground text-[10px] flex-shrink-0">✊</span>
+              <span className="w-2.5 h-2.5 rounded-full bg-left ring-2 ring-left/20 flex-shrink-0" />
               <span className="text-[10px] font-black tracking-[0.25em] uppercase text-foreground/80">Links</span>
             </div>
 
@@ -152,9 +152,9 @@ const SwipeCard = ({ topic, tagType, category, leftView, rightView, mitteView, i
           {/* Right Column */}
           <div className="sm:pl-5 relative">
             <div className="flex items-center gap-2.5 sm:justify-end mb-4">
-              <span className="sm:hidden flex items-center justify-center w-5 h-5 rounded-full bg-right-red text-primary-foreground text-[10px] flex-shrink-0">🏛</span>
+              <span className="sm:hidden w-2.5 h-2.5 rounded-full bg-right-red ring-2 ring-right/20 flex-shrink-0" />
               <span className="text-[10px] font-black tracking-[0.25em] uppercase text-right-red">Rechts</span>
-              <span className="hidden sm:flex items-center justify-center w-5 h-5 rounded-full bg-right-red text-primary-foreground text-[10px] flex-shrink-0">🏛</span>
+              <span className="hidden sm:block w-2.5 h-2.5 rounded-full bg-right-red ring-2 ring-right/20 flex-shrink-0" />
             </div>
 
             <p className="font-body text-[13px] text-foreground font-semibold leading-snug mb-3 sm:text-right">
@@ -184,8 +184,7 @@ const SwipeCard = ({ topic, tagType, category, leftView, rightView, mitteView, i
         <div className="mt-8 relative">
           <div className="flex items-center gap-3 mb-3">
             <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent/25 to-transparent" />
-            <span className="flex items-center gap-1.5 text-[9px] font-bold tracking-[0.3em] uppercase text-accent/60 flex-shrink-0">
-              <span className="text-sm">⚖️</span>
+            <span className="text-[9px] font-bold tracking-[0.3em] uppercase text-accent/60 flex-shrink-0">
               Die Mitte
             </span>
             <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent/25 to-transparent" />
