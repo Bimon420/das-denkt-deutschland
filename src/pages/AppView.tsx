@@ -32,9 +32,15 @@ const variants = {
 };
 
 const AppView = () => {
-  const { data: topics = [], isLoading } = useTopics();
+  const { data: topics = [], isLoading, isFetching } = useTopics();
   const [[current, direction], setCurrent] = useState([0, 0]);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ["topics"] });
+    setCurrent([0, 0]);
+  };
 
   const paginate = useCallback(
     (dir: number) => {
