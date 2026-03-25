@@ -154,6 +154,7 @@ const AppView = () => {
             <SwipeCard
               topic={t.topic}
               tagType={t.tagType}
+              category={t.category}
               leftView={t.leftView}
               rightView={t.rightView}
               mitteView={t.mitteView}
