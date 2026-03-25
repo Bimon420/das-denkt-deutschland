@@ -124,6 +124,7 @@ serve(async (req) => {
     const rows = topicsArray.map((t: any) => ({
       topic: t.topic,
       tag_type: t.tag_type,
+      category: t.category || 'politik',
       left_position: t.left_position,
       left_quote: t.left_quote,
       left_speaker: t.left_speaker,

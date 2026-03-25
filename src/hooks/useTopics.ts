@@ -30,6 +30,7 @@ function mapDbToTopic(row: any): Topic {
   return {
     topic: row.topic,
     tagType: row.tag_type as Topic["tagType"],
+    category: (row.category as Topic["category"]) || "politik",
     leftView: {
       position: row.left_position,
       quote: row.left_quote,
