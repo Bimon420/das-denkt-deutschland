@@ -1,6 +1,7 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import TransparencyTag from "./TransparencyTag";
+import OpinionSlider from "./OpinionSlider";
 import SourceBadge from "./SourceBadge";
 import { AlertTriangle } from "lucide-react";
 
