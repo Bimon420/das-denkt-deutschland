@@ -4,7 +4,8 @@ import { useTopics } from "@/hooks/useTopics";
 import SwipeCard from "@/components/SwipeCard";
 import ShareMenu from "@/components/ShareMenu";
 import ThemeToggle from "@/components/ThemeToggle";
-import { ChevronUp, ChevronDown, Info, Archive, Loader2 } from "lucide-react";
+import { ChevronUp, ChevronDown, Info, Archive, Loader2, RefreshCw } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
 const SWIPE_THRESHOLD = 60;
