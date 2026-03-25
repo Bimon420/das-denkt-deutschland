@@ -4,7 +4,8 @@ import { useTopics } from "@/hooks/useTopics";
 import SwipeCard from "@/components/SwipeCard";
 import ShareMenu from "@/components/ShareMenu";
 import ThemeToggle from "@/components/ThemeToggle";
-import { ChevronUp, ChevronDown, Info, Archive, Loader2 } from "lucide-react";
+import { ChevronUp, ChevronDown, Info, Archive, Loader2, RefreshCw } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
 const SWIPE_THRESHOLD = 60;
@@ -31,9 +32,15 @@ const variants = {
 };
 
 const AppView = () => {
-  const { data: topics = [], isLoading } = useTopics();
+  const { data: topics = [], isLoading, isFetching } = useTopics();
   const [[current, direction], setCurrent] = useState([0, 0]);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ["topics"] });
+    setCurrent([0, 0]);
+  };
 
   const paginate = useCallback(
     (dir: number) => {
@@ -93,6 +100,14 @@ const AppView = () => {
           <span className="font-body text-sm font-extrabold tracking-tight uppercase">Das Denkt Deutschland</span>
         </div>
         <div className="flex items-center gap-0.5">
+          <button
+            onClick={handleRefresh}
+            disabled={isFetching}
+            className="p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95 disabled:opacity-50"
+            aria-label="Aktualisieren"
+          >
+            <RefreshCw className={`w-4 h-4 text-muted-foreground ${isFetching ? 'animate-spin' : ''}`} />
+          </button>
           <ShareMenu topic={t.topic} />
           <ThemeToggle />
           <button
