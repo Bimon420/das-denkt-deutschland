@@ -14,6 +14,35 @@ export type Database = {
   }
   public: {
     Tables: {
+      topic_votes: {
+        Row: {
+          created_at: string
+          id: string
+          topic_id: string
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          topic_id: string
+          value: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          topic_id?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "topic_votes_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       topics: {
         Row: {
           category: string
