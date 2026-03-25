@@ -178,7 +178,7 @@ const AppView = () => {
 
         {/* Dot indicators */}
         <div className="flex gap-1.5 items-center">
-          {topics.map((_, i) => (
+          {topics.map((topic, i) => (
             <button
               key={i}
               onClick={() => setCurrent([i, i > current ? 1 : -1])}
@@ -191,8 +191,12 @@ const AppView = () => {
                   width: i === current ? 20 : 8,
                   height: 8,
                   backgroundColor: i === current
-                    ? "hsl(var(--accent))"
-                    : "hsl(var(--muted-foreground) / 0.25)",
+                    ? topic.category === "boulevard"
+                      ? "hsl(var(--accent))"
+                      : "hsl(var(--accent))"
+                    : topic.category === "boulevard"
+                      ? "hsl(var(--accent) / 0.4)"
+                      : "hsl(var(--muted-foreground) / 0.25)",
                 }}
                 transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
               />
