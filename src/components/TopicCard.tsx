@@ -43,8 +43,18 @@ const ViewpointPanel = ({
       viewport={{ once: true, amount: 0.2 }}
       transition={{ delay, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
     >
-      <div className={`text-xs font-bold tracking-widest uppercase mb-4 ${isLeft ? "text-left-blue" : "text-right-red"}`}>
-        {isLeft ? "← Links" : "Rechts →"}
+      <div className={`flex items-center gap-2 text-xs font-bold tracking-widest uppercase mb-4 ${isLeft ? "text-left-blue" : "text-right-red"}`}>
+        {isLeft ? (
+          <>
+            <span className="flex items-center justify-center w-5 h-5 rounded-full bg-left text-primary-foreground text-[10px]">✊</span>
+            Links
+          </>
+        ) : (
+          <>
+            Rechts
+            <span className="flex items-center justify-center w-5 h-5 rounded-full bg-right-red text-primary-foreground text-[10px]">🏛</span>
+          </>
+        )}
       </div>
 
       <h4 className="font-body font-semibold text-foreground mb-3">{data.position}</h4>
