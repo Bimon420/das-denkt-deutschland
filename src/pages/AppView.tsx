@@ -105,14 +105,16 @@ const AppView = () => {
           <span className="font-body text-sm font-extrabold tracking-tight uppercase">Das Denkt Deutschland</span>
         </div>
         <div className="flex items-center gap-0.5">
-          <button
+          <motion.button
             onClick={handleRefresh}
-            disabled={isFetching}
+            disabled={spinning || isFetching}
             className="p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95 disabled:opacity-50"
             aria-label="Aktualisieren"
+            animate={{ rotate: spinning ? 360 : 0 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           >
-            <RefreshCw className={`w-4 h-4 text-muted-foreground ${isFetching ? 'animate-spin' : ''}`} />
-          </button>
+            <RefreshCw className="w-4 h-4 text-muted-foreground" />
+          </motion.button>
           <ShareMenu topic={t.topic} />
           <ThemeToggle />
           <button
