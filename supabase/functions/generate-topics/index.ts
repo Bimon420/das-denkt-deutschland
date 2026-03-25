@@ -161,26 +161,30 @@ serve(async (req) => {
       return validated;
     };
 
-    // Insert topics into database
-    const rows = topicsArray.map((t: any) => ({
-      topic: t.topic,
-      tag_type: t.tag_type,
-      category: t.category || "politik",
-      left_position: t.left_position,
-      left_quote: t.left_quote,
-      left_speaker: t.left_speaker,
-      left_hidden_meaning: t.left_hidden_meaning || null,
-      left_negative_effects: t.left_negative_effects || null,
-      left_sources: sanitizeSources(t.left_sources),
-      right_position: t.right_position,
-      right_quote: t.right_quote,
-      right_speaker: t.right_speaker,
-      right_hidden_meaning: t.right_hidden_meaning || null,
-      right_negative_effects: t.right_negative_effects || null,
-      right_sources: sanitizeSources(t.right_sources),
-      mitte_view: t.mitte_view,
-      published_at: today,
-    }));
+    // Insert topics into database — validate all URLs in parallel
+    console.log("Validating source URLs...");
+    const rows = await Promise.all(
+      topicsArray.map(async (t: any) => ({
+        topic: t.topic,
+        tag_type: t.tag_type,
+        category: t.category || "politik",
+        left_position: t.left_position,
+        left_quote: t.left_quote,
+        left_speaker: t.left_speaker,
+        left_hidden_meaning: t.left_hidden_meaning || null,
+        left_negative_effects: t.left_negative_effects || null,
+        left_sources: await sanitizeSources(t.left_sources),
+        right_position: t.right_position,
+        right_quote: t.right_quote,
+        right_speaker: t.right_speaker,
+        right_hidden_meaning: t.right_hidden_meaning || null,
+        right_negative_effects: t.right_negative_effects || null,
+        right_sources: await sanitizeSources(t.right_sources),
+        mitte_view: t.mitte_view,
+        published_at: today,
+      }))
+    );
+    console.log("URL validation complete.");
 
     const { data, error } = await supabase.from("topics").insert(rows).select();
 
