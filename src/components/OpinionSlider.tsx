@@ -45,14 +45,18 @@ const OpinionSlider = ({ topicId }: OpinionSliderProps) => {
     if (hasVoted || submitting) return;
     setSubmitting(true);
 
-    const { error } = await supabase
-      .from("topic_votes")
-      .insert({ topic_id: topicId, value });
+    try {
+      const res = await supabase.functions.invoke("submit-vote", {
+        body: { topic_id: topicId, value },
+      });
 
-    if (!error) {
+      if (res.error) throw res.error;
+
       localStorage.setItem(`vote-${topicId}`, String(value));
       setHasVoted(true);
       await loadResults();
+    } catch (e) {
+      console.error("Vote failed:", e);
     }
     setSubmitting(false);
   };
