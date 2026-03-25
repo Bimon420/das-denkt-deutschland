@@ -29,6 +29,7 @@ export interface Topic {
 
 function mapDbToTopic(row: any): Topic {
   return {
+    id: row.id,
     topic: row.topic,
     tagType: row.tag_type as Topic["tagType"],
     category: (row.category as Topic["category"]) || "politik",
