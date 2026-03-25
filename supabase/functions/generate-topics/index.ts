@@ -16,13 +16,20 @@ REGELN:
 - Links = progressive, egalitäre, ökologische, kollektivistische Position
 - Rechts = konservative, nationale, marktwirtschaftliche, traditionsbewahrende Position
 - Mitte = informiert, historisch bewusst, realistisch, weder zynisch noch naiv
-- Quellen müssen plausibel sein (echte Organisationen, Medien, Studien)
 - tag_type: "gleich" wenn beide Seiten ähnlich denken, "gegensaetzlich" bei starkem Gegensatz, "teilweise" bei Teilüberschneidungen
-- category: "politik" für politische Themen, "boulevard" für genau EIN Boulevard-/Promi-/Gesellschafts-Thema (z.B. aktuelle Promi-Debatten, Skandale, virale Diskussionen)
+- category: "politik" für politische Themen, "boulevard" für genau EIN Boulevard-/Promi-/Gesellschafts-Thema
 - Genau 9 Themen mit category "politik" und genau 1 Thema mit category "boulevard"
 - Zitate müssen realistisch klingen und einer benannten Person/Organisation zugeordnet sein
 - hidden_meaning und negative_effects sollen ehrlich und kritisch beide Seiten beleuchten
 - Die Mitte-Perspektive soll 3-5 Sätze lang sein, historisch verankert und ausgewogen
+
+QUELLEN — EXTREM WICHTIG:
+- Generiere KEINE URLs. URLs sind verboten, da sie fast immer falsch sind.
+- Gib stattdessen nur den Namen der Quelle an (z.B. "Spiegel Online", "ARD Tagesschau", "DIW Studie 2024")
+- Das Feld "url" muss immer ein leerer String "" sein
+- Quellen müssen echte, existierende Organisationen, Medien oder Studien sein
+- Erfinde KEINE Quellen. Wenn du dir nicht sicher bist, lass die Quelle weg.
+- Es darf NICHTS Erfundenes oder Falsches generiert werden.
 
 Antworte NUR mit dem JSON-Array, keine weiteren Erklärungen.`;
 
@@ -38,20 +45,22 @@ Jedes Thema als JSON-Objekt mit dieser Struktur:
   "left_speaker": "Sprecher/Organisation",
   "left_hidden_meaning": "Versteckte Bedeutung",
   "left_negative_effects": "Mögliche negative Auswirkungen",
-  "left_sources": [{"type": "article"|"document"|"video"|"quote", "label": "Bezeichnung", "url": "https://..."}],
+  "left_sources": [{"type": "article"|"document"|"video"|"quote", "label": "Quellenname (z.B. Spiegel Online)", "url": ""}],
   "right_position": "Position Rechts",
   "right_quote": "Zitat",
   "right_speaker": "Sprecher/Organisation",
   "right_hidden_meaning": "Versteckte Bedeutung",
   "right_negative_effects": "Mögliche negative Auswirkungen",
-  "right_sources": [{"type": "article"|"document"|"video"|"quote", "label": "Bezeichnung", "url": "https://..."}],
+  "right_sources": [{"type": "article"|"document"|"video"|"quote", "label": "Quellenname", "url": ""}],
   "mitte_view": "Die Mitte-Perspektive (3-5 Sätze)"
 }
 
-WICHTIG: Genau 9 Themen mit "category": "politik" und genau 1 Thema mit "category": "boulevard".
-Das Boulevard-Thema soll ein aktuelles Promi-/Gesellschaftsthema sein (z.B. Medien-Skandale, virale Debatten, Celebrity-Kontroversen).
+WICHTIG:
+- Genau 9x "politik" und 1x "boulevard"
+- KEINE URLs generieren! "url" muss IMMER "" sein. Nur den Quellennamen im "label".
+- Es darf NICHTS Erfundenes auf der Seite landen.
 
-Antworte NUR mit einem JSON-Array von 10 solchen Objekten.`;
+Antworte NUR mit einem JSON-Array von 10 Objekten.`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -120,23 +129,33 @@ serve(async (req) => {
 
     const today = new Date().toISOString().split("T")[0];
 
+    // Strip any URLs the AI may have generated despite instructions
+    const sanitizeSources = (sources: any[]) => {
+      if (!Array.isArray(sources)) return [];
+      return sources.map((s: any) => ({
+        type: s.type || "article",
+        label: s.label || "",
+        url: "", // Always empty — never trust AI-generated URLs
+      }));
+    };
+
     // Insert topics into database
     const rows = topicsArray.map((t: any) => ({
       topic: t.topic,
       tag_type: t.tag_type,
-      category: t.category || 'politik',
+      category: t.category || "politik",
       left_position: t.left_position,
       left_quote: t.left_quote,
       left_speaker: t.left_speaker,
       left_hidden_meaning: t.left_hidden_meaning || null,
       left_negative_effects: t.left_negative_effects || null,
-      left_sources: t.left_sources || [],
+      left_sources: sanitizeSources(t.left_sources),
       right_position: t.right_position,
       right_quote: t.right_quote,
       right_speaker: t.right_speaker,
       right_hidden_meaning: t.right_hidden_meaning || null,
       right_negative_effects: t.right_negative_effects || null,
-      right_sources: t.right_sources || [],
+      right_sources: sanitizeSources(t.right_sources),
       mitte_view: t.mitte_view,
       published_at: today,
     }));
