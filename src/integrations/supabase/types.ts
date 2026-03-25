@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       topics: {
         Row: {
+          category: string
           created_at: string
           id: string
           left_hidden_meaning: string | null
@@ -36,6 +37,7 @@ export type Database = {
           topic: string
         }
         Insert: {
+          category?: string
           created_at?: string
           id?: string
           left_hidden_meaning?: string | null
@@ -56,6 +58,7 @@ export type Database = {
           topic: string
         }
         Update: {
+          category?: string
           created_at?: string
           id?: string
           left_hidden_meaning?: string | null

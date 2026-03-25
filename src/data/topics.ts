@@ -31,6 +31,7 @@ export const topics = [
   {
     topic: "Migration & Integration",
     tagType: "gegensaetzlich" as const,
+    category: "politik" as const,
     leftView: {
       position:
         "Sichere Fluchtwege schaffen, kommunale Aufnahme stärken, Abschiebungen in Kriegsgebiete stoppen.",
@@ -83,6 +84,7 @@ export const topics = [
   {
     topic: "Klimapolitik & Wirtschaft",
     tagType: "teilweise" as const,
+    category: "politik" as const,
     leftView: {
       position:
         "Sofortiger Kohleausstieg, massiver Ausbau erneuerbarer Energien, Klimageld für soziale Gerechtigkeit.",
@@ -135,6 +137,7 @@ export const topics = [
   {
     topic: "Meinungsfreiheit & Diskursklima",
     tagType: "teilweise" as const,
+    category: "politik" as const,
     leftView: {
       position:
         "Hassrede ist keine Meinung. Plattformen und Staat müssen Betroffene aktiv schützen.",

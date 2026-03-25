@@ -18,6 +18,8 @@ REGELN:
 - Mitte = informiert, historisch bewusst, realistisch, weder zynisch noch naiv
 - Quellen müssen plausibel sein (echte Organisationen, Medien, Studien)
 - tag_type: "gleich" wenn beide Seiten ähnlich denken, "gegensaetzlich" bei starkem Gegensatz, "teilweise" bei Teilüberschneidungen
+- category: "politik" für politische Themen, "boulevard" für genau EIN Boulevard-/Promi-/Gesellschafts-Thema (z.B. aktuelle Promi-Debatten, Skandale, virale Diskussionen)
+- Genau 9 Themen mit category "politik" und genau 1 Thema mit category "boulevard"
 - Zitate müssen realistisch klingen und einer benannten Person/Organisation zugeordnet sein
 - hidden_meaning und negative_effects sollen ehrlich und kritisch beide Seiten beleuchten
 - Die Mitte-Perspektive soll 3-5 Sätze lang sein, historisch verankert und ausgewogen
@@ -30,6 +32,7 @@ Jedes Thema als JSON-Objekt mit dieser Struktur:
 {
   "topic": "Thementitel",
   "tag_type": "gleich" | "gegensaetzlich" | "teilweise",
+  "category": "politik" | "boulevard",
   "left_position": "Position Links",
   "left_quote": "Zitat",
   "left_speaker": "Sprecher/Organisation",
@@ -44,6 +47,9 @@ Jedes Thema als JSON-Objekt mit dieser Struktur:
   "right_sources": [{"type": "article"|"document"|"video"|"quote", "label": "Bezeichnung", "url": "https://..."}],
   "mitte_view": "Die Mitte-Perspektive (3-5 Sätze)"
 }
+
+WICHTIG: Genau 9 Themen mit "category": "politik" und genau 1 Thema mit "category": "boulevard".
+Das Boulevard-Thema soll ein aktuelles Promi-/Gesellschaftsthema sein (z.B. Medien-Skandale, virale Debatten, Celebrity-Kontroversen).
 
 Antworte NUR mit einem JSON-Array von 10 solchen Objekten.`;
 
@@ -118,6 +124,7 @@ serve(async (req) => {
     const rows = topicsArray.map((t: any) => ({
       topic: t.topic,
       tag_type: t.tag_type,
+      category: t.category || 'politik',
       left_position: t.left_position,
       left_quote: t.left_quote,
       left_speaker: t.left_speaker,

@@ -16,6 +16,7 @@ interface ViewpointData {
 interface SwipeCardProps {
   topic: string;
   tagType: "gleich" | "gegensaetzlich" | "teilweise";
+  category: "politik" | "boulevard";
   leftView: ViewpointData;
   rightView: ViewpointData;
   mitteView: string;
@@ -87,15 +88,24 @@ const HiddenContent = ({ data }: { data: ViewpointData }) => {
   );
 };
 
-const SwipeCard = ({ topic, tagType, leftView, rightView, mitteView, index, total }: SwipeCardProps) => {
+const SwipeCard = ({ topic, tagType, category, leftView, rightView, mitteView, index, total }: SwipeCardProps) => {
+  const isBoulevard = category === "boulevard";
+
   return (
     <div className="w-full h-full flex flex-col overflow-y-auto">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-xl px-5 pt-5 pb-3 border-b border-border/30">
+      <div className={`sticky top-0 z-10 backdrop-blur-xl px-5 pt-5 pb-3 border-b ${isBoulevard ? 'bg-accent/5 border-accent/20' : 'bg-background/80 border-border/30'}`}>
         <div className="flex items-center justify-between mb-2.5">
-          <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-muted-foreground tabular-nums">
-            {String(index + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-muted-foreground tabular-nums">
+              {String(index + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+            </span>
+            {isBoulevard && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider uppercase bg-accent/15 text-accent border border-accent/25">
+                ✦ Boulevard
+              </span>
+            )}
+          </div>
           <TransparencyTag type={tagType} />
         </div>
         <h2 className="font-editorial text-2xl md:text-3xl font-bold leading-[1.08] tracking-tight">{topic}</h2>
