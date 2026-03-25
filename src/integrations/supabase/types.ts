@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      page_views: {
+        Row: {
+          created_at: string
+          id: string
+          page: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          page?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          page?: string
+        }
+        Relationships: []
+      }
       topic_votes: {
         Row: {
           created_at: string
