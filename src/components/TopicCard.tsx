@@ -15,6 +15,7 @@ interface ViewpointData {
 }
 
 interface TopicCardProps {
+  id?: string;
   topic: string;
   tagType: "gleich" | "gegensaetzlich" | "teilweise";
   category?: "politik" | "boulevard";
