@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import ViewCounter from "./ViewCounter";
 
 const Footer = () => {
   return (
