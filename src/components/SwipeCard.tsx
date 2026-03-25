@@ -16,6 +16,7 @@ interface ViewpointData {
 interface SwipeCardProps {
   topic: string;
   tagType: "gleich" | "gegensaetzlich" | "teilweise";
+  category: "politik" | "boulevard";
   leftView: ViewpointData;
   rightView: ViewpointData;
   mitteView: string;
