@@ -127,10 +127,8 @@ const TopicCard = ({ id, topic, tagType, category = "politik", leftView, rightVi
         viewport={{ once: true, amount: 0.3 }}
         transition={{ delay: 0.4, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       >
-        <div className="flex items-center justify-center gap-2 text-xs font-medium tracking-wide uppercase text-muted-foreground mb-2">
-          <Scale className="w-3.5 h-3.5 text-mitte-gold" />
-          <span>Irgendwo dazwischen</span>
-          <span className="text-sm">⚖️</span>
+        <div className="text-xs font-medium tracking-wide uppercase text-muted-foreground mb-2">
+          ↔ Irgendwo dazwischen
         </div>
         <p className="font-body text-sm text-foreground/70 leading-relaxed">{mitteView}</p>
       </motion.div>
