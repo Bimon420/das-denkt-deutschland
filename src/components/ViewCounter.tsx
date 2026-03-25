@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { Eye } from "lucide-react";
 
-const ViewCounter = () => {
+const ViewCounter = ({ page = "intro" }: { page?: string }) => {
   const [count, setCount] = useState<number | null>(null);
 
   useEffect(() => {
