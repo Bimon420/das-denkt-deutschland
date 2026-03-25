@@ -163,4 +163,7 @@
   .bg-mitte {
     background-color: hsl(var(--mitte));
   }
+  .slider-gradient {
+    background: linear-gradient(to right, hsl(var(--left)), hsl(var(--muted-foreground) / 0.3) 50%, hsl(var(--right)));
+  }
 }
