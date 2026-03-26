@@ -9,7 +9,7 @@ const corsHeaders = {
 
 const SYSTEM_PROMPT = `Du bist ein redaktioneller KI-Assistent für "Das Denkt Deutschland" — eine Plattform, die aktuelle politische Themen aus drei Perspektiven darstellt: Links, Rechts und Die Mitte.
 
-AUFGABE: Generiere genau 10 aktuelle deutsche Nachrichtenthemen mit folgender Struktur für jedes Thema.
+AUFGABE: Generiere genau 10 aktuelle deutsche politische Nachrichtenthemen mit folgender Struktur für jedes Thema.
 
 REGELN:
 - Jedes Thema muss ein aktuelles, relevantes Thema der deutschen Politik/Gesellschaft sein
@@ -17,8 +17,8 @@ REGELN:
 - Rechts = konservative, nationale, marktwirtschaftliche, traditionsbewahrende Position
 - Mitte = informiert, historisch bewusst, realistisch, weder zynisch noch naiv
 - tag_type: "gleich" wenn beide Seiten ähnlich denken, "gegensaetzlich" bei starkem Gegensatz, "teilweise" bei Teilüberschneidungen
-- category: "politik" für politische Themen, "boulevard" für genau EIN Boulevard-/Promi-/Gesellschafts-Thema
-- Genau 9 Themen mit category "politik" und genau 1 Thema mit category "boulevard"
+- category: immer "politik"
+- Alle 10 Themen müssen category "politik" haben — KEIN Boulevard
 - Zitate müssen realistisch klingen und einer benannten Person/Organisation zugeordnet sein
 - hidden_meaning und negative_effects sollen ehrlich und kritisch beide Seiten beleuchten
 - Die Mitte-Perspektive soll 3-5 Sätze lang sein, historisch verankert und ausgewogen
@@ -26,11 +26,9 @@ REGELN:
 THEMEN-INTEGRITÄT — EXTREM WICHTIG:
 - Jedes Thema muss GENAU EIN konkretes Ereignis oder EINE konkrete Debatte behandeln
 - NIEMALS verschiedene Nachrichten, Personen oder Debatten in einem Thema vermischen
-- Besonders bei Boulevard: Prüfe, ob alle Zitate, Positionen und Quellen sich auf DASSELBE Ereignis beziehen
 - Wenn eine Person zitiert wird, muss das Zitat nachweislich von dieser Person stammen — KEINE erfundenen oder zugeschriebenen Zitate
 - Zitate die nicht eindeutig einer konkreten Person zugeordnet werden können, MÜSSEN als "Konservative Kommentatoren" o.ä. gekennzeichnet werden, NIEMALS einer konkreten Person in den Mund gelegt werden
 - Verwechsle NICHT Personen die ein Thema kommentieren mit Personen die vom Thema betroffen sind
-- Prüfe bei Boulevard-Themen besonders: Geht es um Person A oder um Person B? Werden Aussagen richtig zugeordnet?
 
 QUELLEN — EXTREM WICHTIG:
 - Generiere KEINE URLs. URLs sind verboten, da sie fast immer falsch sind.
@@ -42,13 +40,13 @@ QUELLEN — EXTREM WICHTIG:
 
 Antworte NUR mit dem JSON-Array, keine weiteren Erklärungen.`;
 
-const USER_PROMPT = `Generiere 10 aktuelle deutsche Nachrichtenthemen für heute. Beziehe dich auf reale aktuelle Ereignisse und Debatten in Deutschland.
+const USER_PROMPT = `Generiere 10 aktuelle deutsche politische Nachrichtenthemen für heute. Beziehe dich auf reale aktuelle Ereignisse und Debatten in Deutschland. NUR Politik, KEIN Boulevard.
 
 Jedes Thema als JSON-Objekt mit dieser Struktur:
 {
   "topic": "Thementitel",
   "tag_type": "gleich" | "gegensaetzlich" | "teilweise",
-  "category": "politik" | "boulevard",
+  "category": "politik",
   "left_position": "Position Links",
   "left_quote": "Zitat",
   "left_speaker": "Sprecher/Organisation",
@@ -65,11 +63,10 @@ Jedes Thema als JSON-Objekt mit dieser Struktur:
 }
 
 WICHTIG:
-- Genau 9x "politik" und 1x "boulevard"
+- Alle 10 Themen mit category "politik" — KEIN Boulevard
 - KEINE URLs generieren! "url" muss IMMER "" sein. Nur den Quellennamen im "label".
 - Es darf NICHTS Erfundenes auf der Seite landen.
 - Jedes Thema = EIN Ereignis. Keine Vermischung verschiedener Nachrichten oder Personen.
-- Boulevard: Prüfe dreifach, dass Zitate der richtigen Person zugeordnet sind und alle Inhalte sich auf dasselbe Ereignis beziehen.
 
 Antworte NUR mit einem JSON-Array von 10 Objekten.`;
 

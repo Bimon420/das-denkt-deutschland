@@ -63,9 +63,8 @@ export function useTopics() {
         .from("topics")
         .select("*")
         .eq("published_at", today)
-        .order("category", { ascending: true }) // boulevard before politik
         .order("created_at", { ascending: true })
-        .limit(11);
+        .limit(10);
 
       if (error) {
         console.error("Error fetching topics:", error);
@@ -77,9 +76,7 @@ export function useTopics() {
         return staticTopics;
       }
 
-      const mapped = data.map(mapDbToTopic);
-      // Boulevard topics first
-      return mapped.sort((a, b) => (a.category === "boulevard" ? -1 : b.category === "boulevard" ? 1 : 0));
+      return data.map(mapDbToTopic);
     },
     staleTime: 5 * 60 * 1000, // 5 min
   });
