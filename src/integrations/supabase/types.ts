@@ -32,6 +32,27 @@ export type Database = {
         }
         Relationships: []
       }
+      topic_suggestions: {
+        Row: {
+          created_at: string
+          id: string
+          title: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          title: string
+          url?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          title?: string
+          url?: string
+        }
+        Relationships: []
+      }
       topic_votes: {
         Row: {
           created_at: string
