@@ -68,6 +68,8 @@ WICHTIG:
 - Genau 9x "politik" und 1x "boulevard"
 - KEINE URLs generieren! "url" muss IMMER "" sein. Nur den Quellennamen im "label".
 - Es darf NICHTS Erfundenes auf der Seite landen.
+- Jedes Thema = EIN Ereignis. Keine Vermischung verschiedener Nachrichten oder Personen.
+- Boulevard: Prüfe dreifach, dass Zitate der richtigen Person zugeordnet sind und alle Inhalte sich auf dasselbe Ereignis beziehen.
 
 Antworte NUR mit einem JSON-Array von 10 Objekten.`;
 
