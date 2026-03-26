@@ -90,9 +90,10 @@ const ArchivePage = () => {
 
               <div className="space-y-2">
                 {items.map((t) => (
-                  <div
+                  <button
                     key={t.id}
-                    className="flex items-center justify-between p-4 rounded-lg bg-card border border-border/50 hover:border-border transition-colors"
+                    onClick={() => navigate(`/thema/${t.id}`)}
+                    className="w-full flex items-center justify-between p-4 rounded-lg bg-card border border-border/50 hover:border-accent/40 hover:bg-card/80 transition-all cursor-pointer active:scale-[0.99] text-left"
                   >
                     <span className="font-body text-sm font-semibold text-foreground">
                       {t.topic}
@@ -100,7 +101,7 @@ const ArchivePage = () => {
                     <TransparencyTag
                       type={t.tag_type as "gleich" | "gegensaetzlich" | "teilweise"}
                     />
-                  </div>
+                  </button>
                 ))}
               </div>
             </motion.div>
