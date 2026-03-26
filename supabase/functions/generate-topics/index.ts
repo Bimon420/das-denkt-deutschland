@@ -46,7 +46,7 @@ Jedes Thema als JSON-Objekt mit dieser Struktur:
 {
   "topic": "Thementitel",
   "tag_type": "gleich" | "gegensaetzlich" | "teilweise",
-  "category": "politik" | "boulevard",
+  "category": "politik",
   "left_position": "Position Links",
   "left_quote": "Zitat",
   "left_speaker": "Sprecher/Organisation",
