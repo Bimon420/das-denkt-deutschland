@@ -26,11 +26,9 @@ REGELN:
 THEMEN-INTEGRITÄT — EXTREM WICHTIG:
 - Jedes Thema muss GENAU EIN konkretes Ereignis oder EINE konkrete Debatte behandeln
 - NIEMALS verschiedene Nachrichten, Personen oder Debatten in einem Thema vermischen
-- Besonders bei Boulevard: Prüfe, ob alle Zitate, Positionen und Quellen sich auf DASSELBE Ereignis beziehen
 - Wenn eine Person zitiert wird, muss das Zitat nachweislich von dieser Person stammen — KEINE erfundenen oder zugeschriebenen Zitate
 - Zitate die nicht eindeutig einer konkreten Person zugeordnet werden können, MÜSSEN als "Konservative Kommentatoren" o.ä. gekennzeichnet werden, NIEMALS einer konkreten Person in den Mund gelegt werden
 - Verwechsle NICHT Personen die ein Thema kommentieren mit Personen die vom Thema betroffen sind
-- Prüfe bei Boulevard-Themen besonders: Geht es um Person A oder um Person B? Werden Aussagen richtig zugeordnet?
 
 QUELLEN — EXTREM WICHTIG:
 - Generiere KEINE URLs. URLs sind verboten, da sie fast immer falsch sind.
