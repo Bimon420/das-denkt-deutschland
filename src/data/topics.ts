@@ -29,49 +29,6 @@
 
 export const topics: import("@/hooks/useTopics").Topic[] = [
   {
-    topic: "Christian Ulmen & die Empörungskultur",
-    tagType: "teilweise" as const,
-    category: "boulevard" as const,
-    leftView: {
-      position:
-        "Ulmens Aussagen reproduzieren toxische Muster. Prominente müssen ihre Reichweite verantwortungsvoller nutzen.",
-      quote:
-        "Wer Millionen erreicht, trägt Verantwortung — Humor ist keine Entschuldigung für Grenzüberschreitungen.",
-      speaker: "Kulturkritische Stimmen in sozialen Medien",
-      hiddenMeaning:
-        "Die Forderung nach 'Verantwortung' klingt vernünftig, meint aber oft: Prominente sollen nur noch sagen, was dem eigenen Weltbild entspricht. Humor wird zur Risikozone, Ironie zum Vergehen.",
-      negativeEffects:
-        "Wenn jeder Witz auf die Goldwaage gelegt wird, stirbt die Satire zuerst. Künstler üben Selbstzensur, das kulturelle Klima verarmt.",
-      sources: [
-        {
-          type: "article" as const,
-          label: "Spiegel: Ulmen-Debatte",
-          url: "https://www.spiegel.de/kultur/christian-ulmen/",
-        },
-      ],
-    },
-    rightView: {
-      position:
-        "Ulmen sagt, was viele denken. Die Empörungswelle zeigt, wie überempfindlich Deutschland geworden ist.",
-      quote:
-        "Man darf in diesem Land ja gar nichts mehr sagen, ohne dass sofort ein Shitstorm losgeht.",
-      speaker: "Konservative Kommentatoren",
-      hiddenMeaning:
-        "'Man darf nichts mehr sagen' wird von Leuten gesagt, die es in jede Talkshow schaffen. Die vermeintliche Zensur ist oft nur: Widerspruch. Und Widerspruch ist das Gegenteil von Zensur.",
-      negativeEffects:
-        "Die pauschale Opfererzählung verwischt die Grenze zwischen berechtigter Kritik und tatsächlicher Einschränkung. Echte Probleme wie Chilling Effects werden trivialisiert.",
-      sources: [
-        {
-          type: "article" as const,
-          label: "DWDL: Ulmen im Interview",
-          url: "https://www.dwdl.de/interviews/christian-ulmen/",
-        },
-      ],
-    },
-    mitteView:
-      "Christian Ulmen ist ein Komiker — kein Politiker, kein Ideologe. Die Frage ist nicht, ob man über seine Aussagen empört sein darf (natürlich darf man), sondern ob die Intensität der Reaktion noch im Verhältnis steht. Deutschland hat ein Talent entwickelt, aus jeder Pointe eine Grundsatzdebatte zu machen. Humor braucht Freiheit, Freiheit braucht Grenzen, aber Grenzen brauchen Gelassenheit. Wer bei jedem Witz 'Haltung' fordert, hat die Ironie schon begraben.",
-  },
-  {
     topic: "Migration & Integration",
     tagType: "gegensaetzlich" as const,
     category: "politik" as const,
