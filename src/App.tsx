@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import AdminPage from "./pages/AdminPage";
 import ArchivePage from "./pages/ArchivePage";
 import ImpressumPage from "./pages/ImpressumPage";
+import TopicDetailPage from "./pages/TopicDetailPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
