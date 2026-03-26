@@ -40,7 +40,7 @@ QUELLEN — EXTREM WICHTIG:
 
 Antworte NUR mit dem JSON-Array, keine weiteren Erklärungen.`;
 
-const USER_PROMPT = `Generiere 10 aktuelle deutsche Nachrichtenthemen für heute. Beziehe dich auf reale aktuelle Ereignisse und Debatten in Deutschland.
+const USER_PROMPT = `Generiere 10 aktuelle deutsche politische Nachrichtenthemen für heute. Beziehe dich auf reale aktuelle Ereignisse und Debatten in Deutschland. NUR Politik, KEIN Boulevard.
 
 Jedes Thema als JSON-Objekt mit dieser Struktur:
 {
