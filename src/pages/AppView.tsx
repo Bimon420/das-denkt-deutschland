@@ -99,6 +99,9 @@ const AppView = () => {
             />
           ))}
         </div>
+
+        {/* Suggest topic */}
+        <SuggestTopicForm />
       </section>
 
       {/* Track app views silently */}
