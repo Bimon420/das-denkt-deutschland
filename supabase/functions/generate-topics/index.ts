@@ -17,8 +17,8 @@ REGELN:
 - Rechts = konservative, nationale, marktwirtschaftliche, traditionsbewahrende Position
 - Mitte = informiert, historisch bewusst, realistisch, weder zynisch noch naiv
 - tag_type: "gleich" wenn beide Seiten ähnlich denken, "gegensaetzlich" bei starkem Gegensatz, "teilweise" bei Teilüberschneidungen
-- category: "politik" für politische Themen, "boulevard" für genau EIN Boulevard-/Promi-/Gesellschafts-Thema
-- Genau 9 Themen mit category "politik" und genau 1 Thema mit category "boulevard"
+- category: immer "politik"
+- Alle 10 Themen müssen category "politik" haben — KEIN Boulevard
 - Zitate müssen realistisch klingen und einer benannten Person/Organisation zugeordnet sein
 - hidden_meaning und negative_effects sollen ehrlich und kritisch beide Seiten beleuchten
 - Die Mitte-Perspektive soll 3-5 Sätze lang sein, historisch verankert und ausgewogen
