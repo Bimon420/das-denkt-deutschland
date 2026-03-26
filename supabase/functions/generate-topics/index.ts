@@ -70,127 +70,43 @@ WICHTIG:
 
 Antworte NUR mit einem JSON-Array von 10 Objekten.`;
 
-// ─── 10 verification perspectives ───────────────────────────────────────────
+// ─── 10 verification perspectives (batched: all topics in one call per perspective) ──
 const VERIFICATION_PERSPECTIVES = [
-  {
-    name: "Politischer Faktenprüfer",
-    prompt: `Du bist ein politischer Faktenprüfer. Prüfe dieses Thema auf:
-- Ist der Titel korrekt und beschreibt genau EIN Ereignis?
-- Passt die linke Position tatsächlich zum Titel?
-- Passt die rechte Position tatsächlich zum Titel?
-- Passt die Mitte-Perspektive zum Titel?
-- Werden verschiedene Ereignisse vermischt?`,
-  },
-  {
-    name: "Personen-Zuordnungsprüfer",
-    prompt: `Du bist ein Experte für Personenzuordnung in Nachrichten. Prüfe:
-- Werden Zitate der richtigen Person zugeordnet?
-- Wird eine Person, die das Thema kommentiert, mit einer betroffenen Person verwechselt?
-- Werden Aussagen fälschlicherweise einer konkreten Person in den Mund gelegt?
-- Stimmen Sprecher und Zitat zusammen?`,
-  },
-  {
-    name: "Gesellschaftlicher Kohärenzprüfer",
-    prompt: `Du bist ein Gesellschaftsanalyst. Prüfe:
-- Beschreibt das Thema eine echte gesellschaftliche Debatte?
-- Passen Links, Rechts und Mitte logisch zum selben Thema?
-- Werden gesellschaftliche Aspekte korrekt dargestellt?
-- Ist die Darstellung fair und nicht irreführend?`,
-  },
-  {
-    name: "Wirtschaftlicher Plausibilitätsprüfer",
-    prompt: `Du bist ein Wirtschaftsexperte. Prüfe:
-- Falls wirtschaftliche Argumente gemacht werden: Sind sie plausibel?
-- Werden wirtschaftliche Fakten korrekt dargestellt?
-- Passen wirtschaftliche Positionen zum Thementitel?
-- Werden Links und Rechts korrekt wirtschaftlich eingeordnet?`,
-  },
-  {
-    name: "Gesundheitspolitischer Prüfer",
-    prompt: `Du bist ein Gesundheitsexperte. Prüfe:
-- Falls gesundheitliche Aspekte erwähnt werden: Sind sie korrekt?
-- Werden medizinische oder gesundheitliche Behauptungen korrekt dargestellt?
-- Passen gesundheitliche Argumente zum Thementitel?
-- Gibt es irreführende Gesundheitsaussagen?`,
-  },
-  {
-    name: "Historischer Kontextprüfer",
-    prompt: `Du bist Historiker. Prüfe:
-- Werden historische Vergleiche oder Referenzen korrekt verwendet?
-- Ist der Mitte-Standpunkt historisch fundiert?
-- Werden keine falschen historischen Parallelen gezogen?
-- Ist der historische Kontext angemessen?`,
-  },
-  {
-    name: "Sprachlicher Präzisionsprüfer",
-    prompt: `Du bist Linguist und Medienethiker. Prüfe:
-- Werden Begriffe korrekt und präzise verwendet?
-- Werden Sachverhalte sprachlich korrekt dargestellt, nicht aufgebauscht?
-- Sind Zitate realistisch formuliert?
-- Ist der Ton sachlich und fair für alle Perspektiven?`,
-  },
-  {
-    name: "Quellen-Plausibilitätsprüfer",
-    prompt: `Du bist Quellenanalyst. Prüfe:
-- Sind die genannten Quellen echte, existierende Medien oder Organisationen?
-- Passen die Quellen zum jeweiligen Thema?
-- Werden keine erfundenen Quellen oder Studien zitiert?
-- Sind Quellentypen (article, video, quote) korrekt zugeordnet?`,
-  },
-  {
-    name: "Bias-Detektor",
-    prompt: `Du bist ein Bias-Detektor. Prüfe:
-- Wird die linke Position fair dargestellt (nicht karikiert)?
-- Wird die rechte Position fair dargestellt (nicht karikiert)?
-- Ist die Mitte wirklich ausgewogen oder tendiert sie zu einer Seite?
-- Werden Strohmann-Argumente verwendet?`,
-  },
-  {
-    name: "Abschluss-Integritätsprüfer",
-    prompt: `Du bist der finale Integritätsprüfer. Mache einen Gesamtcheck:
-- Gehören Titel, Links, Rechts und Mitte ZWEIFELSFREI zum selben Thema?
-- Gibt es IRGENDEINEN Widerspruch oder eine Vermischung?
-- Würde ein informierter Leser sofort erkennen, dass alles zusammenpasst?
-- Ist das Thema als Ganzes publizierbar ohne Risiko von Fehlinformation?`,
-  },
+  { name: "Politischer Faktenprüfer", focus: "Titel korrekt? Beschreibt genau EIN Ereignis? Passen Links/Rechts/Mitte zum Titel? Werden verschiedene Ereignisse vermischt?" },
+  { name: "Personen-Zuordnungsprüfer", focus: "Zitate richtig zugeordnet? Kommentator vs. Betroffener verwechselt? Aussagen fälschlicherweise konkreten Personen zugeschrieben?" },
+  { name: "Gesellschaftlicher Kohärenzprüfer", focus: "Echte gesellschaftliche Debatte? Links/Rechts/Mitte logisch zum selben Thema? Fair und nicht irreführend?" },
+  { name: "Wirtschaftlicher Plausibilitätsprüfer", focus: "Wirtschaftliche Argumente plausibel? Fakten korrekt? Links/Rechts wirtschaftlich korrekt eingeordnet?" },
+  { name: "Gesundheitspolitischer Prüfer", focus: "Gesundheitliche Aussagen korrekt? Keine irreführenden medizinischen Behauptungen?" },
+  { name: "Historischer Kontextprüfer", focus: "Historische Referenzen korrekt? Mitte-Standpunkt historisch fundiert? Keine falschen Parallelen?" },
+  { name: "Sprachlicher Präzisionsprüfer", focus: "Begriffe korrekt und präzise? Nicht aufgebauscht? Zitate realistisch? Ton sachlich und fair?" },
+  { name: "Quellen-Plausibilitätsprüfer", focus: "Quellen echte existierende Medien/Organisationen? Passen zum Thema? Keine erfundenen Studien?" },
+  { name: "Bias-Detektor", focus: "Linke Position fair (nicht karikiert)? Rechte Position fair? Mitte wirklich ausgewogen? Strohmann-Argumente?" },
+  { name: "Abschluss-Integritätsprüfer", focus: "Titel/Links/Rechts/Mitte ZWEIFELSFREI zum selben Thema? Irgendein Widerspruch? Publizierbar ohne Fehlinformationsrisiko?" },
 ];
 
-function buildVerificationPrompt(perspective: typeof VERIFICATION_PERSPECTIVES[0], topic: any): string {
-  return `${perspective.prompt}
-
-Hier ist das zu prüfende Thema:
-
+function formatTopicForReview(topic: any, idx: number): string {
+  return `--- THEMA ${idx + 1} ---
 TITEL: ${topic.topic}
-
-LINKS:
-- Position: ${topic.left_position}
-- Zitat: „${topic.left_quote}" — ${topic.left_speaker}
-- Versteckte Bedeutung: ${topic.left_hidden_meaning || "–"}
-- Negative Auswirkungen: ${topic.left_negative_effects || "–"}
-
-RECHTS:
-- Position: ${topic.right_position}
-- Zitat: „${topic.right_quote}" — ${topic.right_speaker}
-- Versteckte Bedeutung: ${topic.right_hidden_meaning || "–"}
-- Negative Auswirkungen: ${topic.right_negative_effects || "–"}
-
-MITTE: ${topic.mitte_view}
-
-Antworte NUR mit einem JSON-Objekt:
-{
-  "approved": true/false,
-  "reason": "Kurze Begründung falls abgelehnt, sonst leer"
-}`;
+LINKS: ${topic.left_position}
+  Zitat: „${topic.left_quote}" — ${topic.left_speaker}
+RECHTS: ${topic.right_position}
+  Zitat: „${topic.right_quote}" — ${topic.right_speaker}
+MITTE: ${topic.mitte_view}`;
 }
 
-async function verifyTopic(
-  topic: any,
+// One AI call per perspective, checking ALL topics at once
+async function runBatchVerification(
+  topics: any[],
   apiKey: string,
-): Promise<{ approved: boolean; rejectedBy: string[]; reasons: string[] }> {
-  const rejectedBy: string[] = [];
-  const reasons: string[] = [];
+): Promise<Map<number, { rejectedBy: string[]; reasons: string[] }>> {
+  const rejections = new Map<number, { rejectedBy: string[]; reasons: string[] }>();
+  for (let i = 0; i < topics.length; i++) {
+    rejections.set(i, { rejectedBy: [], reasons: [] });
+  }
 
-  // Run all 10 checks in parallel
+  const allTopicsText = topics.map((t, i) => formatTopicForReview(t, i)).join("\n\n");
+
+  // Run all 10 perspectives in parallel (10 calls total, not 100)
   const results = await Promise.all(
     VERIFICATION_PERSPECTIVES.map(async (perspective) => {
       try {
@@ -205,68 +121,62 @@ async function verifyTopic(
             messages: [
               {
                 role: "system",
-                content: "Du bist ein strenger Faktenprüfer. Antworte NUR mit dem geforderten JSON-Objekt.",
+                content: `Du bist "${perspective.name}". Dein Fokus: ${perspective.focus}\n\nAntworte NUR mit einem JSON-Array. Für jedes Thema ein Objekt: {"thema_nr": 1, "approved": true/false, "reason": "..."}`,
               },
-              { role: "user", content: buildVerificationPrompt(perspective, topic) },
+              {
+                role: "user",
+                content: `Prüfe ALLE folgenden Themen aus deiner Perspektive.\n\n${allTopicsText}\n\nAntworte NUR mit einem JSON-Array von ${topics.length} Objekten.`,
+              },
             ],
           }),
         });
 
         if (!res.ok) {
-          // On API error, fail safe — reject the topic
           const errText = await res.text();
-          console.error(`Verification "${perspective.name}" API error: ${res.status}`, errText);
-          return { name: perspective.name, approved: false, reason: `API error ${res.status}` };
+          console.error(`${perspective.name} API error: ${res.status}`, errText);
+          return { name: perspective.name, results: topics.map((_, i) => ({ thema_nr: i + 1, approved: false, reason: `API error ${res.status}` })) };
         }
 
         const data = await res.json();
         let raw = data.choices?.[0]?.message?.content || "";
         raw = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-
         const parsed = JSON.parse(raw);
-        return {
-          name: perspective.name,
-          approved: parsed.approved === true,
-          reason: parsed.reason || "",
-        };
+        return { name: perspective.name, results: Array.isArray(parsed) ? parsed : [] };
       } catch (e) {
-        console.error(`Verification "${perspective.name}" failed:`, e);
-        return { name: perspective.name, approved: false, reason: "Parse/network error" };
+        console.error(`${perspective.name} failed:`, e);
+        return { name: perspective.name, results: topics.map((_, i) => ({ thema_nr: i + 1, approved: false, reason: "Parse/network error" })) };
       }
     })
   );
 
-  for (const r of results) {
-    if (!r.approved) {
-      rejectedBy.push(r.name);
-      if (r.reason) reasons.push(`[${r.name}]: ${r.reason}`);
+  // Aggregate rejections
+  for (const { name, results: perspectiveResults } of results) {
+    for (const r of perspectiveResults) {
+      const idx = (r.thema_nr || 1) - 1;
+      if (idx >= 0 && idx < topics.length && r.approved === false) {
+        const entry = rejections.get(idx)!;
+        entry.rejectedBy.push(name);
+        if (r.reason) entry.reasons.push(`[${name}]: ${r.reason}`);
+      }
     }
   }
 
-  return { approved: rejectedBy.length === 0, rejectedBy, reasons };
+  return rejections;
 }
 
 // ─── URL validation ─────────────────────────────────────────────────────────
-async function isUrlReachable(url: string): Promise<boolean> {
-  if (!url || url.trim() === "") return false;
-  try {
-    const res = await fetch(url, {
-      method: "HEAD",
-      redirect: "follow",
-      signal: AbortSignal.timeout(5000),
-    });
-    return res.ok;
-  } catch {
-    return false;
-  }
-}
-
 async function sanitizeSources(sources: any[]): Promise<any[]> {
   if (!Array.isArray(sources)) return [];
   return Promise.all(
     sources.map(async (s: any) => {
       const url = s.url?.trim() || "";
-      const reachable = url ? await isUrlReachable(url) : false;
+      let reachable = false;
+      if (url) {
+        try {
+          const res = await fetch(url, { method: "HEAD", redirect: "follow", signal: AbortSignal.timeout(5000) });
+          reachable = res.ok;
+        } catch { /* unreachable */ }
+      }
       return { type: s.type || "article", label: s.label || "", url: reachable ? url : "" };
     })
   );
@@ -284,9 +194,7 @@ serve(async (req) => {
 
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      throw new Error("Supabase credentials not configured");
-    }
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) throw new Error("Supabase credentials not configured");
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
@@ -295,10 +203,7 @@ serve(async (req) => {
 
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
+      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
@@ -311,18 +216,8 @@ serve(async (req) => {
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
       console.error("AI gateway error:", aiResponse.status, errorText);
-      if (aiResponse.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limited, try again later" }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (aiResponse.status === 402) {
-        return new Response(JSON.stringify({ error: "Credits exhausted" }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+      if (aiResponse.status === 429) return new Response(JSON.stringify({ error: "Rate limited" }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      if (aiResponse.status === 402) return new Response(JSON.stringify({ error: "Credits exhausted" }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       throw new Error(`AI gateway error: ${aiResponse.status}`);
     }
 
@@ -331,55 +226,43 @@ serve(async (req) => {
     content = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
 
     const topicsArray = JSON.parse(content);
-    if (!Array.isArray(topicsArray) || topicsArray.length === 0) {
-      throw new Error("AI returned invalid topics format");
-    }
+    if (!Array.isArray(topicsArray) || topicsArray.length === 0) throw new Error("AI returned invalid topics format");
 
-    console.log(`Generated ${topicsArray.length} topics. Starting 10-pass verification...`);
+    console.log(`Generated ${topicsArray.length} topics. Starting 10-pass batch verification...`);
 
-    // ── Step 2: 10-pass verification for each topic ──
-    console.log("Step 2/3: Running 10-pass verification on each topic...");
+    // ── Step 2: Batched 10-pass verification (10 AI calls total) ──
+    console.log("Step 2/3: Running 10-pass batch verification...");
+    const rejections = await runBatchVerification(topicsArray, LOVABLE_API_KEY);
 
-    const verificationResults = await Promise.all(
-      topicsArray.map(async (topic: any, idx: number) => {
-        const result = await verifyTopic(topic, LOVABLE_API_KEY);
-        if (result.approved) {
-          console.log(`  ✅ Topic ${idx + 1} "${topic.topic}" — ALL 10 checks passed`);
-        } else {
-          console.warn(
-            `  ❌ Topic ${idx + 1} "${topic.topic}" — REJECTED by: ${result.rejectedBy.join(", ")}`
-          );
-          for (const r of result.reasons) console.warn(`     ${r}`);
-        }
-        return { topic, ...result };
-      })
-    );
+    const approved: any[] = [];
+    const rejected: { topic: string; rejectedBy: string[]; reasons: string[] }[] = [];
 
-    const approvedTopics = verificationResults.filter((r) => r.approved).map((r) => r.topic);
-    const rejectedCount = verificationResults.length - approvedTopics.length;
+    topicsArray.forEach((topic: any, idx: number) => {
+      const entry = rejections.get(idx)!;
+      if (entry.rejectedBy.length === 0) {
+        console.log(`  ✅ Topic ${idx + 1} "${topic.topic}" — ALL 10 checks passed`);
+        approved.push(topic);
+      } else {
+        console.warn(`  ❌ Topic ${idx + 1} "${topic.topic}" — REJECTED by: ${entry.rejectedBy.join(", ")}`);
+        rejected.push({ topic: topic.topic, ...entry });
+      }
+    });
 
-    console.log(`Verification complete: ${approvedTopics.length} approved, ${rejectedCount} rejected`);
+    console.log(`Verification done: ${approved.length} approved, ${rejected.length} rejected`);
 
-    if (approvedTopics.length === 0) {
+    if (approved.length === 0) {
       return new Response(
-        JSON.stringify({
-          success: false,
-          error: "All topics failed verification. None published.",
-          details: verificationResults
-            .filter((r) => !r.approved)
-            .map((r) => ({ topic: r.topic.topic, rejectedBy: r.rejectedBy, reasons: r.reasons })),
-        }),
+        JSON.stringify({ success: false, error: "All topics failed verification.", details: rejected }),
         { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     // ── Step 3: Save approved topics ──
     console.log("Step 3/3: Saving approved topics...");
-
     const today = new Date().toISOString().split("T")[0];
 
     const rows = await Promise.all(
-      approvedTopics.map(async (t: any) => ({
+      approved.map(async (t: any) => ({
         topic: t.topic,
         tag_type: t.tag_type,
         category: t.category || "politik",
@@ -401,32 +284,17 @@ serve(async (req) => {
     );
 
     const { data, error } = await supabase.from("topics").insert(rows).select();
+    if (error) throw new Error(`Failed to save topics: ${error.message}`);
 
-    if (error) {
-      console.error("Database insert error:", error);
-      throw new Error(`Failed to save topics: ${error.message}`);
-    }
-
-    console.log(`Successfully saved ${data.length} verified topics (${rejectedCount} rejected)`);
+    console.log(`Successfully saved ${data.length} verified topics`);
 
     return new Response(
-      JSON.stringify({
-        success: true,
-        count: data.length,
-        rejected: rejectedCount,
-        rejectionDetails: verificationResults
-          .filter((r) => !r.approved)
-          .map((r) => ({ topic: r.topic.topic, rejectedBy: r.rejectedBy, reasons: r.reasons })),
-        topics: data,
-      }),
+      JSON.stringify({ success: true, count: data.length, rejected: rejected.length, rejectionDetails: rejected, topics: data }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
     console.error("Error generating topics:", error);
     const msg = error instanceof Error ? error.message : "Unknown error";
-    return new Response(JSON.stringify({ success: false, error: msg }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(JSON.stringify({ success: false, error: msg }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });
