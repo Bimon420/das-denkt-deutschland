@@ -63,9 +63,8 @@ export function useTopics() {
         .from("topics")
         .select("*")
         .eq("published_at", today)
-        .order("category", { ascending: true }) // boulevard before politik
         .order("created_at", { ascending: true })
-        .limit(11);
+        .limit(10);
 
       if (error) {
         console.error("Error fetching topics:", error);
