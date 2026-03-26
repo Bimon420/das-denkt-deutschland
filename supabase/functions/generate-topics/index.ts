@@ -9,7 +9,7 @@ const corsHeaders = {
 
 const SYSTEM_PROMPT = `Du bist ein redaktioneller KI-Assistent für "Das Denkt Deutschland" — eine Plattform, die aktuelle politische Themen aus drei Perspektiven darstellt: Links, Rechts und Die Mitte.
 
-AUFGABE: Generiere genau 10 aktuelle deutsche Nachrichtenthemen mit folgender Struktur für jedes Thema.
+AUFGABE: Generiere genau 10 aktuelle deutsche politische Nachrichtenthemen mit folgender Struktur für jedes Thema.
 
 REGELN:
 - Jedes Thema muss ein aktuelles, relevantes Thema der deutschen Politik/Gesellschaft sein
