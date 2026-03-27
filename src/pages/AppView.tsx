@@ -183,9 +183,6 @@ const AppView = () => {
             />
           ))}
         </div>
-
-        {/* Suggest topic */}
-        <SuggestTopicForm open={suggestOpen} onOpenChange={setSuggestOpen} />
       </section>
 
       {/* Track app views silently */}
