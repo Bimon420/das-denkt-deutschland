@@ -58,10 +58,15 @@ const AppView = () => {
         setSuggestUrl("");
         setSuggestOpen(false);
       } else {
-        toast.error(data?.error || "Qualitätsprüfung nicht bestanden.");
+        const detail = Array.isArray(data?.details) && data.details.length > 0 ? data.details[0] : null;
+        toast.error(detail ? `${data?.error || "Qualitätsprüfung nicht bestanden."} ${detail}` : (data?.error || "Qualitätsprüfung nicht bestanden."));
       }
-    } catch {
-      toast.error("Fehler bei der Verarbeitung.");
+    } catch (error: any) {
+      const details = Array.isArray(error?.context?.details) ? error.context.details : null;
+      const message = details?.length
+        ? `${error?.context?.error || "Fehler bei der Verarbeitung."} ${details[0]}`
+        : (error?.message || "Fehler bei der Verarbeitung.");
+      toast.error(message);
     } finally {
       setSubmitting(false);
     }
