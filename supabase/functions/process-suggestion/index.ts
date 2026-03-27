@@ -1,0 +1,204 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+};
+
+const VERIFICATION_PERSPECTIVES = [
+  { name: "Politischer Faktenprüfer", focus: "Titel korrekt? Beschreibt genau EIN Ereignis? Passen Links/Rechts/Mitte zum Titel?" },
+  { name: "Personen-Zuordnungsprüfer", focus: "Zitate richtig zugeordnet? Kommentator vs. Betroffener verwechselt?" },
+  { name: "Gesellschaftlicher Kohärenzprüfer", focus: "Echte gesellschaftliche Debatte? Links/Rechts/Mitte logisch zum selben Thema?" },
+  { name: "Wirtschaftlicher Plausibilitätsprüfer", focus: "Wirtschaftliche Argumente plausibel? Fakten korrekt?" },
+  { name: "Gesundheitspolitischer Prüfer", focus: "Gesundheitliche Aussagen korrekt? Keine irreführenden Behauptungen?" },
+  { name: "Historischer Kontextprüfer", focus: "Historische Referenzen korrekt? Mitte-Standpunkt historisch fundiert?" },
+  { name: "Sprachlicher Präzisionsprüfer", focus: "Begriffe korrekt und präzise? Zitate realistisch? Ton sachlich?" },
+  { name: "Quellen-Plausibilitätsprüfer", focus: "Quellen echte existierende Medien/Organisationen?" },
+  { name: "Bias-Detektor", focus: "Linke Position fair? Rechte Position fair? Mitte ausgewogen? Strohmann-Argumente?" },
+  { name: "Abschluss-Integritätsprüfer", focus: "Titel/Links/Rechts/Mitte ZWEIFELSFREI zum selben Thema? Publizierbar?" },
+];
+
+async function runVerification(topic: any, apiKey: string): Promise<{ approved: boolean; rejectedBy: string[]; reasons: string[] }> {
+  const topicText = `TITEL: ${topic.topic}
+LINKS: ${topic.left_position}
+  Zitat: „${topic.left_quote}" — ${topic.left_speaker}
+RECHTS: ${topic.right_position}
+  Zitat: „${topic.right_quote}" — ${topic.right_speaker}
+MITTE: ${topic.mitte_view}`;
+
+  const results = await Promise.all(
+    VERIFICATION_PERSPECTIVES.map(async (p) => {
+      try {
+        const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash-lite",
+            messages: [
+              { role: "system", content: `Du bist "${p.name}". Fokus: ${p.focus}\nAntworte NUR mit JSON: {"approved": true/false, "reason": "..."}` },
+              { role: "user", content: `Prüfe dieses Thema:\n\n${topicText}\n\nJSON-Antwort:` },
+            ],
+          }),
+        });
+        if (!res.ok) return { name: p.name, approved: false, reason: `API error ${res.status}` };
+        const data = await res.json();
+        let raw = data.choices?.[0]?.message?.content || "";
+        raw = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+        const parsed = JSON.parse(raw);
+        return { name: p.name, approved: parsed.approved !== false, reason: parsed.reason || "" };
+      } catch (e) {
+        return { name: p.name, approved: false, reason: "Parse/network error" };
+      }
+    })
+  );
+
+  const rejectedBy: string[] = [];
+  const reasons: string[] = [];
+  for (const r of results) {
+    if (!r.approved) {
+      rejectedBy.push(r.name);
+      if (r.reason) reasons.push(`[${r.name}]: ${r.reason}`);
+    }
+  }
+  return { approved: rejectedBy.length === 0, rejectedBy, reasons };
+}
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { url } = await req.json();
+    if (!url || typeof url !== "string" || url.length > 500) {
+      return new Response(JSON.stringify({ error: "Ungültige URL" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) throw new Error("Supabase not configured");
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // Save suggestion
+    await supabase.from("topic_suggestions").insert({ title: url, url });
+
+    // Step 1: Generate topic from URL via AI
+    console.log("Generating topic from URL:", url);
+
+    const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          {
+            role: "system",
+            content: `Du bist ein redaktioneller KI-Assistent für "Das Denkt Deutschland". Du erhältst einen Link zu einem Nachrichtenartikel und musst daraus EIN politisches Thema generieren.
+
+REGELN:
+- Das Thema muss sich EXAKT auf den verlinkten Artikel beziehen
+- Links = progressive Position
+- Rechts = konservative Position
+- Mitte = ausgewogene, historisch bewusste Einordnung (3-5 Sätze)
+- tag_type: "gleich", "gegensaetzlich" oder "teilweise"
+- category: immer "politik"
+- KEINE erfundenen Zitate — wenn unklar, nutze "Politische Beobachter" o.ä.
+- KEINE URLs generieren, "url" immer ""
+- Quellen: nur echte Medien/Organisationen
+
+Antworte NUR mit einem JSON-Objekt.`,
+          },
+          {
+            role: "user",
+            content: `Analysiere diesen Artikel und generiere ein Thema: ${url}
+
+JSON-Struktur:
+{
+  "topic": "Thementitel",
+  "tag_type": "gleich" | "gegensaetzlich" | "teilweise",
+  "category": "politik",
+  "left_position": "...", "left_quote": "...", "left_speaker": "...",
+  "left_hidden_meaning": "...", "left_negative_effects": "...",
+  "left_sources": [{"type": "article", "label": "Quellenname", "url": ""}],
+  "right_position": "...", "right_quote": "...", "right_speaker": "...",
+  "right_hidden_meaning": "...", "right_negative_effects": "...",
+  "right_sources": [{"type": "article", "label": "Quellenname", "url": ""}],
+  "mitte_view": "..."
+}`,
+          },
+        ],
+      }),
+    });
+
+    if (!aiRes.ok) {
+      const errText = await aiRes.text();
+      console.error("AI error:", aiRes.status, errText);
+      throw new Error(`AI error: ${aiRes.status}`);
+    }
+
+    const aiData = await aiRes.json();
+    let content = aiData.choices?.[0]?.message?.content || "";
+    content = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+    const topic = JSON.parse(content);
+
+    console.log("Generated topic:", topic.topic);
+
+    // Step 2: 10-fold verification
+    console.log("Running 10-fold verification...");
+    const verification = await runVerification(topic, LOVABLE_API_KEY);
+
+    if (!verification.approved) {
+      console.warn("Topic REJECTED:", verification.rejectedBy.join(", "));
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Das Thema hat die Qualitätsprüfung nicht bestanden.",
+          details: verification.reasons,
+        }),
+        { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Step 3: Save approved topic
+    console.log("Topic approved! Saving...");
+    const today = new Date().toISOString().split("T")[0];
+
+    const row = {
+      topic: topic.topic,
+      tag_type: topic.tag_type,
+      category: "politik",
+      left_position: topic.left_position,
+      left_quote: topic.left_quote,
+      left_speaker: topic.left_speaker,
+      left_hidden_meaning: topic.left_hidden_meaning || null,
+      left_negative_effects: topic.left_negative_effects || null,
+      left_sources: topic.left_sources || [],
+      right_position: topic.right_position,
+      right_quote: topic.right_quote,
+      right_speaker: topic.right_speaker,
+      right_hidden_meaning: topic.right_hidden_meaning || null,
+      right_negative_effects: topic.right_negative_effects || null,
+      right_sources: topic.right_sources || [],
+      mitte_view: topic.mitte_view,
+      published_at: today,
+    };
+
+    const { data, error } = await supabase.from("topics").insert(row).select();
+    if (error) throw new Error(`DB error: ${error.message}`);
+
+    return new Response(
+      JSON.stringify({ success: true, topic: data[0] }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  } catch (error) {
+    console.error("Error:", error);
+    const msg = error instanceof Error ? error.message : "Unknown error";
+    return new Response(JSON.stringify({ success: false, error: msg }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  }
+});
