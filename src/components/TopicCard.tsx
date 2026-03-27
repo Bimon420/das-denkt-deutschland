@@ -101,9 +101,11 @@ const TopicCard = ({ id, topic, tagType, category = "politik", leftView, rightVi
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       >
         <div className="flex items-center justify-center gap-2.5">
-          <span className="text-xs font-bold tracking-widest uppercase text-muted-foreground">
-            Thema {String(index + 1).padStart(2, "0")}
-          </span>
+          {!hideIndex && (
+            <span className="text-xs font-bold tracking-widest uppercase text-muted-foreground">
+              Thema {String(index + 1).padStart(2, "0")}
+            </span>
+          )}
           {isBoulevard && (
             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wide uppercase bg-accent/20 text-accent border border-accent/30">
               ✦ Boulevard
