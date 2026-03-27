@@ -58,8 +58,7 @@ const AppView = () => {
         setSuggestUrl("");
         setSuggestOpen(false);
       } else {
-        const detail = Array.isArray(data?.details) && data.details.length > 0 ? data.details[0] : null;
-        toast.error(detail ? `${data?.error || "Qualitätsprüfung nicht bestanden."} ${detail}` : (data?.error || "Qualitätsprüfung nicht bestanden."));
+        toast.error("Dieser Link hat leider keine Relevanz für diese Seite.");
       }
     } catch (error: any) {
       const details = Array.isArray(error?.context?.details) ? error.context.details : null;
