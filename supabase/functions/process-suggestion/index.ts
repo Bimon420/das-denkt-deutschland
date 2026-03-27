@@ -8,7 +8,7 @@ const corsHeaders = {
 };
 
 const VERIFICATION_PERSPECTIVES = [
-  { name: "Politischer Faktenprüfer", focus: "Titel korrekt? Beschreibt genau EIN Ereignis? Passen Links/Rechts/Mitte zum Titel?" },
+  { name: "Politischer Faktenprüfer", focus: "Titel korrekt? Beschreibt genau EIN Ereignis? Passen Links/Rechts/Mitte zum Titel? WICHTIG: Bei Liveblogs/Eilmeldungen innere Konsistenz prüfen und nicht allein wegen fehlender Echtzeit-Verifizierbarkeit ablehnen." },
   { name: "Personen-Zuordnungsprüfer", focus: "Zitate zur jeweiligen Position passend? WICHTIG: Generische Sprecher wie 'Politischer Beobachter', 'Experten', 'Kritiker' sind ERLAUBT und kein Ablehnungsgrund. Prüfe nur ob Zitat inhaltlich zur Position (links/rechts) passt." },
   { name: "Gesellschaftlicher Kohärenzprüfer", focus: "Echte gesellschaftliche Debatte? Links/Rechts/Mitte logisch zum selben Thema?" },
   { name: "Wirtschaftlicher Plausibilitätsprüfer", focus: "Wirtschaftliche Argumente plausibel? Fakten korrekt?" },
@@ -98,6 +98,72 @@ MITTE: ${topic.mitte_view}`;
   return { approved: rejectedBy.length === 0, rejectedBy, reasons };
 }
 
+async function generateTopicFromUrl(url: string, apiKey: string): Promise<any> {
+  const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash",
+      response_format: { type: "json_object" },
+      messages: [
+        {
+          role: "system",
+          content: `Du bist ein redaktioneller KI-Assistent für "Das Denkt Deutschland". Du erhältst einen Link zu einem Nachrichtenartikel und musst daraus EIN politisches Thema generieren.
+
+REGELN:
+- Das Thema muss sich EXAKT auf den verlinkten Artikel beziehen
+- Links = progressive Position
+- Rechts = konservative Position
+- Mitte = ausgewogene, historisch bewusste Einordnung (3-5 Sätze)
+- tag_type: "gleich", "gegensaetzlich" oder "teilweise"
+- category: immer "politik"
+- KEINE erfundenen Zitate — wenn unklar, nutze "Politische Beobachter" o.ä.
+- KEINE URLs generieren, "url" immer ""
+- Quellen: nur echte Medien/Organisationen
+
+WICHTIG: Antworte AUSSCHLIESSLICH mit einem validen JSON-Objekt. Kein Text davor oder danach. Kein Markdown.`,
+        },
+        {
+          role: "user",
+          content: `Analysiere diesen Artikel und generiere ein Thema als JSON: ${url}
+
+Exakte JSON-Struktur (keine anderen Felder):
+{
+  "topic": "Thementitel",
+  "tag_type": "gleich" | "gegensaetzlich" | "teilweise",
+  "category": "politik",
+  "left_position": "...", "left_quote": "...", "left_speaker": "...",
+  "left_hidden_meaning": "...", "left_negative_effects": "...",
+  "left_sources": [{"type": "article", "label": "Quellenname", "url": ""}],
+  "right_position": "...", "right_quote": "...", "right_speaker": "...",
+  "right_hidden_meaning": "...", "right_negative_effects": "...",
+  "right_sources": [{"type": "article", "label": "Quellenname", "url": ""}],
+  "mitte_view": "..."
+}`,
+        },
+      ],
+    }),
+  });
+
+  if (!aiRes.ok) {
+    const errText = await aiRes.text();
+    console.error("AI error:", aiRes.status, errText);
+    throw new Error(`AI error: ${aiRes.status}`);
+  }
+
+  const aiData = await aiRes.json();
+  let content = aiData.choices?.[0]?.message?.content || "";
+  content = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+
+  const jsonMatch = content.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    console.error("AI returned non-JSON:", content.substring(0, 200));
+    throw new Error("Die AI konnte den Artikel nicht verarbeiten. Bitte versuche einen anderen Link.");
+  }
+
+  return JSON.parse(jsonMatch[0]);
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -121,86 +187,36 @@ serve(async (req) => {
     // Save suggestion
     await supabase.from("topic_suggestions").insert({ title: url, url });
 
-    // Step 1: Generate topic from URL via AI
-    console.log("Generating topic from URL:", url);
+    const maxAttempts = 3;
+    let topic: any = null;
+    let verification: { approved: boolean; rejectedBy: string[]; reasons: string[] } | null = null;
 
-    const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        response_format: { type: "json_object" },
-        messages: [
-          {
-            role: "system",
-            content: `Du bist ein redaktioneller KI-Assistent für "Das Denkt Deutschland". Du erhältst einen Link zu einem Nachrichtenartikel und musst daraus EIN politisches Thema generieren.
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        console.log(`Attempt ${attempt}/${maxAttempts}: Generating topic from URL:`, url);
+        topic = await generateTopicFromUrl(url, LOVABLE_API_KEY);
+        console.log("Generated topic:", topic.topic);
 
-REGELN:
-- Das Thema muss sich EXAKT auf den verlinkten Artikel beziehen
-- Links = progressive Position
-- Rechts = konservative Position
-- Mitte = ausgewogene, historisch bewusste Einordnung (3-5 Sätze)
-- tag_type: "gleich", "gegensaetzlich" oder "teilweise"
-- category: immer "politik"
-- KEINE erfundenen Zitate — wenn unklar, nutze "Politische Beobachter" o.ä.
-- KEINE URLs generieren, "url" immer ""
-- Quellen: nur echte Medien/Organisationen
+        console.log(`Attempt ${attempt}/${maxAttempts}: Running 10-fold verification...`);
+        verification = await runVerification(topic, LOVABLE_API_KEY, url);
 
-WICHTIG: Antworte AUSSCHLIESSLICH mit einem validen JSON-Objekt. Kein Text davor oder danach. Kein Markdown.`,
-          },
-          {
-            role: "user",
-            content: `Analysiere diesen Artikel und generiere ein Thema als JSON: ${url}
+        if (verification.approved) {
+          break;
+        }
 
-Exakte JSON-Struktur (keine anderen Felder):
-{
-  "topic": "Thementitel",
-  "tag_type": "gleich" | "gegensaetzlich" | "teilweise",
-  "category": "politik",
-  "left_position": "...", "left_quote": "...", "left_speaker": "...",
-  "left_hidden_meaning": "...", "left_negative_effects": "...",
-  "left_sources": [{"type": "article", "label": "Quellenname", "url": ""}],
-  "right_position": "...", "right_quote": "...", "right_speaker": "...",
-  "right_hidden_meaning": "...", "right_negative_effects": "...",
-  "right_sources": [{"type": "article", "label": "Quellenname", "url": ""}],
-  "mitte_view": "..."
-}`,
-          },
-        ],
-      }),
-    });
-
-    if (!aiRes.ok) {
-      const errText = await aiRes.text();
-      console.error("AI error:", aiRes.status, errText);
-      throw new Error(`AI error: ${aiRes.status}`);
+        console.warn(`Attempt ${attempt}/${maxAttempts} REJECTED:`, verification.rejectedBy.join(", "));
+      } catch (attemptError) {
+        console.error(`Attempt ${attempt}/${maxAttempts} failed:`, attemptError);
+        if (attempt === maxAttempts) throw attemptError;
+      }
     }
 
-    const aiData = await aiRes.json();
-    let content = aiData.choices?.[0]?.message?.content || "";
-    content = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-    
-    // Extract JSON if wrapped in text
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      console.error("AI returned non-JSON:", content.substring(0, 200));
-      throw new Error("Die AI konnte den Artikel nicht verarbeiten. Bitte versuche einen anderen Link.");
-    }
-    const topic = JSON.parse(jsonMatch[0]);
-
-    console.log("Generated topic:", topic.topic);
-
-    // Step 2: 10-fold verification
-    console.log("Running 10-fold verification...");
-    const verification = await runVerification(topic, LOVABLE_API_KEY, url);
-
-    if (!verification.approved) {
-      console.warn("Topic REJECTED:", verification.rejectedBy.join(", "));
+    if (!verification?.approved || !topic) {
       return new Response(
         JSON.stringify({
           success: false,
           error: "Das Thema hat die Qualitätsprüfung nicht bestanden.",
-          details: verification.reasons,
+          details: verification?.reasons ?? ["Bitte mit einem weiteren Link erneut versuchen."],
         }),
         { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
