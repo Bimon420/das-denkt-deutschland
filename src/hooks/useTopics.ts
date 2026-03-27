@@ -27,7 +27,7 @@ export interface Topic {
   mitteView: string;
 }
 
-function mapDbToTopic(row: any): Topic {
+export function mapDbToTopic(row: any): Topic {
   return {
     id: row.id,
     topic: row.topic,

@@ -44,7 +44,17 @@ const AppView = () => {
       if (error) throw error;
       if (data?.success) {
         toast.success("Thema wurde geprüft und veröffentlicht!");
-        queryClient.invalidateQueries({ queryKey: ["topics"] });
+        // Prepend the new topic so it appears at the top for this user
+        if (data.topic) {
+          const { mapDbToTopic } = await import("@/hooks/useTopics");
+          const newTopic = mapDbToTopic(data.topic);
+          queryClient.setQueryData(["topics"], (old: any) => {
+            if (Array.isArray(old)) return [newTopic, ...old];
+            return [newTopic];
+          });
+        } else {
+          queryClient.invalidateQueries({ queryKey: ["topics"] });
+        }
         setSuggestUrl("");
         setSuggestOpen(false);
       } else {
