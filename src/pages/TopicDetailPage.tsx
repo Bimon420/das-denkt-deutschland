@@ -78,6 +78,7 @@ const TopicDetailPage = () => {
               rightView={topic.rightView}
               mitteView={topic.mitteView}
               index={0}
+              hideIndex
             />
           ) : (
             <motion.p
