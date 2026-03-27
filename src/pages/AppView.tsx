@@ -17,6 +17,9 @@ const AppView = () => {
   const queryClient = useQueryClient();
   const [spinning, setSpinning] = useState(false);
   const [suggestOpen, setSuggestOpen] = useState(false);
+  const [suggestUrl, setSuggestUrl] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleRefresh = async () => {
     setSpinning(true);
