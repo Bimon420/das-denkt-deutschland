@@ -15,6 +15,7 @@ const AppView = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [spinning, setSpinning] = useState(false);
+  const [suggestOpen, setSuggestOpen] = useState(false);
 
   const handleRefresh = async () => {
     setSpinning(true);
