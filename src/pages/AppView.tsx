@@ -1,14 +1,15 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import ViewCounter from "@/components/ViewCounter";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useTopics } from "@/hooks/useTopics";
 import TopicCard from "@/components/TopicCard";
 import ShareMenu from "@/components/ShareMenu";
 import ThemeToggle from "@/components/ThemeToggle";
-import SuggestTopicForm from "@/components/SuggestTopicForm";
-import { Info, Archive, Loader2, RefreshCw, Plus } from "lucide-react";
+import { Info, Archive, Loader2, RefreshCw, Plus, Send, X } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const AppView = () => {
   const { data: topics = [], isLoading, isFetching } = useTopics();
