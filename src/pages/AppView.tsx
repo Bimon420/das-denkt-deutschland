@@ -82,46 +82,88 @@ const AppView = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Sticky header */}
-      <header className="sticky top-0 z-30 flex items-center justify-between px-3 md:px-5 py-2.5 md:py-3 border-b border-border/40 bg-background/90 backdrop-blur-xl">
-        <div className="flex items-center gap-2 min-w-0">
-          <img src="/logo.png" alt="DDD" className="w-auto flex-shrink-0" style={{ height: '1.5rem' }} />
-          <span className="font-body text-xs md:text-sm font-extrabold tracking-tight uppercase truncate">Das Denkt Deutschland</span>
+      <header className="sticky top-0 z-30 border-b border-border/40 bg-background/90 backdrop-blur-xl">
+        <div className="flex items-center justify-between px-3 md:px-5 py-2.5 md:py-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <img src="/logo.png" alt="DDD" className="w-auto flex-shrink-0" style={{ height: '1.5rem' }} />
+            <span className="font-body text-xs md:text-sm font-extrabold tracking-tight uppercase truncate">Das Denkt Deutschland</span>
+          </div>
+          <div className="flex items-center gap-0.5">
+            <motion.button
+              onClick={handleRefresh}
+              disabled={spinning || isFetching}
+              className="p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95 disabled:opacity-50"
+              aria-label="Aktualisieren"
+              animate={{ rotate: spinning ? 360 : 0 }}
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <RefreshCw className="w-4 h-4 text-muted-foreground" />
+            </motion.button>
+            <button
+              onClick={() => {
+                setSuggestOpen(!suggestOpen);
+                setTimeout(() => inputRef.current?.focus(), 100);
+              }}
+              className={`p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95 ${suggestOpen ? 'bg-secondary text-accent' : ''}`}
+              aria-label="Thema einreichen"
+            >
+              {suggestOpen ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4 text-muted-foreground" />}
+            </button>
+            <ShareMenu topic={topics[0]?.topic || ""} />
+            <ThemeToggle />
+            <button
+              onClick={() => navigate("/archiv")}
+              className="p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95"
+              aria-label="Archiv"
+            >
+              <Archive className="w-4 h-4 text-muted-foreground" />
+            </button>
+            <button
+              onClick={() => navigate("/")}
+              className="p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95"
+              aria-label="Info"
+            >
+              <Info className="w-4 h-4 text-muted-foreground" />
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-0.5">
-          <motion.button
-            onClick={handleRefresh}
-            disabled={spinning || isFetching}
-            className="p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95 disabled:opacity-50"
-            aria-label="Aktualisieren"
-            animate={{ rotate: spinning ? 360 : 0 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <RefreshCw className="w-4 h-4 text-muted-foreground" />
-          </motion.button>
-          <button
-            onClick={() => setSuggestOpen(true)}
-            className="p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95"
-            aria-label="Thema einreichen"
-          >
-            <Plus className="w-4 h-4 text-muted-foreground" />
-          </button>
-          <ShareMenu topic={topics[0]?.topic || ""} />
-          <ThemeToggle />
-          <button
-            onClick={() => navigate("/archiv")}
-            className="p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95"
-            aria-label="Archiv"
-          >
-            <Archive className="w-4 h-4 text-muted-foreground" />
-          </button>
-          <button
-            onClick={() => navigate("/")}
-            className="p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95"
-            aria-label="Info"
-          >
-            <Info className="w-4 h-4 text-muted-foreground" />
-          </button>
-        </div>
+
+        <AnimatePresence>
+          {suggestOpen && (
+            <motion.div
+              className="px-3 md:px-5 pb-2.5"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <div className="flex items-center gap-2">
+                <input
+                  ref={inputRef}
+                  type="url"
+                  value={suggestUrl}
+                  onChange={(e) => setSuggestUrl(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSuggestSubmit()}
+                  placeholder="Link zum Artikel einfügen…"
+                  disabled={submitting}
+                  className="flex-1 px-3 py-2 rounded-full bg-card border border-border text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-accent/40 transition-all disabled:opacity-50"
+                />
+                <button
+                  onClick={handleSuggestSubmit}
+                  disabled={submitting || !suggestUrl.trim()}
+                  className="p-2 rounded-full bg-primary text-primary-foreground hover:opacity-90 active:scale-95 transition-all disabled:opacity-50"
+                >
+                  {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                </button>
+              </div>
+              {submitting && (
+                <p className="text-[10px] text-muted-foreground mt-1.5 text-center">
+                  Wird analysiert & geprüft…
+                </p>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       {/* Scrollable topic list */}
