@@ -23,6 +23,7 @@ interface TopicCardProps {
   rightView: ViewpointData;
   mitteView: string;
   index: number;
+  hideIndex?: boolean;
 }
 
 const ViewpointPanel = ({
