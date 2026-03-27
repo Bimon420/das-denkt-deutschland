@@ -20,12 +20,30 @@ const VERIFICATION_PERSPECTIVES = [
   { name: "Abschluss-Integritätsprüfer", focus: "Titel/Links/Rechts/Mitte ZWEIFELSFREI zum selben Thema? Publizierbar?" },
 ];
 
-async function runVerification(topic: any, apiKey: string): Promise<{ approved: boolean; rejectedBy: string[]; reasons: string[] }> {
+async function runVerification(topic: any, apiKey: string, sourceUrl: string): Promise<{ approved: boolean; rejectedBy: string[]; reasons: string[] }> {
+  const formatSources = (sources: unknown): string => {
+    if (!Array.isArray(sources) || sources.length === 0) return "keine expliziten Quellen";
+    return sources
+      .map((s: any) => {
+        const label = typeof s?.label === "string" && s.label.trim() ? s.label.trim() : "Unbekannte Quelle";
+        const url = typeof s?.url === "string" && s.url.trim() ? s.url.trim() : "";
+        return url ? `${label} (${url})` : label;
+      })
+      .join("; ");
+  };
+
+  const hasExplicitSources =
+    (Array.isArray(topic?.left_sources) && topic.left_sources.length > 0) ||
+    (Array.isArray(topic?.right_sources) && topic.right_sources.length > 0);
+
   const topicText = `TITEL: ${topic.topic}
+ARTIKEL-QUELLE (verlinkter Einreichungslink): ${sourceUrl}
 LINKS: ${topic.left_position}
   Zitat: „${topic.left_quote}" — ${topic.left_speaker}
+  Quellen: ${formatSources(topic.left_sources)}
 RECHTS: ${topic.right_position}
   Zitat: „${topic.right_quote}" — ${topic.right_speaker}
+  Quellen: ${formatSources(topic.right_sources)}
 MITTE: ${topic.mitte_view}`;
 
   const results = await Promise.all(
@@ -54,9 +72,24 @@ MITTE: ${topic.mitte_view}`;
     })
   );
 
+  const normalizedResults = results.map((r) => {
+    const isSourceVerifier = r.name === "Quellen-Plausibilitätsprüfer";
+    const missingExplicitSourcesOnly = /keine\s+(expliziten|konkreten)\s+quellen|keine\s+quellenangaben|rein\s+deskriptiv|hypothetisch/i.test(r.reason || "");
+
+    if (isSourceVerifier && !hasExplicitSources && sourceUrl && missingExplicitSourcesOnly) {
+      return {
+        ...r,
+        approved: true,
+        reason: "Artikel-Link ist als Primärquelle vorhanden.",
+      };
+    }
+
+    return r;
+  });
+
   const rejectedBy: string[] = [];
   const reasons: string[] = [];
-  for (const r of results) {
+  for (const r of normalizedResults) {
     if (!r.approved) {
       rejectedBy.push(r.name);
       if (r.reason) reasons.push(`[${r.name}]: ${r.reason}`);
@@ -159,7 +192,7 @@ Exakte JSON-Struktur (keine anderen Felder):
 
     // Step 2: 10-fold verification
     console.log("Running 10-fold verification...");
-    const verification = await runVerification(topic, LOVABLE_API_KEY);
+    const verification = await runVerification(topic, LOVABLE_API_KEY, url);
 
     if (!verification.approved) {
       console.warn("Topic REJECTED:", verification.rejectedBy.join(", "));
