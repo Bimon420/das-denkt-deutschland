@@ -6,7 +6,7 @@ import TopicCard from "@/components/TopicCard";
 import ShareMenu from "@/components/ShareMenu";
 import ThemeToggle from "@/components/ThemeToggle";
 import SuggestTopicForm from "@/components/SuggestTopicForm";
-import { Info, Archive, Loader2, RefreshCw } from "lucide-react";
+import { Info, Archive, Loader2, RefreshCw, Plus } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
