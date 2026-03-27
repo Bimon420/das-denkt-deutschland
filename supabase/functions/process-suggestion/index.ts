@@ -9,13 +9,13 @@ const corsHeaders = {
 
 const VERIFICATION_PERSPECTIVES = [
   { name: "Politischer Faktenprüfer", focus: "Titel korrekt? Beschreibt genau EIN Ereignis? Passen Links/Rechts/Mitte zum Titel?" },
-  { name: "Personen-Zuordnungsprüfer", focus: "Zitate richtig zugeordnet? Kommentator vs. Betroffener verwechselt?" },
+  { name: "Personen-Zuordnungsprüfer", focus: "Zitate zur jeweiligen Position passend? WICHTIG: Generische Sprecher wie 'Politischer Beobachter', 'Experten', 'Kritiker' sind ERLAUBT und kein Ablehnungsgrund. Prüfe nur ob Zitat inhaltlich zur Position (links/rechts) passt." },
   { name: "Gesellschaftlicher Kohärenzprüfer", focus: "Echte gesellschaftliche Debatte? Links/Rechts/Mitte logisch zum selben Thema?" },
   { name: "Wirtschaftlicher Plausibilitätsprüfer", focus: "Wirtschaftliche Argumente plausibel? Fakten korrekt?" },
-  { name: "Gesundheitspolitischer Prüfer", focus: "Gesundheitliche Aussagen korrekt? Keine irreführenden Behauptungen?" },
+  { name: "Gesundheitspolitischer Prüfer", focus: "Gesundheitliche Aussagen korrekt? Keine irreführenden Behauptungen? Wenn kein Gesundheitsthema: automatisch APPROVED." },
   { name: "Historischer Kontextprüfer", focus: "Historische Referenzen korrekt? Mitte-Standpunkt historisch fundiert?" },
   { name: "Sprachlicher Präzisionsprüfer", focus: "Begriffe korrekt und präzise? Zitate realistisch? Ton sachlich?" },
-  { name: "Quellen-Plausibilitätsprüfer", focus: "Quellen echte existierende Medien/Organisationen?" },
+  { name: "Quellen-Plausibilitätsprüfer", focus: "Quellen echte existierende Medien/Organisationen? WICHTIG: Wenn keine expliziten Quellen angegeben sind, ist das KEIN Ablehnungsgrund — der Artikel-Link selbst ist die Quelle." },
   { name: "Bias-Detektor", focus: "Linke Position fair? Rechte Position fair? Mitte ausgewogen? Strohmann-Argumente?" },
   { name: "Abschluss-Integritätsprüfer", focus: "Titel/Links/Rechts/Mitte ZWEIFELSFREI zum selben Thema? Publizierbar?" },
 ];
