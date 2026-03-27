@@ -27,6 +27,36 @@ const AppView = () => {
     setTimeout(() => setSpinning(false), 700);
   };
 
+  const handleSuggestSubmit = async () => {
+    const trimmed = suggestUrl.trim();
+    if (!trimmed) return;
+    try {
+      new URL(trimmed);
+    } catch {
+      toast.error("Bitte eine gültige URL eingeben");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("process-suggestion", {
+        body: { url: trimmed },
+      });
+      if (error) throw error;
+      if (data?.success) {
+        toast.success("Thema wurde geprüft und veröffentlicht!");
+        queryClient.invalidateQueries({ queryKey: ["topics"] });
+        setSuggestUrl("");
+        setSuggestOpen(false);
+      } else {
+        toast.error(data?.error || "Qualitätsprüfung nicht bestanden.");
+      }
+    } catch {
+      toast.error("Fehler bei der Verarbeitung.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   if (isLoading || topics.length === 0) {
     return (
       <div className="h-[100dvh] w-full bg-background flex flex-col items-center justify-center gap-3">
