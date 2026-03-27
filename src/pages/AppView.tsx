@@ -6,7 +6,7 @@ import TopicCard from "@/components/TopicCard";
 import ShareMenu from "@/components/ShareMenu";
 import ThemeToggle from "@/components/ThemeToggle";
 import SuggestTopicForm from "@/components/SuggestTopicForm";
-import { Info, Archive, Loader2, RefreshCw } from "lucide-react";
+import { Info, Archive, Loader2, RefreshCw, Plus } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
@@ -15,6 +15,7 @@ const AppView = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [spinning, setSpinning] = useState(false);
+  const [suggestOpen, setSuggestOpen] = useState(false);
 
   const handleRefresh = async () => {
     setSpinning(true);
@@ -63,6 +64,13 @@ const AppView = () => {
           >
             <RefreshCw className="w-4 h-4 text-muted-foreground" />
           </motion.button>
+          <button
+            onClick={() => setSuggestOpen(true)}
+            className="p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95"
+            aria-label="Thema einreichen"
+          >
+            <Plus className="w-4 h-4 text-muted-foreground" />
+          </button>
           <ShareMenu topic={topics[0]?.topic || ""} />
           <ThemeToggle />
           <button
@@ -101,7 +109,7 @@ const AppView = () => {
         </div>
 
         {/* Suggest topic */}
-        <SuggestTopicForm />
+        <SuggestTopicForm open={suggestOpen} onOpenChange={setSuggestOpen} />
       </section>
 
       {/* Track app views silently */}

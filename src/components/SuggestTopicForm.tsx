@@ -12,8 +12,17 @@ const urlSchema = z.object({
 
 type Status = "idle" | "processing" | "success" | "error";
 
-const SuggestTopicForm = () => {
-  const [open, setOpen] = useState(false);
+interface SuggestTopicFormProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+const SuggestTopicForm = ({ open: externalOpen, onOpenChange }: SuggestTopicFormProps) => {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = externalOpen ?? internalOpen;
+  const setOpen = (v: boolean) => {
+    onOpenChange ? onOpenChange(v) : setInternalOpen(v);
+  };
   const [url, setUrl] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState("");
