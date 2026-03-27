@@ -96,6 +96,7 @@ serve(async (req) => {
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
+        response_format: { type: "json_object" },
         messages: [
           {
             role: "system",
@@ -112,13 +113,13 @@ REGELN:
 - KEINE URLs generieren, "url" immer ""
 - Quellen: nur echte Medien/Organisationen
 
-Antworte NUR mit einem JSON-Objekt.`,
+WICHTIG: Antworte AUSSCHLIESSLICH mit einem validen JSON-Objekt. Kein Text davor oder danach. Kein Markdown.`,
           },
           {
             role: "user",
-            content: `Analysiere diesen Artikel und generiere ein Thema: ${url}
+            content: `Analysiere diesen Artikel und generiere ein Thema als JSON: ${url}
 
-JSON-Struktur:
+Exakte JSON-Struktur (keine anderen Felder):
 {
   "topic": "Thementitel",
   "tag_type": "gleich" | "gegensaetzlich" | "teilweise",
@@ -145,7 +146,14 @@ JSON-Struktur:
     const aiData = await aiRes.json();
     let content = aiData.choices?.[0]?.message?.content || "";
     content = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-    const topic = JSON.parse(content);
+    
+    // Extract JSON if wrapped in text
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      console.error("AI returned non-JSON:", content.substring(0, 200));
+      throw new Error("Die AI konnte den Artikel nicht verarbeiten. Bitte versuche einen anderen Link.");
+    }
+    const topic = JSON.parse(jsonMatch[0]);
 
     console.log("Generated topic:", topic.topic);
 
