@@ -1,14 +1,15 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import ViewCounter from "@/components/ViewCounter";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useTopics } from "@/hooks/useTopics";
 import TopicCard from "@/components/TopicCard";
 import ShareMenu from "@/components/ShareMenu";
 import ThemeToggle from "@/components/ThemeToggle";
-import SuggestTopicForm from "@/components/SuggestTopicForm";
-import { Info, Archive, Loader2, RefreshCw, Plus } from "lucide-react";
+import { Info, Archive, Loader2, RefreshCw, Plus, Send, X } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const AppView = () => {
   const { data: topics = [], isLoading, isFetching } = useTopics();
@@ -16,11 +17,44 @@ const AppView = () => {
   const queryClient = useQueryClient();
   const [spinning, setSpinning] = useState(false);
   const [suggestOpen, setSuggestOpen] = useState(false);
+  const [suggestUrl, setSuggestUrl] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleRefresh = async () => {
     setSpinning(true);
     await queryClient.invalidateQueries({ queryKey: ["topics"] });
     setTimeout(() => setSpinning(false), 700);
+  };
+
+  const handleSuggestSubmit = async () => {
+    const trimmed = suggestUrl.trim();
+    if (!trimmed) return;
+    try {
+      new URL(trimmed);
+    } catch {
+      toast.error("Bitte eine gültige URL eingeben");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("process-suggestion", {
+        body: { url: trimmed },
+      });
+      if (error) throw error;
+      if (data?.success) {
+        toast.success("Thema wurde geprüft und veröffentlicht!");
+        queryClient.invalidateQueries({ queryKey: ["topics"] });
+        setSuggestUrl("");
+        setSuggestOpen(false);
+      } else {
+        toast.error(data?.error || "Qualitätsprüfung nicht bestanden.");
+      }
+    } catch {
+      toast.error("Fehler bei der Verarbeitung.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (isLoading || topics.length === 0) {
@@ -48,46 +82,88 @@ const AppView = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Sticky header */}
-      <header className="sticky top-0 z-30 flex items-center justify-between px-3 md:px-5 py-2.5 md:py-3 border-b border-border/40 bg-background/90 backdrop-blur-xl">
-        <div className="flex items-center gap-2 min-w-0">
-          <img src="/logo.png" alt="DDD" className="w-auto flex-shrink-0" style={{ height: '1.5rem' }} />
-          <span className="font-body text-xs md:text-sm font-extrabold tracking-tight uppercase truncate">Das Denkt Deutschland</span>
+      <header className="sticky top-0 z-30 border-b border-border/40 bg-background/90 backdrop-blur-xl">
+        <div className="flex items-center justify-between px-3 md:px-5 py-2.5 md:py-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <img src="/logo.png" alt="DDD" className="w-auto flex-shrink-0" style={{ height: '1.5rem' }} />
+            <span className="font-body text-xs md:text-sm font-extrabold tracking-tight uppercase truncate">Das Denkt Deutschland</span>
+          </div>
+          <div className="flex items-center gap-0.5">
+            <motion.button
+              onClick={handleRefresh}
+              disabled={spinning || isFetching}
+              className="p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95 disabled:opacity-50"
+              aria-label="Aktualisieren"
+              animate={{ rotate: spinning ? 360 : 0 }}
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <RefreshCw className="w-4 h-4 text-muted-foreground" />
+            </motion.button>
+            <button
+              onClick={() => {
+                setSuggestOpen(!suggestOpen);
+                setTimeout(() => inputRef.current?.focus(), 100);
+              }}
+              className={`p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95 ${suggestOpen ? 'bg-secondary text-accent' : ''}`}
+              aria-label="Thema einreichen"
+            >
+              {suggestOpen ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4 text-muted-foreground" />}
+            </button>
+            <ShareMenu topic={topics[0]?.topic || ""} />
+            <ThemeToggle />
+            <button
+              onClick={() => navigate("/archiv")}
+              className="p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95"
+              aria-label="Archiv"
+            >
+              <Archive className="w-4 h-4 text-muted-foreground" />
+            </button>
+            <button
+              onClick={() => navigate("/")}
+              className="p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95"
+              aria-label="Info"
+            >
+              <Info className="w-4 h-4 text-muted-foreground" />
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-0.5">
-          <motion.button
-            onClick={handleRefresh}
-            disabled={spinning || isFetching}
-            className="p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95 disabled:opacity-50"
-            aria-label="Aktualisieren"
-            animate={{ rotate: spinning ? 360 : 0 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <RefreshCw className="w-4 h-4 text-muted-foreground" />
-          </motion.button>
-          <button
-            onClick={() => setSuggestOpen(true)}
-            className="p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95"
-            aria-label="Thema einreichen"
-          >
-            <Plus className="w-4 h-4 text-muted-foreground" />
-          </button>
-          <ShareMenu topic={topics[0]?.topic || ""} />
-          <ThemeToggle />
-          <button
-            onClick={() => navigate("/archiv")}
-            className="p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95"
-            aria-label="Archiv"
-          >
-            <Archive className="w-4 h-4 text-muted-foreground" />
-          </button>
-          <button
-            onClick={() => navigate("/")}
-            className="p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95"
-            aria-label="Info"
-          >
-            <Info className="w-4 h-4 text-muted-foreground" />
-          </button>
-        </div>
+
+        <AnimatePresence>
+          {suggestOpen && (
+            <motion.div
+              className="px-3 md:px-5 pb-2.5"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <div className="flex items-center gap-2">
+                <input
+                  ref={inputRef}
+                  type="url"
+                  value={suggestUrl}
+                  onChange={(e) => setSuggestUrl(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSuggestSubmit()}
+                  placeholder="Link zum Artikel einfügen…"
+                  disabled={submitting}
+                  className="flex-1 px-3 py-2 rounded-full bg-card border border-border text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-accent/40 transition-all disabled:opacity-50"
+                />
+                <button
+                  onClick={handleSuggestSubmit}
+                  disabled={submitting || !suggestUrl.trim()}
+                  className="p-2 rounded-full bg-primary text-primary-foreground hover:opacity-90 active:scale-95 transition-all disabled:opacity-50"
+                >
+                  {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                </button>
+              </div>
+              {submitting && (
+                <p className="text-[10px] text-muted-foreground mt-1.5 text-center">
+                  Wird analysiert & geprüft…
+                </p>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       {/* Scrollable topic list */}
@@ -107,9 +183,6 @@ const AppView = () => {
             />
           ))}
         </div>
-
-        {/* Suggest topic */}
-        <SuggestTopicForm open={suggestOpen} onOpenChange={setSuggestOpen} />
       </section>
 
       {/* Track app views silently */}
