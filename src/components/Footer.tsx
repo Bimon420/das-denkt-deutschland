@@ -29,9 +29,15 @@ const Footer = () => {
         <p className="mt-4 text-xs text-muted-foreground/60">
           © 2026 DAS DENKT DEUTSCHLAND. Alle Quellen öffentlich zugänglich.
         </p>
-        <Link to="/impressum" className="mt-2 inline-block text-xs text-muted-foreground/40 hover:text-muted-foreground transition-colors">
-          Impressum
-        </Link>
+        <div className="mt-2 flex items-center justify-center gap-3">
+          <Link to="/impressum" className="text-xs text-muted-foreground/40 hover:text-muted-foreground transition-colors">
+            Impressum
+          </Link>
+          <span className="text-xs text-muted-foreground/20">|</span>
+          <Link to="/datenschutz" className="text-xs text-muted-foreground/40 hover:text-muted-foreground transition-colors">
+            Datenschutz
+          </Link>
+        </div>
         <div className="mt-4">
           <ViewCounter page="intro" />
         </div>
