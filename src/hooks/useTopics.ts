@@ -63,7 +63,7 @@ export function useTopics() {
         .from("topics")
         .select("*")
         .eq("published_at", today)
-        .order("created_at", { ascending: true })
+        .order("created_at", { ascending: false })
         .limit(10);
 
       if (error) {
