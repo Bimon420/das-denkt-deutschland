@@ -64,6 +64,13 @@ const AppView = () => {
           >
             <RefreshCw className="w-4 h-4 text-muted-foreground" />
           </motion.button>
+          <button
+            onClick={() => setSuggestOpen(true)}
+            className="p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95"
+            aria-label="Thema einreichen"
+          >
+            <Plus className="w-4 h-4 text-muted-foreground" />
+          </button>
           <ShareMenu topic={topics[0]?.topic || ""} />
           <ThemeToggle />
           <button
