@@ -93,6 +93,11 @@ const TopicCard = ({ id, topic, tagType, category = "politik", leftView, rightVi
   const isInView = useInView(ref, { once: true, amount: 0.15 });
   const isBoulevard = category === "boulevard";
 
+  // Calculate reading time (~200 words/min for German)
+  const allText = [topic, leftView.position, leftView.quote, leftView.speaker, leftView.hiddenMeaning, leftView.negativeEffects, rightView.position, rightView.quote, rightView.speaker, rightView.hiddenMeaning, rightView.negativeEffects, mitteView].filter(Boolean).join(" ");
+  const wordCount = allText.split(/\s+/).length;
+  const readingMinutes = Math.max(1, Math.round(wordCount / 200));
+
   return (
     <div ref={ref} className="mb-12 md:mb-20">
       {/* Topic header */}
