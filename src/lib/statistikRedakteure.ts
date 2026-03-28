@@ -44,7 +44,7 @@ const VOTE_BUCKET_DEFS = [
  * Prüft ob die Summe der Tagesstatistiken mit den Gesamtzahlen übereinstimmt.
  */
 function redakteurSummenprüfer(
-  dayStats: { topics: number; suggestions: number }[],
+  dayStats: { date: string; topics: number; suggestions: number }[],
   totalTopicsFromChart: number,
   totalSuggestionsFromChart: number,
   totalTopics: number,
