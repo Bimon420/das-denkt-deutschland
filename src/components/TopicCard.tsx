@@ -4,7 +4,7 @@ import TransparencyTag from "./TransparencyTag";
 import OpinionSlider from "./OpinionSlider";
 import SourceBadge from "./SourceBadge";
 import FaktencheckScore from "./FaktencheckScore";
-import { AlertTriangle, Trophy } from "lucide-react";
+import { AlertTriangle, Trophy, Clock } from "lucide-react";
 
 interface ViewpointData {
   position: string;
@@ -93,6 +93,11 @@ const TopicCard = ({ id, topic, tagType, category = "politik", leftView, rightVi
   const isInView = useInView(ref, { once: true, amount: 0.15 });
   const isBoulevard = category === "boulevard";
 
+  // Calculate reading time (~200 words/min for German)
+  const allText = [topic, leftView.position, leftView.quote, leftView.speaker, leftView.hiddenMeaning, leftView.negativeEffects, rightView.position, rightView.quote, rightView.speaker, rightView.hiddenMeaning, rightView.negativeEffects, mitteView].filter(Boolean).join(" ");
+  const wordCount = allText.split(/\s+/).length;
+  const readingMinutes = Math.max(1, Math.round(wordCount / 200));
+
   return (
     <div ref={ref} className="mb-12 md:mb-20">
       {/* Topic header */}
@@ -121,7 +126,13 @@ const TopicCard = ({ id, topic, tagType, category = "politik", leftView, rightVi
           )}
         </div>
         <h3 className="font-editorial text-2xl md:text-4xl font-bold mt-2 mb-3 md:mb-4 px-1">{topic}</h3>
-        <TransparencyTag type={tagType} />
+        <div className="flex items-center justify-center gap-3">
+          <TransparencyTag type={tagType} />
+          <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground/60 font-medium">
+            <Clock className="w-3 h-3" />
+            {readingMinutes} Min.
+          </span>
+        </div>
       </motion.div>
 
       {/* Left vs Right panels */}
