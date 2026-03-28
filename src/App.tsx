@@ -10,6 +10,7 @@ import ArchivePage from "./pages/ArchivePage";
 import ImpressumPage from "./pages/ImpressumPage";
 import DatenschutzPage from "./pages/DatenschutzPage";
 import TopicDetailPage from "./pages/TopicDetailPage";
+import StatistikPage from "./pages/StatistikPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
