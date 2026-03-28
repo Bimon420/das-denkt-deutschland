@@ -39,7 +39,7 @@ const Hero = () => {
           transition={{ delay: 0.5, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
           <h1 className="font-editorial text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.92]">
-            DAS DENKT
+            DAS <span className="text-right">DENKT</span>
             <br />
             <span className="text-mitte-gold">DEUTSCHLAND</span>
           </h1>
