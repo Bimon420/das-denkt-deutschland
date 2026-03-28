@@ -3,6 +3,7 @@ import { useRef } from "react";
 import TransparencyTag from "./TransparencyTag";
 import OpinionSlider from "./OpinionSlider";
 import SourceBadge from "./SourceBadge";
+import FaktencheckScore from "./FaktencheckScore";
 import { AlertTriangle, Trophy } from "lucide-react";
 
 interface ViewpointData {
@@ -142,6 +143,9 @@ const TopicCard = ({ id, topic, tagType, category = "politik", leftView, rightVi
         </div>
         <p className="font-body text-sm text-foreground/70 leading-relaxed">{mitteView}</p>
       </motion.div>
+
+      {/* Faktencheck Score */}
+      <FaktencheckScore leftSources={leftView.sources} rightSources={rightView.sources} />
 
       {/* Opinion slider */}
       {id && <OpinionSlider topicId={id} />}
