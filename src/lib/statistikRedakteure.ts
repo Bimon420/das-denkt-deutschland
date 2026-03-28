@@ -12,12 +12,18 @@ export interface RedakteurErgebnis {
   details: string;
 }
 
+export interface TopThema {
+  topic: string;
+  voteCount: number;
+}
+
 export interface GeprüfteDaten {
   totalTopics: number;
   totalSuggestions: number;
   totalVotes: number;
   dayStats: { date: string; topics: number; suggestions: number }[];
   voteBuckets: { label: string; count: number; color: string }[];
+  topThemen: TopThema[];
   prüfungen: RedakteurErgebnis[];
   allebestanden: boolean;
 }
