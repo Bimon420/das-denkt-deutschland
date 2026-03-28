@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
+import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 interface OpinionSliderProps {
   topicId: string;
@@ -12,6 +13,7 @@ const OpinionSlider = ({ topicId }: OpinionSliderProps) => {
   const [submitting, setSubmitting] = useState(false);
   const [distribution, setDistribution] = useState<number[]>([]);
   const [totalVotes, setTotalVotes] = useState(0);
+  const [trend, setTrend] = useState<"left" | "right" | "stable" | null>(null);
 
   // Check localStorage for previous vote
   useEffect(() => {
@@ -25,7 +27,7 @@ const OpinionSlider = ({ topicId }: OpinionSliderProps) => {
   const loadResults = useCallback(async () => {
     const { data } = await supabase
       .from("topic_votes")
-      .select("value")
+      .select("value, created_at")
       .eq("topic_id", topicId);
 
     if (data && data.length > 0) {
@@ -38,6 +40,27 @@ const OpinionSlider = ({ topicId }: OpinionSliderProps) => {
       });
       const max = Math.max(...buckets, 1);
       setDistribution(buckets.map((b) => b / max));
+
+      // Calculate trend: compare avg of last 24h vs older votes
+      if (data.length >= 4) {
+        const now = Date.now();
+        const cutoff = now - 24 * 60 * 60 * 1000;
+        const recent: number[] = [];
+        const older: number[] = [];
+        data.forEach((v) => {
+          const t = new Date(v.created_at).getTime();
+          if (t >= cutoff) recent.push(v.value);
+          else older.push(v.value);
+        });
+        if (recent.length >= 2 && older.length >= 2) {
+          const avgRecent = recent.reduce((a, b) => a + b, 0) / recent.length;
+          const avgOlder = older.reduce((a, b) => a + b, 0) / older.length;
+          const diff = avgRecent - avgOlder;
+          if (diff > 5) setTrend("right");
+          else if (diff < -5) setTrend("left");
+          else setTrend("stable");
+        }
+      }
     }
   }, [topicId]);
 
@@ -158,9 +181,36 @@ const OpinionSlider = ({ topicId }: OpinionSliderProps) => {
               ))}
             </div>
 
-            <p className="text-center text-[11px] text-muted-foreground mt-3">
-              {totalVotes} {totalVotes === 1 ? "Stimme" : "Stimmen"} · Danke für deine Meinung!
-            </p>
+            <div className="flex items-center justify-center gap-2 mt-3">
+              <p className="text-[11px] text-muted-foreground">
+                {totalVotes} {totalVotes === 1 ? "Stimme" : "Stimmen"} · Danke für deine Meinung!
+              </p>
+              {trend && (
+                <motion.span
+                  className={`inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+                    trend === "left"
+                      ? "bg-left-light text-left-blue"
+                      : trend === "right"
+                      ? "bg-right-light text-right-red"
+                      : "bg-secondary text-muted-foreground"
+                  }`}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.6, duration: 0.3 }}
+                  title={
+                    trend === "left"
+                      ? "Trend: Meinung verschiebt sich nach links"
+                      : trend === "right"
+                      ? "Trend: Meinung verschiebt sich nach rechts"
+                      : "Trend: Meinung bleibt stabil"
+                  }
+                >
+                  {trend === "left" && <><TrendingDown className="w-3 h-3" /> ← Links</>}
+                  {trend === "right" && <><TrendingUp className="w-3 h-3" /> Rechts →</>}
+                  {trend === "stable" && <><Minus className="w-3 h-3" /> Stabil</>}
+                </motion.span>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
