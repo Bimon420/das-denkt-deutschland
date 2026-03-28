@@ -107,6 +107,7 @@ const AppView = () => {
             <span className="font-body text-[10px] md:text-sm font-extrabold tracking-tight uppercase truncate hidden xs:inline">Das Denkt Deutschland</span>
           </div>
           <div className="flex items-center gap-0">
+            <NotificationBell />
             <motion.button
               onClick={handleRefresh}
               disabled={spinning || isFetching}
