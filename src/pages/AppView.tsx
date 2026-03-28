@@ -5,7 +5,7 @@ import { useTopics } from "@/hooks/useTopics";
 import TopicCard from "@/components/TopicCard";
 import ShareMenu from "@/components/ShareMenu";
 import ThemeToggle from "@/components/ThemeToggle";
-import { Info, Archive, Loader2, RefreshCw, Plus, Send, X } from "lucide-react";
+import { Info, Archive, Loader2, RefreshCw, Plus, Send, X, BarChart3 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
