@@ -62,11 +62,13 @@ const AppView = () => {
         toast.error("Dieser Link hat leider keine Relevanz für diese Seite.");
       }
     } catch (error: any) {
-      const details = Array.isArray(error?.context?.details) ? error.context.details : null;
-      const message = details?.length
-        ? `${error?.context?.error || "Fehler bei der Verarbeitung."} ${details[0]}`
-        : (error?.message || "Fehler bei der Verarbeitung.");
-      toast.error(message);
+      // 422 = quality check failed → show friendly rejection message
+      const body = error?.context?.body || error?.context;
+      if (body?.success === false) {
+        toast.error("Dieser Link hat leider keine Relevanz für diese Seite.");
+      } else {
+        toast.error(error?.message || "Fehler bei der Verarbeitung.");
+      }
     } finally {
       setSubmitting(false);
     }
