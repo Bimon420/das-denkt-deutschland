@@ -117,7 +117,7 @@ const TopicCard = ({ id, topic, tagType, category = "politik", leftView, rightVi
       </motion.div>
 
       {/* Left vs Right panels */}
-      <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+      <div className="flex flex-col md:flex-row gap-3 md:gap-6">
         <ViewpointPanel data={leftView} side="left" delay={0.1} />
         <ViewpointPanel data={rightView} side="right" delay={0.2} />
       </div>
