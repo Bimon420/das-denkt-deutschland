@@ -3,6 +3,7 @@ import { useRef } from "react";
 import TransparencyTag from "./TransparencyTag";
 import OpinionSlider from "./OpinionSlider";
 import SourceBadge from "./SourceBadge";
+import FaktencheckScore from "./FaktencheckScore";
 import { AlertTriangle, Trophy } from "lucide-react";
 
 interface ViewpointData {
