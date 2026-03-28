@@ -10,7 +10,7 @@ const principles = [
   {
     icon: Scale,
     title: "Beide Seiten",
-    desc: "Links und Rechts gleichberechtigt dargestellt — mit allen Stärken und Schwächen.",
+    desc: "Links und Rechts gleichberechtigt dargestellt — mit versteckten Bedeutungen und möglichen Risiken.",
   },
   {
     icon: Shield,
