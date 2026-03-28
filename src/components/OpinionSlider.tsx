@@ -13,6 +13,7 @@ const OpinionSlider = ({ topicId }: OpinionSliderProps) => {
   const [submitting, setSubmitting] = useState(false);
   const [distribution, setDistribution] = useState<number[]>([]);
   const [totalVotes, setTotalVotes] = useState(0);
+  const [trend, setTrend] = useState<"left" | "right" | "stable" | null>(null);
 
   // Check localStorage for previous vote
   useEffect(() => {
