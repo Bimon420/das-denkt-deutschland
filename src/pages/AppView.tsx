@@ -210,6 +210,7 @@ const AppView = () => {
               rightView={t.rightView}
               mitteView={t.mitteView}
               index={i}
+              isTopicOfTheWeek={!!t.id && t.id === topicOfTheWeekId}
             />
           ))}
         </div>
