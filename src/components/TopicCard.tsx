@@ -112,7 +112,7 @@ const TopicCard = ({ id, topic, tagType, category = "politik", leftView, rightVi
             </span>
           )}
         </div>
-        <h3 className="font-editorial text-3xl md:text-4xl font-bold mt-2 mb-4">{topic}</h3>
+        <h3 className="font-editorial text-2xl md:text-4xl font-bold mt-2 mb-3 md:mb-4 px-1">{topic}</h3>
         <TransparencyTag type={tagType} />
       </motion.div>
 
