@@ -126,7 +126,13 @@ const TopicCard = ({ id, topic, tagType, category = "politik", leftView, rightVi
           )}
         </div>
         <h3 className="font-editorial text-2xl md:text-4xl font-bold mt-2 mb-3 md:mb-4 px-1">{topic}</h3>
-        <TransparencyTag type={tagType} />
+        <div className="flex items-center justify-center gap-3">
+          <TransparencyTag type={tagType} />
+          <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground/60 font-medium">
+            <Clock className="w-3 h-3" />
+            {readingMinutes} Min.
+          </span>
+        </div>
       </motion.div>
 
       {/* Left vs Right panels */}
