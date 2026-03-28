@@ -181,9 +181,36 @@ const OpinionSlider = ({ topicId }: OpinionSliderProps) => {
               ))}
             </div>
 
-            <p className="text-center text-[11px] text-muted-foreground mt-3">
-              {totalVotes} {totalVotes === 1 ? "Stimme" : "Stimmen"} · Danke für deine Meinung!
-            </p>
+            <div className="flex items-center justify-center gap-2 mt-3">
+              <p className="text-[11px] text-muted-foreground">
+                {totalVotes} {totalVotes === 1 ? "Stimme" : "Stimmen"} · Danke für deine Meinung!
+              </p>
+              {trend && (
+                <motion.span
+                  className={`inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+                    trend === "left"
+                      ? "bg-left-light text-left-blue"
+                      : trend === "right"
+                      ? "bg-right-light text-right-red"
+                      : "bg-secondary text-muted-foreground"
+                  }`}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.6, duration: 0.3 }}
+                  title={
+                    trend === "left"
+                      ? "Trend: Meinung verschiebt sich nach links"
+                      : trend === "right"
+                      ? "Trend: Meinung verschiebt sich nach rechts"
+                      : "Trend: Meinung bleibt stabil"
+                  }
+                >
+                  {trend === "left" && <><TrendingDown className="w-3 h-3" /> ← Links</>}
+                  {trend === "right" && <><TrendingUp className="w-3 h-3" /> Rechts →</>}
+                  {trend === "stable" && <><Minus className="w-3 h-3" /> Stabil</>}
+                </motion.span>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
