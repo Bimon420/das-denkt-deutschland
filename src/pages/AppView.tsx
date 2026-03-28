@@ -7,6 +7,7 @@ import ShareMenu from "@/components/ShareMenu";
 import ThemeToggle from "@/components/ThemeToggle";
 import NotificationBell from "@/components/NotificationBell";
 import { Info, Archive, Loader2, RefreshCw, Plus, Send, X, BarChart3 } from "lucide-react";
+import { useTopicOfTheWeek } from "@/hooks/useTopicOfTheWeek";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,6 +15,7 @@ import { toast } from "sonner";
 
 const AppView = () => {
   const { data: topics = [], isLoading, isFetching } = useTopics();
+  const { data: topicOfTheWeekId } = useTopicOfTheWeek();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [spinning, setSpinning] = useState(false);
@@ -208,6 +210,7 @@ const AppView = () => {
               rightView={t.rightView}
               mitteView={t.mitteView}
               index={i}
+              isTopicOfTheWeek={!!t.id && t.id === topicOfTheWeekId}
             />
           ))}
         </div>
