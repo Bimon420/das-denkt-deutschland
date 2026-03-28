@@ -24,6 +24,7 @@ interface TopicCardProps {
   mitteView: string;
   index: number;
   hideIndex?: boolean;
+  isTopicOfTheWeek?: boolean;
 }
 
 const ViewpointPanel = ({
