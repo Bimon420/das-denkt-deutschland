@@ -7,6 +7,7 @@ import ShareMenu from "@/components/ShareMenu";
 import ThemeToggle from "@/components/ThemeToggle";
 import NotificationBell from "@/components/NotificationBell";
 import { Info, Archive, Loader2, RefreshCw, Plus, Send, X, BarChart3 } from "lucide-react";
+import { useTopicOfTheWeek } from "@/hooks/useTopicOfTheWeek";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
