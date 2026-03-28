@@ -124,7 +124,7 @@ const TopicCard = ({ id, topic, tagType, category = "politik", leftView, rightVi
 
       {/* Die Mitte spricht */}
       <motion.div
-        className="mt-6 mx-auto max-w-2xl p-5 rounded-xl bg-secondary/50 border border-border text-center"
+        className="mt-4 md:mt-6 mx-auto max-w-2xl p-4 md:p-5 rounded-xl bg-secondary/50 border border-border text-center"
         initial={{ opacity: 0, y: 20, scale: 0.97 }}
         whileInView={{ opacity: 1, y: 0, scale: 1 }}
         viewport={{ once: true, amount: 0.3 }}

@@ -191,7 +191,7 @@ const AppView = () => {
       </header>
 
       {/* Scrollable topic list */}
-      <section className="py-10 md:py-16 px-5 md:px-6">
+      <section className="py-6 md:py-16 px-3 md:px-6">
         <div className="max-w-5xl mx-auto">
           {topics.map((t, i) => (
             <TopicCard

@@ -113,7 +113,7 @@ const OpinionSlider = ({ topicId }: OpinionSliderProps) => {
               <button
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="px-6 py-2.5 md:px-5 md:py-2 rounded-full text-xs font-semibold bg-foreground text-background hover:opacity-90 transition-all active:scale-95 disabled:opacity-50"
+                className="px-8 py-3 md:px-5 md:py-2 rounded-full text-sm md:text-xs font-semibold bg-foreground text-background hover:opacity-90 transition-all active:scale-95 disabled:opacity-50 touch-manipulation min-h-[44px]"
               >
                 {submitting ? "…" : "Abstimmen"}
               </button>
