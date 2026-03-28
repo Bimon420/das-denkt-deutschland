@@ -95,7 +95,7 @@ const TopicCard = ({ id, topic, tagType, category = "politik", leftView, rightVi
     <div ref={ref} className="mb-12 md:mb-20">
       {/* Topic header */}
       <motion.div
-        className="text-center mb-8"
+        className="text-center mb-5 md:mb-8"
         initial={{ opacity: 0, y: 20 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
