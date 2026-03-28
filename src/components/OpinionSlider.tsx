@@ -27,7 +27,7 @@ const OpinionSlider = ({ topicId }: OpinionSliderProps) => {
   const loadResults = useCallback(async () => {
     const { data } = await supabase
       .from("topic_votes")
-      .select("value")
+      .select("value, created_at")
       .eq("topic_id", topicId);
 
     if (data && data.length > 0) {
@@ -40,6 +40,27 @@ const OpinionSlider = ({ topicId }: OpinionSliderProps) => {
       });
       const max = Math.max(...buckets, 1);
       setDistribution(buckets.map((b) => b / max));
+
+      // Calculate trend: compare avg of last 24h vs older votes
+      if (data.length >= 4) {
+        const now = Date.now();
+        const cutoff = now - 24 * 60 * 60 * 1000;
+        const recent: number[] = [];
+        const older: number[] = [];
+        data.forEach((v) => {
+          const t = new Date(v.created_at).getTime();
+          if (t >= cutoff) recent.push(v.value);
+          else older.push(v.value);
+        });
+        if (recent.length >= 2 && older.length >= 2) {
+          const avgRecent = recent.reduce((a, b) => a + b, 0) / recent.length;
+          const avgOlder = older.reduce((a, b) => a + b, 0) / older.length;
+          const diff = avgRecent - avgOlder;
+          if (diff > 5) setTrend("right");
+          else if (diff < -5) setTrend("left");
+          else setTrend("stable");
+        }
+      }
     }
   }, [topicId]);
 
