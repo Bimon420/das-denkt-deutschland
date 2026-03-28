@@ -4,7 +4,7 @@ import TransparencyTag from "./TransparencyTag";
 import OpinionSlider from "./OpinionSlider";
 import SourceBadge from "./SourceBadge";
 import FaktencheckScore from "./FaktencheckScore";
-import { AlertTriangle, Trophy } from "lucide-react";
+import { AlertTriangle, Trophy, Clock } from "lucide-react";
 
 interface ViewpointData {
   position: string;
