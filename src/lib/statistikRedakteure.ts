@@ -151,9 +151,9 @@ function redakteurVollständigkeit(
  * Hauptfunktion: Verarbeitet Rohdaten und lässt sie durch alle Redakteure prüfen.
  */
 export function verarbeiteUndPrüfe(
-  topics: { published_at: string }[] | null,
+  topics: { published_at: string; id: string; topic: string }[] | null,
   suggestions: { created_at: string }[] | null,
-  votes: { value: number }[] | null,
+  votes: { value: number; topic_id: string }[] | null,
 ): GeprüfteDaten {
   const topicsList = topics || [];
   const suggestionsList = suggestions || [];
