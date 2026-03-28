@@ -5,6 +5,7 @@ import { useTopics } from "@/hooks/useTopics";
 import TopicCard from "@/components/TopicCard";
 import ShareMenu from "@/components/ShareMenu";
 import ThemeToggle from "@/components/ThemeToggle";
+import NotificationBell from "@/components/NotificationBell";
 import { Info, Archive, Loader2, RefreshCw, Plus, Send, X, BarChart3 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -106,6 +107,7 @@ const AppView = () => {
             <span className="font-body text-[10px] md:text-sm font-extrabold tracking-tight uppercase truncate hidden xs:inline">Das Denkt Deutschland</span>
           </div>
           <div className="flex items-center gap-0">
+            <NotificationBell />
             <motion.button
               onClick={handleRefresh}
               disabled={spinning || isFetching}
