@@ -38,7 +38,7 @@ const ViewpointPanel = ({
   const isLeft = side === "left";
   return (
     <motion.div
-      className={`flex-1 p-6 md:p-8 rounded-xl ${isLeft ? "bg-left-light border-l-4 border-left" : "bg-right-light border-r-4 border-right-red"}`}
+      className={`flex-1 p-4 md:p-8 rounded-xl ${isLeft ? "bg-left-light border-l-4 border-left" : "bg-right-light border-r-4 border-right-red"}`}
       initial={{ opacity: 0, x: isLeft ? -30 : 30, filter: "blur(4px)" }}
       whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
       viewport={{ once: true, amount: 0.2 }}
@@ -92,10 +92,10 @@ const TopicCard = ({ id, topic, tagType, category = "politik", leftView, rightVi
   const isBoulevard = category === "boulevard";
 
   return (
-    <div ref={ref} className="mb-20">
+    <div ref={ref} className="mb-12 md:mb-20">
       {/* Topic header */}
       <motion.div
-        className="text-center mb-8"
+        className="text-center mb-5 md:mb-8"
         initial={{ opacity: 0, y: 20 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
@@ -112,19 +112,19 @@ const TopicCard = ({ id, topic, tagType, category = "politik", leftView, rightVi
             </span>
           )}
         </div>
-        <h3 className="font-editorial text-3xl md:text-4xl font-bold mt-2 mb-4">{topic}</h3>
+        <h3 className="font-editorial text-2xl md:text-4xl font-bold mt-2 mb-3 md:mb-4 px-1">{topic}</h3>
         <TransparencyTag type={tagType} />
       </motion.div>
 
       {/* Left vs Right panels */}
-      <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+      <div className="flex flex-col md:flex-row gap-3 md:gap-6">
         <ViewpointPanel data={leftView} side="left" delay={0.1} />
         <ViewpointPanel data={rightView} side="right" delay={0.2} />
       </div>
 
       {/* Die Mitte spricht */}
       <motion.div
-        className="mt-6 mx-auto max-w-2xl p-5 rounded-xl bg-secondary/50 border border-border text-center"
+        className="mt-4 md:mt-6 mx-auto max-w-2xl p-4 md:p-5 rounded-xl bg-secondary/50 border border-border text-center"
         initial={{ opacity: 0, y: 20, scale: 0.97 }}
         whileInView={{ opacity: 1, y: 0, scale: 1 }}
         viewport={{ once: true, amount: 0.3 }}

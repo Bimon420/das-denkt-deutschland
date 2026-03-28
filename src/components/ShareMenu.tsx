@@ -145,13 +145,13 @@ const ShareMenu = ({ topic }: ShareMenuProps) => {
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="p-2 rounded-full hover:bg-secondary transition-colors active:scale-95"
+        className="p-2.5 md:p-2 rounded-full hover:bg-secondary transition-colors active:scale-95 touch-manipulation"
         aria-label="Teilen"
       >
         {open ? (
-          <X className="w-4 h-4 text-muted-foreground" />
+          <X className="w-[18px] h-[18px] md:w-4 md:h-4 text-muted-foreground" />
         ) : (
-          <Share2 className="w-4 h-4 text-muted-foreground" />
+          <Share2 className="w-[18px] h-[18px] md:w-4 md:h-4 text-muted-foreground" />
         )}
       </button>
 
