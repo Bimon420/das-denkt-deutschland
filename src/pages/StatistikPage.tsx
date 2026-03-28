@@ -1,113 +1,40 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ShieldCheck, ShieldAlert } from "lucide-react";
 import { motion } from "framer-motion";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, CartesianGrid,
 } from "recharts";
-
-interface DayStat {
-  date: string;
-  topics: number;
-  suggestions: number;
-}
-
-interface VoteBucket {
-  label: string;
-  count: number;
-  color: string;
-}
-
-const VOTE_COLORS = [
-  "hsl(0, 72%, 51%)",    // links/rot
-  "hsl(25, 90%, 55%)",
-  "hsl(46, 100%, 50%)",  // mitte/gold
-  "hsl(150, 60%, 45%)",
-  "hsl(210, 70%, 50%)",  // rechts/blau
-];
+import { verarbeiteUndPrüfe, type GeprüfteDaten } from "@/lib/statistikRedakteure";
 
 const StatistikPage = () => {
   const navigate = useNavigate();
-  const [dayStats, setDayStats] = useState<DayStat[]>([]);
-  const [voteBuckets, setVoteBuckets] = useState<VoteBucket[]>([]);
-  const [totalTopics, setTotalTopics] = useState(0);
-  const [totalSuggestions, setTotalSuggestions] = useState(0);
-  const [totalVotes, setTotalVotes] = useState(0);
+  const [data, setData] = useState<GeprüfteDaten | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
-      // Fetch topics grouped by day
-      const { data: topics } = await supabase
-        .from("topics")
-        .select("published_at")
-        .order("published_at", { ascending: true });
+      const [topicsRes, suggestionsRes, votesRes] = await Promise.all([
+        supabase.from("topics").select("published_at").order("published_at", { ascending: true }),
+        supabase.from("topic_suggestions").select("created_at"),
+        supabase.from("topic_votes").select("value"),
+      ]);
 
-      // Fetch suggestions
-      const { data: suggestions } = await supabase
-        .from("topic_suggestions")
-        .select("created_at");
+      const geprüft = verarbeiteUndPrüfe(
+        topicsRes.data,
+        suggestionsRes.data,
+        votesRes.data,
+      );
 
-      // Fetch votes
-      const { data: votes } = await supabase
-        .from("topic_votes")
-        .select("value");
-
-      // -- Topics per day --
-      const topicsByDay: Record<string, number> = {};
-      (topics || []).forEach((t) => {
-        const d = t.published_at;
-        topicsByDay[d] = (topicsByDay[d] || 0) + 1;
-      });
-
-      // -- Suggestions per day --
-      const suggsByDay: Record<string, number> = {};
-      (suggestions || []).forEach((s) => {
-        const d = s.created_at.split("T")[0];
-        suggsByDay[d] = (suggsByDay[d] || 0) + 1;
-      });
-
-      // Merge days
-      const allDays = new Set([...Object.keys(topicsByDay), ...Object.keys(suggsByDay)]);
-      const merged: DayStat[] = Array.from(allDays)
-        .sort()
-        .slice(-14) // last 14 days
-        .map((date) => ({
-          date: new Date(date).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }),
-          topics: topicsByDay[date] || 0,
-          suggestions: suggsByDay[date] || 0,
-        }));
-      setDayStats(merged);
-      setTotalTopics((topics || []).length);
-      setTotalSuggestions((suggestions || []).length);
-
-      // -- Vote distribution --
-      const buckets = [
-        { label: "Stark links", min: -50, max: -30, count: 0 },
-        { label: "Eher links", min: -29, max: -10, count: 0 },
-        { label: "Mitte", min: -9, max: 9, count: 0 },
-        { label: "Eher rechts", min: 10, max: 29, count: 0 },
-        { label: "Stark rechts", min: 30, max: 50, count: 0 },
-      ];
-      (votes || []).forEach((v) => {
-        for (const b of buckets) {
-          if (v.value >= b.min && v.value <= b.max) {
-            b.count++;
-            break;
-          }
-        }
-      });
-      setVoteBuckets(buckets.map((b, i) => ({ label: b.label, count: b.count, color: VOTE_COLORS[i] })));
-      setTotalVotes((votes || []).length);
-
+      setData(geprüft);
       setLoading(false);
     };
     load();
   }, []);
 
-  if (loading) {
+  if (loading || !data) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-spin w-8 h-8 border-2 border-accent border-t-transparent rounded-full" />
@@ -117,7 +44,6 @@ const StatistikPage = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Header */}
       <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-border px-4 py-3">
         <div className="max-w-3xl mx-auto flex items-center gap-3">
           <button onClick={() => navigate(-1)} className="p-1.5 rounded-full hover:bg-muted transition-colors">
@@ -128,6 +54,37 @@ const StatistikPage = () => {
       </header>
 
       <main className="max-w-3xl mx-auto px-4 py-8 space-y-10">
+        {/* Redakteur-Prüfstatus */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`rounded-xl border p-3 flex items-start gap-3 text-sm ${
+            data.allebestanden
+              ? "bg-green-500/10 border-green-500/30 text-green-700 dark:text-green-400"
+              : "bg-red-500/10 border-red-500/30 text-red-700 dark:text-red-400"
+          }`}
+        >
+          {data.allebestanden ? (
+            <ShieldCheck className="w-5 h-5 shrink-0 mt-0.5" />
+          ) : (
+            <ShieldAlert className="w-5 h-5 shrink-0 mt-0.5" />
+          )}
+          <div>
+            <div className="font-medium mb-1">
+              {data.allebestanden
+                ? "Alle 4 Redakteure bestätigen: Daten konsistent ✓"
+                : "Dateninkonsistenz erkannt — Details:"}
+            </div>
+            <ul className="space-y-0.5 text-xs opacity-80">
+              {data.prüfungen.map((p) => (
+                <li key={p.name}>
+                  {p.bestanden ? "✅" : "❌"} <strong>{p.name}</strong>: {p.details}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </motion.div>
+
         {/* KPI Cards */}
         <motion.div
           className="grid grid-cols-3 gap-3"
@@ -136,9 +93,9 @@ const StatistikPage = () => {
           transition={{ duration: 0.4 }}
         >
           {[
-            { label: "Themen", value: totalTopics },
-            { label: "Einreichungen", value: totalSuggestions },
-            { label: "Abstimmungen", value: totalVotes },
+            { label: "Themen", value: data.totalTopics },
+            { label: "Einreichungen", value: data.totalSuggestions },
+            { label: "Abstimmungen", value: data.totalVotes },
           ].map((kpi) => (
             <div key={kpi.label} className="bg-card rounded-xl border border-border p-4 text-center">
               <div className="text-2xl font-bold tabular-nums">{kpi.value.toLocaleString("de-DE")}</div>
@@ -147,7 +104,7 @@ const StatistikPage = () => {
           ))}
         </motion.div>
 
-        {/* Bar Chart — Topics + Suggestions per day */}
+        {/* Bar Chart */}
         <motion.section
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -158,7 +115,7 @@ const StatistikPage = () => {
           </h2>
           <div className="bg-card rounded-xl border border-border p-4">
             <ResponsiveContainer width="100%" height={260}>
-              <BarChart data={dayStats} barGap={2}>
+              <BarChart data={data.dayStats} barGap={2}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
                 <YAxis allowDecimals={false} tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
@@ -177,7 +134,7 @@ const StatistikPage = () => {
           </div>
         </motion.section>
 
-        {/* Pie Chart — Vote distribution */}
+        {/* Pie Chart */}
         <motion.section
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -187,12 +144,12 @@ const StatistikPage = () => {
             Meinungsverteilung
           </h2>
           <div className="bg-card rounded-xl border border-border p-4 flex flex-col sm:flex-row items-center gap-6">
-            {totalVotes > 0 ? (
+            {data.totalVotes > 0 ? (
               <>
                 <ResponsiveContainer width={200} height={200}>
                   <PieChart>
                     <Pie
-                      data={voteBuckets}
+                      data={data.voteBuckets}
                       dataKey="count"
                       nameKey="label"
                       cx="50%"
@@ -201,7 +158,7 @@ const StatistikPage = () => {
                       strokeWidth={2}
                       stroke="hsl(var(--card))"
                     >
-                      {voteBuckets.map((entry, i) => (
+                      {data.voteBuckets.map((entry, i) => (
                         <Cell key={i} fill={entry.color} />
                       ))}
                     </Pie>
@@ -216,7 +173,7 @@ const StatistikPage = () => {
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="space-y-2">
-                  {voteBuckets.map((b) => (
+                  {data.voteBuckets.map((b) => (
                     <div key={b.label} className="flex items-center gap-2 text-sm">
                       <span className="w-3 h-3 rounded-full shrink-0" style={{ background: b.color }} />
                       <span className="text-muted-foreground">{b.label}</span>
