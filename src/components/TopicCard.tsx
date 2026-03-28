@@ -92,7 +92,7 @@ const TopicCard = ({ id, topic, tagType, category = "politik", leftView, rightVi
   const isBoulevard = category === "boulevard";
 
   return (
-    <div ref={ref} className="mb-20">
+    <div ref={ref} className="mb-12 md:mb-20">
       {/* Topic header */}
       <motion.div
         className="text-center mb-8"
