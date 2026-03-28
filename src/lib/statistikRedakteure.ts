@@ -221,12 +221,25 @@ export function verarbeiteUndPrüfe(
     console.log(`  ${p.bestanden ? "✅" : "❌"} ${p.name}: ${p.details}`);
   });
 
+  // -- Top Themen nach Abstimmungen --
+  const votesByTopicId: Record<string, number> = {};
+  votesList.forEach((v) => {
+    votesByTopicId[v.topic_id] = (votesByTopicId[v.topic_id] || 0) + 1;
+  });
+  const topicNameMap: Record<string, string> = {};
+  topicsList.forEach((t) => { topicNameMap[t.id] = t.topic; });
+  const topThemen: TopThema[] = Object.entries(votesByTopicId)
+    .map(([id, count]) => ({ topic: topicNameMap[id] || id, voteCount: count }))
+    .sort((a, b) => b.voteCount - a.voteCount)
+    .slice(0, 10);
+
   return {
     totalTopics,
     totalSuggestions,
     totalVotes,
     dayStats,
     voteBuckets,
+    topThemen,
     prüfungen,
     allebestanden,
   };

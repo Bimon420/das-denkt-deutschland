@@ -17,9 +17,9 @@ const StatistikPage = () => {
   useEffect(() => {
     const load = async () => {
       const [topicsRes, suggestionsRes, votesRes] = await Promise.all([
-        supabase.from("topics").select("published_at").order("published_at", { ascending: true }),
+        supabase.from("topics").select("published_at, id, topic").order("published_at", { ascending: true }),
         supabase.from("topic_suggestions").select("created_at"),
-        supabase.from("topic_votes").select("value"),
+        supabase.from("topic_votes").select("value, topic_id"),
       ]);
 
       const geprüft = verarbeiteUndPrüfe(
