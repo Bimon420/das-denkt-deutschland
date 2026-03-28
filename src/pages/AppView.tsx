@@ -133,6 +133,13 @@ const AppView = () => {
               <Archive className="w-4 h-4 text-muted-foreground" />
             </button>
             <button
+              onClick={() => navigate("/statistik")}
+              className="p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95"
+              aria-label="Statistiken"
+            >
+              <BarChart3 className="w-4 h-4 text-muted-foreground" />
+            </button>
+            <button
               onClick={() => navigate("/")}
               className="p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95"
               aria-label="Info"
