@@ -93,58 +93,61 @@ const AppView = () => {
     );
   }
 
+  const btnClass = "p-2.5 md:p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95 touch-manipulation";
+  const iconClass = "w-[18px] h-[18px] md:w-4 md:h-4 text-muted-foreground";
+
   return (
     <div className="min-h-screen bg-background">
       {/* Sticky header */}
-      <header className="sticky top-0 z-30 border-b border-border/40 bg-background/90 backdrop-blur-xl">
-        <div className="flex items-center justify-between px-3 md:px-5 py-2.5 md:py-3">
-          <div className="flex items-center gap-2 min-w-0">
-            <img src="/logo.png" alt="DDD" className="w-auto flex-shrink-0" style={{ height: '1.5rem' }} />
-            <span className="font-body text-xs md:text-sm font-extrabold tracking-tight uppercase truncate">Das Denkt Deutschland</span>
+      <header className="sticky top-0 z-30 border-b border-border/40 bg-background/90 backdrop-blur-xl safe-area-top">
+        <div className="flex items-center justify-between px-2 md:px-5 py-1.5 md:py-3">
+          <div className="flex items-center gap-1.5 md:gap-2 min-w-0">
+            <img src="/logo.png" alt="DDD" className="w-auto flex-shrink-0 h-5 md:h-6" />
+            <span className="font-body text-[10px] md:text-sm font-extrabold tracking-tight uppercase truncate hidden xs:inline">Das Denkt Deutschland</span>
           </div>
-          <div className="flex items-center gap-0.5">
+          <div className="flex items-center gap-0">
             <motion.button
               onClick={handleRefresh}
               disabled={spinning || isFetching}
-              className="p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95 disabled:opacity-50"
+              className={`${btnClass} disabled:opacity-50`}
               aria-label="Aktualisieren"
               animate={{ rotate: spinning ? 360 : 0 }}
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             >
-              <RefreshCw className="w-4 h-4 text-muted-foreground" />
+              <RefreshCw className={iconClass} />
             </motion.button>
             <button
               onClick={() => {
                 setSuggestOpen(!suggestOpen);
                 setTimeout(() => inputRef.current?.focus(), 100);
               }}
-              className={`p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95 ${suggestOpen ? 'bg-secondary text-accent' : ''}`}
+              className={`${btnClass} ${suggestOpen ? 'bg-secondary text-accent' : ''}`}
               aria-label="Thema einreichen"
             >
-              {suggestOpen ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4 text-muted-foreground" />}
+              {suggestOpen ? <X className={iconClass} /> : <Plus className={iconClass} />}
             </button>
             <ShareMenu topic={topics[0]?.topic || ""} />
             <ThemeToggle />
             <button
               onClick={() => navigate("/archiv")}
-              className="p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95"
+              className={btnClass}
               aria-label="Archiv"
             >
-              <Archive className="w-4 h-4 text-muted-foreground" />
+              <Archive className={iconClass} />
             </button>
             <button
               onClick={() => navigate("/statistik")}
-              className="p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95"
+              className={btnClass}
               aria-label="Statistiken"
             >
-              <BarChart3 className="w-4 h-4 text-muted-foreground" />
+              <BarChart3 className={iconClass} />
             </button>
             <button
               onClick={() => navigate("/")}
-              className="p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95"
+              className={btnClass}
               aria-label="Info"
             >
-              <Info className="w-4 h-4 text-muted-foreground" />
+              <Info className={iconClass} />
             </button>
           </div>
         </div>
