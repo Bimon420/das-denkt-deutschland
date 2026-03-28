@@ -144,6 +144,9 @@ const TopicCard = ({ id, topic, tagType, category = "politik", leftView, rightVi
         <p className="font-body text-sm text-foreground/70 leading-relaxed">{mitteView}</p>
       </motion.div>
 
+      {/* Faktencheck Score */}
+      <FaktencheckScore leftSources={leftView.sources} rightSources={rightView.sources} />
+
       {/* Opinion slider */}
       {id && <OpinionSlider topicId={id} />}
     </div>
