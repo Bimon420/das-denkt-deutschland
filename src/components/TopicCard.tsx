@@ -38,7 +38,7 @@ const ViewpointPanel = ({
   const isLeft = side === "left";
   return (
     <motion.div
-      className={`flex-1 p-6 md:p-8 rounded-xl ${isLeft ? "bg-left-light border-l-4 border-left" : "bg-right-light border-r-4 border-right-red"}`}
+      className={`flex-1 p-4 md:p-8 rounded-xl ${isLeft ? "bg-left-light border-l-4 border-left" : "bg-right-light border-r-4 border-right-red"}`}
       initial={{ opacity: 0, x: isLeft ? -30 : 30, filter: "blur(4px)" }}
       whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
       viewport={{ once: true, amount: 0.2 }}
