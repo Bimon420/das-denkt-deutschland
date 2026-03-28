@@ -5,7 +5,7 @@ import { useTopics } from "@/hooks/useTopics";
 import TopicCard from "@/components/TopicCard";
 import ShareMenu from "@/components/ShareMenu";
 import ThemeToggle from "@/components/ThemeToggle";
-import { Info, Archive, Loader2, RefreshCw, Plus, Send, X } from "lucide-react";
+import { Info, Archive, Loader2, RefreshCw, Plus, Send, X, BarChart3 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -131,6 +131,13 @@ const AppView = () => {
               aria-label="Archiv"
             >
               <Archive className="w-4 h-4 text-muted-foreground" />
+            </button>
+            <button
+              onClick={() => navigate("/statistik")}
+              className="p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95"
+              aria-label="Statistiken"
+            >
+              <BarChart3 className="w-4 h-4 text-muted-foreground" />
             </button>
             <button
               onClick={() => navigate("/")}

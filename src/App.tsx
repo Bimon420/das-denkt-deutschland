@@ -10,6 +10,7 @@ import ArchivePage from "./pages/ArchivePage";
 import ImpressumPage from "./pages/ImpressumPage";
 import DatenschutzPage from "./pages/DatenschutzPage";
 import TopicDetailPage from "./pages/TopicDetailPage";
+import StatistikPage from "./pages/StatistikPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/thema/:id" element={<TopicDetailPage />} />
           <Route path="/impressum" element={<ImpressumPage />} />
           <Route path="/datenschutz" element={<DatenschutzPage />} />
+          <Route path="/statistik" element={<StatistikPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
