@@ -94,7 +94,7 @@ function redakteurPlausibilität(
   totalTopics: number,
   totalSuggestions: number,
   totalVotes: number,
-  dayStats: { topics: number; suggestions: number }[],
+  dayStats: { date: string; topics: number; suggestions: number }[],
 ): RedakteurErgebnis {
   const issues: string[] = [];
 
