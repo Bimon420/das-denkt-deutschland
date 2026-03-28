@@ -87,7 +87,7 @@ const ViewpointPanel = ({
   );
 };
 
-const TopicCard = ({ id, topic, tagType, category = "politik", leftView, rightView, mitteView, index, hideIndex }: TopicCardProps) => {
+const TopicCard = ({ id, topic, tagType, category = "politik", leftView, rightView, mitteView, index, hideIndex, isTopicOfTheWeek }: TopicCardProps) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.15 });
   const isBoulevard = category === "boulevard";
