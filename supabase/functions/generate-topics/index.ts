@@ -198,8 +198,21 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+    // ── Step 0: Load existing topic titles for deduplication ──
+    console.log("Step 0: Loading existing topics for deduplication...");
+    const { data: existingTopics } = await supabase
+      .from("topics")
+      .select("topic")
+      .order("created_at", { ascending: false })
+      .limit(200);
+
+    const existingTitles = (existingTopics || []).map((t: any) => t.topic);
+    const deduplicationNote = existingTitles.length > 0
+      ? `\n\nBEREITS BEHANDELTE THEMEN (NICHT ERNEUT GENERIEREN!):\n${existingTitles.map((t: string, i: number) => `${i + 1}. ${t}`).join("\n")}\n\nGeneriere NUR neue Themen, die KEINES der oben genannten Themen wiederholen oder nur leicht umformulieren. Ein Thema gilt als Duplikat wenn es dasselbe Kernthema behandelt, auch wenn der Titel anders formuliert ist.`
+      : "";
+
     // ── Step 1: Generate topics ──
-    console.log("Step 1/3: Generating topics via AI...");
+    console.log(`Step 1/3: Generating topics via AI... (${existingTitles.length} existing topics to avoid)`);
 
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -208,7 +221,7 @@ serve(async (req) => {
         model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: USER_PROMPT },
+          { role: "user", content: USER_PROMPT + deduplicationNote },
         ],
       }),
     });
