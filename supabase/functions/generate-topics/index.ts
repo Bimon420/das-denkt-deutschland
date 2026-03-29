@@ -198,8 +198,21 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+    // ── Step 0: Load existing topic titles for deduplication ──
+    console.log("Step 0: Loading existing topics for deduplication...");
+    const { data: existingTopics } = await supabase
+      .from("topics")
+      .select("topic")
+      .order("created_at", { ascending: false })
+      .limit(200);
+
+    const existingTitles = (existingTopics || []).map((t: any) => t.topic);
+    const deduplicationNote = existingTitles.length > 0
+      ? `\n\nBEREITS BEHANDELTE THEMEN (NICHT ERNEUT GENERIEREN!):\n${existingTitles.map((t: string, i: number) => `${i + 1}. ${t}`).join("\n")}\n\nGeneriere NUR neue Themen, die KEINES der oben genannten Themen wiederholen oder nur leicht umformulieren. Ein Thema gilt als Duplikat wenn es dasselbe Kernthema behandelt, auch wenn der Titel anders formuliert ist.`
+      : "";
+
     // ── Step 1: Generate topics ──
-    console.log("Step 1/3: Generating topics via AI...");
+    console.log(`Step 1/3: Generating topics via AI... (${existingTitles.length} existing topics to avoid)`);
 
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -208,7 +221,7 @@ serve(async (req) => {
         model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: USER_PROMPT },
+          { role: "user", content: USER_PROMPT + deduplicationNote },
         ],
       }),
     });
@@ -225,10 +238,39 @@ serve(async (req) => {
     let content = aiData.choices?.[0]?.message?.content || "";
     content = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
 
-    const topicsArray = JSON.parse(content);
+    let topicsArray = JSON.parse(content);
     if (!Array.isArray(topicsArray) || topicsArray.length === 0) throw new Error("AI returned invalid topics format");
 
-    console.log(`Generated ${topicsArray.length} topics. Starting 10-pass batch verification...`);
+    // ── Deduplication safety net: remove topics too similar to existing ones ──
+    if (existingTitles.length > 0) {
+      const normalise = (s: string) => s.toLowerCase().replace(/[^a-zäöüß0-9]/g, " ").replace(/\s+/g, " ").trim();
+      const existingNorm = existingTitles.map(normalise);
+
+      const before = topicsArray.length;
+      topicsArray = topicsArray.filter((t: any) => {
+        const norm = normalise(t.topic);
+        const isDupe = existingNorm.some((ex: string) => {
+          // Check if titles share 60%+ of words
+          const newWords = norm.split(" ").filter((w: string) => w.length > 2);
+          const exWords = ex.split(" ").filter((w: string) => w.length > 2);
+          if (newWords.length === 0 || exWords.length === 0) return false;
+          const overlap = newWords.filter((w: string) => exWords.includes(w)).length;
+          return overlap / Math.min(newWords.length, exWords.length) >= 0.6;
+        });
+        if (isDupe) console.warn(`  🔄 Duplicate removed: "${t.topic}"`);
+        return !isDupe;
+      });
+      console.log(`Dedup: ${before} → ${topicsArray.length} topics (${before - topicsArray.length} duplicates removed)`);
+    }
+
+    if (topicsArray.length === 0) {
+      return new Response(
+        JSON.stringify({ success: false, error: "All generated topics were duplicates of existing ones." }),
+        { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    console.log(`${topicsArray.length} unique topics. Starting 10-pass batch verification...`);
 
     // ── Step 2: Batched 10-pass verification (10 AI calls total) ──
     console.log("Step 2/3: Running 10-pass batch verification...");
