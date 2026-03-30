@@ -12,6 +12,7 @@ import DatenschutzPage from "./pages/DatenschutzPage";
 import TopicDetailPage from "./pages/TopicDetailPage";
 import StatistikPage from "./pages/StatistikPage";
 import BuergervotingPage from "./pages/BuergervotingPage";
+import ParteienPage from "./pages/ParteienPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/datenschutz" element={<DatenschutzPage />} />
           <Route path="/statistik" element={<StatistikPage />} />
           <Route path="/buergervoting" element={<BuergervotingPage />} />
+          <Route path="/parteien" element={<ParteienPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
