@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import ViewCounter from "@/components/ViewCounter";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTopics } from "@/hooks/useTopics";
@@ -15,6 +15,17 @@ import { toast } from "sonner";
 
 const AppView = () => {
   const { data: topics = [], isLoading, isFetching } = useTopics();
+  // Re-shuffle on every component mount (navigation back to /app)
+  const [shuffleSeed] = useState(() => Math.random());
+  const shuffledTopics = useMemo(() => {
+    const a = [...topics];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [topics, shuffleSeed]);
   const { data: topicOfTheWeekId } = useTopicOfTheWeek();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -132,7 +143,7 @@ const AppView = () => {
             >
               {suggestOpen ? <X className={iconClass} /> : <Plus className={iconClass} />}
             </button>
-            <ShareMenu topic={topics[0]?.topic || ""} />
+            <ShareMenu topic={shuffledTopics[0]?.topic || ""} />
             <ThemeToggle />
             <button
               onClick={() => navigate("/archiv")}
@@ -206,7 +217,7 @@ const AppView = () => {
       {/* Scrollable topic list */}
       <section className="py-6 md:py-16 px-3 md:px-6">
         <div className="max-w-5xl mx-auto">
-          {topics.map((t, i) => (
+          {shuffledTopics.map((t, i) => (
             <TopicCard
               key={t.id || `${t.topic}-${i}`}
               id={t.id}
