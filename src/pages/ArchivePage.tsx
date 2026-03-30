@@ -64,30 +64,35 @@ const ArchivePage = () => {
     },
   });
 
+  const filteredTopics = useMemo(() => {
+    if (!search.trim()) return topics;
+    const q = search.toLowerCase().trim();
+    return topics.filter(t => t.topic.toLowerCase().includes(q));
+  }, [topics, search]);
+
   // Group by theme, randomize within each group, randomize group order
   const themeGroups = useMemo(() => {
     const grouped: Record<string, ArchiveTopic[]> = {};
-    topics.forEach(t => {
+    filteredTopics.forEach(t => {
       const theme = classifyTopic(t.topic);
       if (!grouped[theme]) grouped[theme] = [];
       grouped[theme].push(t);
     });
 
-    // Build array of groups, shuffle topics within, shuffle group order
     const groups = Object.entries(grouped).map(([label, items]) => {
       const cat = THEME_CATEGORIES.find(c => c.label === label);
       return {
         label,
         emoji: cat?.emoji ?? "📌",
-        items: shuffle(items),
+        items: search.trim() ? items : shuffle(items),
         count: items.length,
       };
     });
 
-    return shuffle(groups);
-  }, [topics]);
+    return search.trim() ? groups.sort((a, b) => b.count - a.count) : shuffle(groups);
+  }, [filteredTopics, search]);
 
-  const totalTopics = topics.length;
+  const totalTopics = filteredTopics.length;
   const totalGroups = themeGroups.length;
 
   return (
