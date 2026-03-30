@@ -118,8 +118,8 @@ const AppView = () => {
       <header className="sticky top-0 z-30 border-b border-border/40 bg-background/90 backdrop-blur-xl safe-area-top">
         <div className="flex items-center justify-between px-2 md:px-5 py-1.5 md:py-3">
           <div className="flex items-center gap-1.5 md:gap-2 min-w-0">
-            <img src="/logo.png" alt="DDD" className="w-auto flex-shrink-0 h-5 md:h-6" />
-            <span className="font-body text-[10px] md:text-sm font-extrabold tracking-tight uppercase truncate hidden xs:inline">Das Denkt Deutschland</span>
+            <img src="/logo.png" alt="DDD" className="w-auto flex-shrink-0 h-6 md:h-7" />
+            <span className="font-body text-[12px] md:text-base font-extrabold tracking-tight uppercase truncate hidden xs:inline">Das Denkt Deutschland</span>
           </div>
           <div className="flex items-center gap-0">
             <NotificationBell />
