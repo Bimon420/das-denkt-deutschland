@@ -53,6 +53,16 @@ export function mapDbToTopic(row: any): Topic {
   };
 }
 
+// Fisher-Yates shuffle
+function shuffleArray<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 export function useTopics() {
   return useQuery({
     queryKey: ["topics"],
@@ -72,11 +82,10 @@ export function useTopics() {
       }
 
       if (!data || data.length === 0) {
-        // Fallback to static topics
-        return staticTopics;
+        return shuffleArray(staticTopics);
       }
 
-      return data.map(mapDbToTopic);
+      return shuffleArray(data.map(mapDbToTopic));
     },
     staleTime: 5 * 60 * 1000, // 5 min
   });

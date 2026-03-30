@@ -52,7 +52,13 @@ const BuergervotingPage = () => {
         .select("id, topic, tag_type, category, published_at")
         .order("published_at", { ascending: false });
       if (error) throw error;
-      return (data as VoteTopic[]).filter(t => t.category === "politik");
+      const filtered = (data as VoteTopic[]).filter(t => t.category === "politik");
+      // Randomize for objectivity
+      for (let i = filtered.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [filtered[i], filtered[j]] = [filtered[j], filtered[i]];
+      }
+      return filtered;
     },
   });
 
