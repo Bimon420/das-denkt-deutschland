@@ -13,6 +13,7 @@ import TopicDetailPage from "./pages/TopicDetailPage";
 import StatistikPage from "./pages/StatistikPage";
 import BuergervotingPage from "./pages/BuergervotingPage";
 import ParteienPage from "./pages/ParteienPage";
+import TransparenzPage from "./pages/TransparenzPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
