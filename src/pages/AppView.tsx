@@ -165,6 +165,7 @@ const AppView = () => {
               aria-label="Parteien & Positionen"
             >
               <Landmark className={iconClass} />
+            </button>
             <button
               onClick={() => navigate("/statistik")}
               className={btnClass}
