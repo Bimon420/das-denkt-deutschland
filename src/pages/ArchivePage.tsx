@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2, Hash } from "lucide-react";
+import { ArrowLeft, Loader2, Search, X } from "lucide-react";
 import TransparencyTag from "@/components/TransparencyTag";
-import { motion } from "framer-motion";
-import { useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useMemo, useState } from "react";
 
 interface ArchiveTopic {
   id: string;
@@ -52,7 +52,7 @@ function shuffle<T>(arr: T[]): T[] {
 
 const ArchivePage = () => {
   const navigate = useNavigate();
-
+  const [search, setSearch] = useState("");
   const { data: topics = [], isLoading } = useQuery({
     queryKey: ["archive-topics"],
     queryFn: async () => {
@@ -64,30 +64,35 @@ const ArchivePage = () => {
     },
   });
 
+  const filteredTopics = useMemo(() => {
+    if (!search.trim()) return topics;
+    const q = search.toLowerCase().trim();
+    return topics.filter(t => t.topic.toLowerCase().includes(q));
+  }, [topics, search]);
+
   // Group by theme, randomize within each group, randomize group order
   const themeGroups = useMemo(() => {
     const grouped: Record<string, ArchiveTopic[]> = {};
-    topics.forEach(t => {
+    filteredTopics.forEach(t => {
       const theme = classifyTopic(t.topic);
       if (!grouped[theme]) grouped[theme] = [];
       grouped[theme].push(t);
     });
 
-    // Build array of groups, shuffle topics within, shuffle group order
     const groups = Object.entries(grouped).map(([label, items]) => {
       const cat = THEME_CATEGORIES.find(c => c.label === label);
       return {
         label,
         emoji: cat?.emoji ?? "📌",
-        items: shuffle(items),
+        items: search.trim() ? items : shuffle(items),
         count: items.length,
       };
     });
 
-    return shuffle(groups);
-  }, [topics]);
+    return search.trim() ? groups.sort((a, b) => b.count - a.count) : shuffle(groups);
+  }, [filteredTopics, search]);
 
-  const totalTopics = topics.length;
+  const totalTopics = filteredTopics.length;
   const totalGroups = themeGroups.length;
 
   return (
@@ -104,9 +109,28 @@ const ArchivePage = () => {
       <p className="text-sm text-muted-foreground mb-2">
         Alle {totalTopics} Themen — thematisch gruppiert, randomisiert für Objektivität.
       </p>
-      <p className="text-[10px] text-muted-foreground/60 mb-8">
+      <p className="text-[10px] text-muted-foreground/60 mb-4">
         {totalGroups} Themenfelder · Reihenfolge ändert sich bei jedem Laden
       </p>
+
+      <div className="relative mb-8">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Thema suchen…"
+          className="w-full pl-9 pr-9 py-2.5 rounded-xl bg-card border border-border text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-accent/40 transition-all"
+        />
+        {search && (
+          <button
+            onClick={() => setSearch("")}
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-secondary transition-colors"
+          >
+            <X className="w-3.5 h-3.5 text-muted-foreground" />
+          </button>
+        )}
+      </div>
 
       {isLoading ? (
         <div className="flex justify-center py-20">
