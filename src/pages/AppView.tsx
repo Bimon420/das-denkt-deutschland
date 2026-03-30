@@ -15,6 +15,8 @@ import { toast } from "sonner";
 
 const AppView = () => {
   const { data: topics = [], isLoading, isFetching } = useTopics();
+  // Re-shuffle on every component mount (navigation back to /app)
+  const [shuffleSeed] = useState(() => Math.random());
   const shuffledTopics = useMemo(() => {
     const a = [...topics];
     for (let i = a.length - 1; i > 0; i--) {
@@ -22,7 +24,8 @@ const AppView = () => {
       [a[i], a[j]] = [a[j], a[i]];
     }
     return a;
-  }, [topics]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [topics, shuffleSeed]);
   const { data: topicOfTheWeekId } = useTopicOfTheWeek();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
