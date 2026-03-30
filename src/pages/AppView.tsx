@@ -160,6 +160,12 @@ const AppView = () => {
               <Vote className={iconClass} />
             </button>
             <button
+              onClick={() => navigate("/parteien")}
+              className={btnClass}
+              aria-label="Parteien & Positionen"
+            >
+              <Landmark className={iconClass} />
+            <button
               onClick={() => navigate("/statistik")}
               className={btnClass}
               aria-label="Statistiken"
