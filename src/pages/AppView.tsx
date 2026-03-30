@@ -142,6 +142,13 @@ const AppView = () => {
               <Archive className={iconClass} />
             </button>
             <button
+              onClick={() => navigate("/buergervoting")}
+              className={btnClass}
+              aria-label="Bürgervoting"
+            >
+              <Vote className={iconClass} />
+            </button>
+            <button
               onClick={() => navigate("/statistik")}
               className={btnClass}
               aria-label="Statistiken"
