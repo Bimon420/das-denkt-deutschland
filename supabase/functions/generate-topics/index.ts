@@ -31,11 +31,11 @@ THEMEN-INTEGRITÄT — EXTREM WICHTIG:
 - Verwechsle NICHT Personen die ein Thema kommentieren mit Personen die vom Thema betroffen sind
 
 QUELLEN — EXTREM WICHTIG:
-- Generiere KEINE URLs. URLs sind verboten, da sie fast immer falsch sind.
-- Gib stattdessen nur den Namen der Quelle an (z.B. "Spiegel Online", "ARD Tagesschau", "DIW Studie 2024")
-- Das Feld "url" muss immer ein leerer String "" sein
+- Gib für jede Quelle eine ECHTE, funktionierende URL an (z.B. "https://www.spiegel.de/politik/...", "https://www.tagesschau.de/...")
+- Nutze nur URLs von echten, existierenden Nachrichtenartikeln oder Studien
+- Wenn du dir bei einer URL nicht 100% sicher bist, setze "url" auf "" — eine fehlende URL ist besser als eine falsche
 - Quellen müssen echte, existierende Organisationen, Medien oder Studien sein
-- Erfinde KEINE Quellen. Wenn du dir nicht sicher bist, lass die Quelle weg.
+- Erfinde KEINE Quellen oder URLs. Lieber weniger Quellen mit echten Links als viele ohne.
 - Es darf NICHTS Erfundenes oder Falsches generiert werden.
 
 Antworte NUR mit dem JSON-Array, keine weiteren Erklärungen.`;
@@ -52,19 +52,19 @@ Jedes Thema als JSON-Objekt mit dieser Struktur:
   "left_speaker": "Sprecher/Organisation",
   "left_hidden_meaning": "Versteckte Bedeutung",
   "left_negative_effects": "Mögliche negative Auswirkungen",
-  "left_sources": [{"type": "article"|"document"|"video"|"quote", "label": "Quellenname (z.B. Spiegel Online)", "url": ""}],
+  "left_sources": [{"type": "article"|"document"|"video"|"quote", "label": "Quellenname (z.B. Spiegel Online)", "url": "https://echte-url-zum-artikel.de/..."}],
   "right_position": "Position Rechts",
   "right_quote": "Zitat",
   "right_speaker": "Sprecher/Organisation",
   "right_hidden_meaning": "Versteckte Bedeutung",
   "right_negative_effects": "Mögliche negative Auswirkungen",
-  "right_sources": [{"type": "article"|"document"|"video"|"quote", "label": "Quellenname", "url": ""}],
+  "right_sources": [{"type": "article"|"document"|"video"|"quote", "label": "Quellenname", "url": "https://echte-url-zum-artikel.de/..."}],
   "mitte_view": "Die Mitte-Perspektive (3-5 Sätze)"
 }
 
 WICHTIG:
 - Alle 10 Themen mit category "politik" — KEIN Boulevard
-- KEINE URLs generieren! "url" muss IMMER "" sein. Nur den Quellennamen im "label".
+- Gib echte URLs zu Nachrichtenartikeln an. Wenn du dir unsicher bist, lass "url" leer ("").
 - Es darf NICHTS Erfundenes auf der Seite landen.
 - Jedes Thema = EIN Ereignis. Keine Vermischung verschiedener Nachrichten oder Personen.
 
