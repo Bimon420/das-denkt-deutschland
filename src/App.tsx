@@ -11,6 +11,7 @@ import ImpressumPage from "./pages/ImpressumPage";
 import DatenschutzPage from "./pages/DatenschutzPage";
 import TopicDetailPage from "./pages/TopicDetailPage";
 import StatistikPage from "./pages/StatistikPage";
+import BuergervotingPage from "./pages/BuergervotingPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
