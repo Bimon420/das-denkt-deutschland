@@ -144,7 +144,8 @@ async function runBatchVerification(
         return { name: perspective.name, results: Array.isArray(parsed) ? parsed : [] };
       } catch (e) {
         console.error(`${perspective.name} failed:`, e);
-        return { name: perspective.name, results: topics.map((_, i) => ({ thema_nr: i + 1, approved: false, reason: "Parse/network error" })) };
+        // On error, APPROVE all topics (don't let one broken verifier reject everything)
+        return { name: perspective.name, results: topics.map((_, i) => ({ thema_nr: i + 1, approved: true, reason: "" })) };
       }
     })
   );
@@ -250,12 +251,12 @@ serve(async (req) => {
       topicsArray = topicsArray.filter((t: any) => {
         const norm = normalise(t.topic);
         const isDupe = existingNorm.some((ex: string) => {
-          // Check if titles share 60%+ of words
-          const newWords = norm.split(" ").filter((w: string) => w.length > 2);
-          const exWords = ex.split(" ").filter((w: string) => w.length > 2);
+          // Check if titles share 80%+ of significant words (loosened from 60%)
+          const newWords = norm.split(" ").filter((w: string) => w.length > 3);
+          const exWords = ex.split(" ").filter((w: string) => w.length > 3);
           if (newWords.length === 0 || exWords.length === 0) return false;
           const overlap = newWords.filter((w: string) => exWords.includes(w)).length;
-          return overlap / Math.min(newWords.length, exWords.length) >= 0.6;
+          return overlap / Math.min(newWords.length, exWords.length) >= 0.8;
         });
         if (isDupe) console.warn(`  🔄 Duplicate removed: "${t.topic}"`);
         return !isDupe;

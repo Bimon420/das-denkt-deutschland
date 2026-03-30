@@ -12,14 +12,23 @@ const AdminPage = () => {
     setLoading(true);
     setResult(null);
     try {
-      const { data, error } = await supabase.functions.invoke("generate-topics", {
-        body: {},
+      const url = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/generate-topics`;
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({}),
+        signal: AbortSignal.timeout(120_000),
       });
-      if (error) throw error;
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
       setResult({
         success: data.success,
         message: data.success
-          ? `${data.count} Themen erfolgreich generiert.`
+          ? `${data.count} Themen generiert, ${data.rejected || 0} abgelehnt.`
           : data.error || "Unbekannter Fehler",
       });
     } catch (e: any) {
