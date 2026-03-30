@@ -23,7 +23,24 @@ const ArchivePage = () => {
         .select("id, topic, tag_type, published_at")
         .order("published_at", { ascending: false });
       if (error) throw error;
-      return data as ArchiveTopic[];
+      const items = data as ArchiveTopic[];
+      // Shuffle within each date group for objectivity
+      const grouped: Record<string, ArchiveTopic[]> = {};
+      items.forEach(t => {
+        if (!grouped[t.published_at]) grouped[t.published_at] = [];
+        grouped[t.published_at].push(t);
+      });
+      const result: ArchiveTopic[] = [];
+      // Keep date order (newest first), shuffle within each day
+      Object.keys(grouped).sort((a, b) => b.localeCompare(a)).forEach(date => {
+        const group = grouped[date];
+        for (let i = group.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [group[i], group[j]] = [group[j], group[i]];
+        }
+        result.push(...group);
+      });
+      return result;
     },
   });
 
