@@ -239,7 +239,28 @@ serve(async (req) => {
     let content = aiData.choices?.[0]?.message?.content || "";
     content = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
 
-    let topicsArray = JSON.parse(content);
+    // Robust JSON parsing with truncation recovery
+    let topicsArray: any[];
+    try {
+      topicsArray = JSON.parse(content);
+    } catch (parseErr) {
+      console.warn("JSON parse failed, attempting repair...");
+      // Try to fix truncated JSON: find the last complete object "}" before the error
+      const lastCompleteObj = content.lastIndexOf("}");
+      if (lastCompleteObj > 0) {
+        let trimmed = content.substring(0, lastCompleteObj + 1);
+        // Ensure array closure
+        if (!trimmed.trimEnd().endsWith("]")) trimmed += "]";
+        try {
+          topicsArray = JSON.parse(trimmed);
+          console.log(`JSON repaired: recovered ${Array.isArray(topicsArray) ? topicsArray.length : 0} topics`);
+        } catch {
+          throw new Error(`AI returned unparseable JSON: ${(parseErr as Error).message}`);
+        }
+      } else {
+        throw new Error(`AI returned unparseable JSON: ${(parseErr as Error).message}`);
+      }
+    }
     if (!Array.isArray(topicsArray) || topicsArray.length === 0) throw new Error("AI returned invalid topics format");
 
     // ── Deduplication safety net: remove topics too similar to existing ones ──
