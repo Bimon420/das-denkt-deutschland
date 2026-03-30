@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import ViewCounter from "@/components/ViewCounter";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTopics } from "@/hooks/useTopics";
