@@ -162,7 +162,7 @@ const ShareMenu = ({ topic }: ShareMenuProps) => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: -4 }}
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute right-0 top-full mt-2 bg-card border border-border rounded-xl shadow-lg p-2 z-50 w-[200px]"
+            className="fixed left-2 right-2 top-14 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-[200px] bg-card border border-border rounded-xl shadow-lg p-2 z-50"
           >
             <div className="grid grid-cols-3 gap-1">
               {buttons.map((btn) => (
