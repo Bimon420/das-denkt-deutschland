@@ -15,6 +15,14 @@ import { toast } from "sonner";
 
 const AppView = () => {
   const { data: topics = [], isLoading, isFetching } = useTopics();
+  const shuffledTopics = useMemo(() => {
+    const a = [...topics];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }, [topics]);
   const { data: topicOfTheWeekId } = useTopicOfTheWeek();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
