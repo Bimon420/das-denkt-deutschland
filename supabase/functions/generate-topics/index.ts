@@ -31,11 +31,11 @@ THEMEN-INTEGRITÄT — EXTREM WICHTIG:
 - Verwechsle NICHT Personen die ein Thema kommentieren mit Personen die vom Thema betroffen sind
 
 QUELLEN — EXTREM WICHTIG:
-- Generiere KEINE URLs. URLs sind verboten, da sie fast immer falsch sind.
-- Gib stattdessen nur den Namen der Quelle an (z.B. "Spiegel Online", "ARD Tagesschau", "DIW Studie 2024")
-- Das Feld "url" muss immer ein leerer String "" sein
+- Gib für jede Quelle eine ECHTE, funktionierende URL an (z.B. "https://www.spiegel.de/politik/...", "https://www.tagesschau.de/...")
+- Nutze nur URLs von echten, existierenden Nachrichtenartikeln oder Studien
+- Wenn du dir bei einer URL nicht 100% sicher bist, setze "url" auf "" — eine fehlende URL ist besser als eine falsche
 - Quellen müssen echte, existierende Organisationen, Medien oder Studien sein
-- Erfinde KEINE Quellen. Wenn du dir nicht sicher bist, lass die Quelle weg.
+- Erfinde KEINE Quellen oder URLs. Lieber weniger Quellen mit echten Links als viele ohne.
 - Es darf NICHTS Erfundenes oder Falsches generiert werden.
 
 Antworte NUR mit dem JSON-Array, keine weiteren Erklärungen.`;
