@@ -217,7 +217,7 @@ const AppView = () => {
       {/* Scrollable topic list */}
       <section className="py-6 md:py-16 px-3 md:px-6">
         <div className="max-w-5xl mx-auto">
-          {topics.map((t, i) => (
+          {shuffledTopics.map((t, i) => (
             <TopicCard
               key={t.id || `${t.topic}-${i}`}
               id={t.id}
