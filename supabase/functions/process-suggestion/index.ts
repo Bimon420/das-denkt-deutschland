@@ -118,8 +118,8 @@ REGELN:
 - tag_type: "gleich", "gegensaetzlich" oder "teilweise"
 - category: immer "politik"
 - KEINE erfundenen Zitate — wenn unklar, nutze "Politische Beobachter" o.ä.
-- KEINE URLs generieren, "url" immer ""
-- Quellen: nur echte Medien/Organisationen
+- Gib echte URLs zu Nachrichtenartikeln an. Wenn unsicher, "url" leer lassen ("")
+- Quellen: nur echte Medien/Organisationen mit echten Links
 
 WICHTIG: Antworte AUSSCHLIESSLICH mit einem validen JSON-Objekt. Kein Text davor oder danach. Kein Markdown.`,
         },
