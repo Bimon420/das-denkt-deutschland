@@ -52,19 +52,19 @@ Jedes Thema als JSON-Objekt mit dieser Struktur:
   "left_speaker": "Sprecher/Organisation",
   "left_hidden_meaning": "Versteckte Bedeutung",
   "left_negative_effects": "Mögliche negative Auswirkungen",
-  "left_sources": [{"type": "article"|"document"|"video"|"quote", "label": "Quellenname (z.B. Spiegel Online)", "url": ""}],
+  "left_sources": [{"type": "article"|"document"|"video"|"quote", "label": "Quellenname (z.B. Spiegel Online)", "url": "https://echte-url-zum-artikel.de/..."}],
   "right_position": "Position Rechts",
   "right_quote": "Zitat",
   "right_speaker": "Sprecher/Organisation",
   "right_hidden_meaning": "Versteckte Bedeutung",
   "right_negative_effects": "Mögliche negative Auswirkungen",
-  "right_sources": [{"type": "article"|"document"|"video"|"quote", "label": "Quellenname", "url": ""}],
+  "right_sources": [{"type": "article"|"document"|"video"|"quote", "label": "Quellenname", "url": "https://echte-url-zum-artikel.de/..."}],
   "mitte_view": "Die Mitte-Perspektive (3-5 Sätze)"
 }
 
 WICHTIG:
 - Alle 10 Themen mit category "politik" — KEIN Boulevard
-- KEINE URLs generieren! "url" muss IMMER "" sein. Nur den Quellennamen im "label".
+- Gib echte URLs zu Nachrichtenartikeln an. Wenn du dir unsicher bist, lass "url" leer ("").
 - Es darf NICHTS Erfundenes auf der Seite landen.
 - Jedes Thema = EIN Ereignis. Keine Vermischung verschiedener Nachrichten oder Personen.
 
