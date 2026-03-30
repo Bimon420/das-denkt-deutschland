@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2, Hash } from "lucide-react";
+import { ArrowLeft, Loader2, Search, X } from "lucide-react";
 import TransparencyTag from "@/components/TransparencyTag";
-import { motion } from "framer-motion";
-import { useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useMemo, useState } from "react";
 
 interface ArchiveTopic {
   id: string;
