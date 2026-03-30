@@ -37,6 +37,10 @@ const Footer = () => {
           <Link to="/datenschutz" className="text-xs text-muted-foreground/40 hover:text-muted-foreground transition-colors">
             Datenschutz
           </Link>
+          <span className="text-xs text-muted-foreground/20">|</span>
+          <Link to="/transparenz" className="text-xs text-muted-foreground/40 hover:text-muted-foreground transition-colors font-mono">
+            Rohdaten
+          </Link>
         </div>
         <div className="mt-4">
           <ViewCounter page="intro" />
