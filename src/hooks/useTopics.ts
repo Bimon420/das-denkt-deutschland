@@ -82,10 +82,10 @@ export function useTopics() {
       }
 
       if (!data || data.length === 0) {
-        return shuffleArray(staticTopics);
+        return staticTopics;
       }
 
-      return shuffleArray(data.map(mapDbToTopic));
+      return data.map(mapDbToTopic);
     },
     staleTime: 5 * 60 * 1000, // 5 min
   });
