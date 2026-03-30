@@ -143,7 +143,7 @@ const AppView = () => {
             >
               {suggestOpen ? <X className={iconClass} /> : <Plus className={iconClass} />}
             </button>
-            <ShareMenu topic={topics[0]?.topic || ""} />
+            <ShareMenu topic={shuffledTopics[0]?.topic || ""} />
             <ThemeToggle />
             <button
               onClick={() => navigate("/archiv")}
