@@ -134,10 +134,10 @@ Exakte JSON-Struktur (keine anderen Felder):
   "category": "politik",
   "left_position": "...", "left_quote": "...", "left_speaker": "...",
   "left_hidden_meaning": "...", "left_negative_effects": "...",
-  "left_sources": [{"type": "article", "label": "Quellenname", "url": ""}],
+  "left_sources": [{"type": "article", "label": "Quellenname", "url": "https://echte-url.de/..."}],
   "right_position": "...", "right_quote": "...", "right_speaker": "...",
   "right_hidden_meaning": "...", "right_negative_effects": "...",
-  "right_sources": [{"type": "article", "label": "Quellenname", "url": ""}],
+  "right_sources": [{"type": "article", "label": "Quellenname", "url": "https://echte-url.de/..."}],
   "mitte_view": "..."
 }`,
         },
