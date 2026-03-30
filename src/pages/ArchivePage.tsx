@@ -52,7 +52,7 @@ function shuffle<T>(arr: T[]): T[] {
 
 const ArchivePage = () => {
   const navigate = useNavigate();
-
+  const [search, setSearch] = useState("");
   const { data: topics = [], isLoading } = useQuery({
     queryKey: ["archive-topics"],
     queryFn: async () => {
