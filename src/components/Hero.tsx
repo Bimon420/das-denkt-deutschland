@@ -103,8 +103,8 @@ const Hero = () => {
             animate={{ x: 0, opacity: 1 }}
             transition={{ delay: 1.2, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           >
-            <span className="font-body font-bold text-[11px] tracking-[0.15em] uppercase text-destructive/80">Rechts</span>
-            <div className="w-2 h-2 rounded-full bg-destructive" />
+            <span className="font-body font-bold text-[11px] tracking-[0.15em] uppercase text-foreground/80">Rechts</span>
+            <div className="w-2 h-2 rounded-full bg-foreground" />
           </motion.div>
         </motion.div>
 
