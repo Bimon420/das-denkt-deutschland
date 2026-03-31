@@ -111,7 +111,7 @@ const Hero = () => {
         {/* CTA Button */}
         <motion.button
           onClick={() => navigate("/app")}
-          className="mt-12 inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-accent text-accent-foreground font-semibold text-sm tracking-wide shadow-[0_2px_8px_hsl(var(--accent)/0.3)] hover:shadow-[0_4px_16px_hsl(var(--accent)/0.4)] transition-shadow duration-300 active:scale-[0.97]"
+          className="mt-12 inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-accent text-accent-foreground font-semibold text-sm tracking-wide shadow-[0_2px_8px_hsl(var(--accent)/0.3)] hover:shadow-[0_4px_16px_hsl(var(--accent)/0.4)] dark:shadow-[0_2px_12px_hsl(var(--accent)/0.25)] dark:hover:shadow-[0_4px_24px_hsl(var(--accent)/0.35)] transition-shadow duration-300 active:scale-[0.97]"
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.4, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
