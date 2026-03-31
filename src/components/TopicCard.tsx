@@ -40,7 +40,7 @@ const ViewpointPanel = ({
   const isLeft = side === "left";
   return (
     <motion.div
-      className={`flex-1 p-4 md:p-8 rounded-xl ${isLeft ? "bg-left-light border-l-4 border-left" : "bg-right-light border-r-4 border-right-red"}`}
+      className={`flex-1 p-4 md:p-8 rounded-xl ${isLeft ? "bg-left-light dark:bg-left-light/80 border-l-4 border-left" : "bg-right-light dark:bg-right-light/80 border-r-4 border-right-red"}`}
       initial={{ opacity: 0, x: isLeft ? -30 : 30, filter: "blur(4px)" }}
       whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
       viewport={{ once: true, amount: 0.2 }}
@@ -66,7 +66,7 @@ const ViewpointPanel = ({
 
       {/* Hidden meaning */}
       {data.hiddenMeaning && (
-        <div className="mt-4 p-3 rounded-lg bg-background/60 border border-border">
+        <div className="mt-4 p-3 rounded-lg bg-background/60 dark:bg-background/30 border border-border dark:border-border/60">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">
             <AlertTriangle className="w-3 h-3" />
             Versteckte Bedeutung
@@ -77,7 +77,7 @@ const ViewpointPanel = ({
 
       {/* Negative effects */}
       {data.negativeEffects && (
-        <div className="mt-3 p-3 rounded-lg bg-destructive/5 border border-destructive/15">
+        <div className="mt-3 p-3 rounded-lg bg-destructive/5 dark:bg-destructive/10 border border-destructive/15 dark:border-destructive/25">
           <div className="text-xs font-semibold text-destructive mb-1 uppercase tracking-wide">
             ⚠ Mögliche negative Auswirkungen
           </div>
@@ -143,7 +143,7 @@ const TopicCard = ({ id, topic, tagType, category = "politik", leftView, rightVi
 
       {/* Die Mitte spricht */}
       <motion.div
-        className="mt-4 md:mt-6 mx-auto max-w-2xl p-4 md:p-5 rounded-xl bg-secondary/50 border border-border text-center"
+        className="mt-4 md:mt-6 mx-auto max-w-2xl p-4 md:p-5 rounded-xl bg-secondary/50 dark:bg-secondary/30 border border-border dark:border-border/60 text-center"
         initial={{ opacity: 0, y: 20, scale: 0.97 }}
         whileInView={{ opacity: 1, y: 0, scale: 1 }}
         viewport={{ once: true, amount: 0.3 }}

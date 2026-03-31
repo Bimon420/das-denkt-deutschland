@@ -52,7 +52,7 @@ const IntroSection = () => {
           {principles.map((p, i) => (
             <motion.div
               key={p.title}
-              className="text-center p-6 rounded-xl bg-card shadow-[0_1px_3px_0_hsl(var(--foreground)/0.04),0_4px_12px_-2px_hsl(var(--foreground)/0.06)] hover:shadow-[0_2px_6px_0_hsl(var(--foreground)/0.06),0_8px_24px_-4px_hsl(var(--foreground)/0.1)] transition-shadow duration-300"
+              className="text-center p-6 rounded-xl bg-card dark:bg-card/80 shadow-[0_1px_3px_0_hsl(var(--foreground)/0.04),0_4px_12px_-2px_hsl(var(--foreground)/0.06)] dark:shadow-none dark:border dark:border-border/50 hover:shadow-[0_2px_6px_0_hsl(var(--foreground)/0.06),0_8px_24px_-4px_hsl(var(--foreground)/0.1)] dark:hover:border-border transition-all duration-300"
               initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
               whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
               viewport={{ once: true, amount: 0.2 }}
@@ -85,7 +85,7 @@ const IntroSection = () => {
           {buttons.map((b, i) => (
             <motion.div
               key={b.label}
-              className="flex items-start gap-4 p-4 rounded-xl bg-card border border-border/40"
+              className="flex items-start gap-4 p-4 rounded-xl bg-card dark:bg-card/60 border border-border/40 dark:border-border/50"
               initial={{ opacity: 0, x: -12 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, amount: 0.2 }}

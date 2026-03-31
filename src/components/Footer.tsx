@@ -4,7 +4,7 @@ import ViewCounter from "./ViewCounter";
 
 const Footer = () => {
   return (
-    <footer className="py-16 px-6 border-t border-border">
+    <footer className="py-16 px-6 border-t border-border bg-card/30 dark:bg-card/50">
       <motion.div
         className="max-w-3xl mx-auto text-center"
         initial={{ opacity: 0, y: 16 }}

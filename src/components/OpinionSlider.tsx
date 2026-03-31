@@ -96,7 +96,7 @@ const OpinionSlider = ({ topicId }: OpinionSliderProps) => {
 
   return (
     <motion.div
-      className="mt-5 mx-auto max-w-2xl p-4 md:p-5 rounded-xl bg-secondary/30 border border-border"
+      className="mt-5 mx-auto max-w-2xl p-4 md:p-5 rounded-xl bg-secondary/30 dark:bg-secondary/20 border border-border dark:border-border/60"
       initial={{ opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.3 }}
