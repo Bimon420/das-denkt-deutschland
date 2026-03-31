@@ -107,7 +107,7 @@ const NotificationBell = () => {
                   <span className="text-xs font-bold tracking-wide uppercase text-muted-foreground">
                     Benachrichtigungen
                   </span>
-                  <PushToggle />
+                  <PushToggle onClose={() => setShowPopup(false)} />
                 </div>
               </div>
 
@@ -147,13 +147,17 @@ const NotificationBell = () => {
 };
 
 /** Small toggle for browser push notification permission */
-const PushToggle = () => {
+const PushToggle = ({ onClose }: { onClose: () => void }) => {
   const [permission, setPermission] = useState<NotificationPermission>(
     typeof Notification !== "undefined" ? Notification.permission : "denied"
   );
 
-  const requestPermission = async () => {
+  const handleClick = async () => {
     if (typeof Notification === "undefined") return;
+    if (permission === "granted") {
+      onClose();
+      return;
+    }
     const result = await Notification.requestPermission();
     setPermission(result);
   };
@@ -162,7 +166,7 @@ const PushToggle = () => {
 
   return (
     <button
-      onClick={requestPermission}
+      onClick={handleClick}
       className={`text-[10px] font-semibold px-2 py-1 rounded-full transition-all touch-manipulation ${
         permission === "granted"
           ? "bg-accent/20 text-accent"
