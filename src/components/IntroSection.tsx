@@ -85,7 +85,7 @@ const IntroSection = () => {
           {buttons.map((b, i) => (
             <motion.div
               key={b.label}
-              className="flex items-start gap-4 p-4 rounded-xl bg-card border border-border/40"
+              className="flex items-start gap-4 p-4 rounded-xl bg-card dark:bg-card/60 border border-border/40 dark:border-border/50"
               initial={{ opacity: 0, x: -12 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, amount: 0.2 }}
