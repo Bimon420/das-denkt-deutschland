@@ -65,13 +65,13 @@ const Hero = () => {
 
         {/* Left / Right labels */}
         <motion.div
-          className="mt-12 flex justify-between items-center max-w-md mx-auto"
+          className="mt-12 grid grid-cols-3 items-center max-w-md mx-auto"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.1, duration: 0.6 }}
         >
           <motion.div
-            className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-card/60 dark:bg-card/80 backdrop-blur-sm border border-border/50 dark:border-border"
+            className="justify-self-center flex items-center gap-2.5 px-4 py-2 rounded-full bg-card/60 dark:bg-card/80 backdrop-blur-sm border border-border/50 dark:border-border"
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ delay: 1.2, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
@@ -81,7 +81,7 @@ const Hero = () => {
           </motion.div>
 
           <motion.div
-            className="relative px-5 py-2 rounded-full border border-accent/40 dark:border-accent/50 bg-accent/[0.08] dark:bg-accent/[0.12]"
+            className="justify-self-center relative px-5 py-2 rounded-full border border-accent/40 dark:border-accent/50 bg-accent/[0.08] dark:bg-accent/[0.12]"
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 1.3, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
@@ -98,7 +98,7 @@ const Hero = () => {
           </motion.div>
 
           <motion.div
-            className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-card/60 dark:bg-card/80 backdrop-blur-sm border border-border/50 dark:border-border"
+            className="justify-self-center flex items-center gap-2.5 px-4 py-2 rounded-full bg-card/60 dark:bg-card/80 backdrop-blur-sm border border-border/50 dark:border-border"
             initial={{ x: 20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ delay: 1.2, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
