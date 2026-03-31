@@ -66,7 +66,7 @@ const ViewpointPanel = ({
 
       {/* Hidden meaning */}
       {data.hiddenMeaning && (
-        <div className="mt-4 p-3 rounded-lg bg-background/60 border border-border">
+        <div className="mt-4 p-3 rounded-lg bg-background/60 dark:bg-background/30 border border-border dark:border-border/60">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">
             <AlertTriangle className="w-3 h-3" />
             Versteckte Bedeutung
