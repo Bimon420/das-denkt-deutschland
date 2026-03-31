@@ -2,11 +2,16 @@ import Hero from "@/components/Hero";
 import IntroSection from "@/components/IntroSection";
 import TopicCard from "@/components/TopicCard";
 import Footer from "@/components/Footer";
+import ThemeToggle from "@/components/ThemeToggle";
 import { topics } from "@/data/topics";
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
+      {/* Floating theme toggle on landing page */}
+      <div className="fixed top-4 right-4 z-50">
+        <ThemeToggle />
+      </div>
       <Hero />
       <IntroSection />
 
