@@ -65,7 +65,7 @@ const Hero = () => {
 
         {/* Left / Right labels */}
         <motion.div
-          className="mt-12 flex justify-between items-center max-w-md mx-auto"
+          className="mt-12 grid grid-cols-3 items-center max-w-md mx-auto"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.1, duration: 0.6 }}
