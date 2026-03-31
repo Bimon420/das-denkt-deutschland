@@ -5,7 +5,7 @@ import { ArrowRight } from "lucide-react";
 const Hero = () => {
   const navigate = useNavigate();
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background">
       {/* Split background */}
       <div className="absolute inset-0 flex">
         <motion.div
@@ -22,9 +22,14 @@ const Hero = () => {
         />
       </div>
 
+      {/* Subtle radial glow behind content in dark mode */}
+      <div className="absolute inset-0 hidden dark:block pointer-events-none">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-accent/[0.06] blur-[120px]" />
+      </div>
+
       {/* Center divider line */}
       <motion.div
-        className="absolute left-1/2 top-0 bottom-0 w-px bg-accent"
+        className="absolute left-1/2 top-0 bottom-0 w-px bg-accent/70 dark:bg-accent/40 dark:shadow-[0_0_8px_hsl(var(--accent)/0.2)]"
         initial={{ scaleY: 0, opacity: 0 }}
         animate={{ scaleY: 1, opacity: 1 }}
         transition={{ delay: 0.7, duration: 1, ease: [0.16, 1, 0.3, 1] }}
@@ -66,7 +71,7 @@ const Hero = () => {
           transition={{ delay: 1.1, duration: 0.6 }}
         >
           <motion.div
-            className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-card/60 backdrop-blur-sm border border-border/50"
+            className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-card/60 dark:bg-card/80 backdrop-blur-sm border border-border/50 dark:border-border"
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ delay: 1.2, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
@@ -76,7 +81,7 @@ const Hero = () => {
           </motion.div>
 
           <motion.div
-            className="relative px-5 py-2 rounded-full border border-accent/40 bg-accent/8"
+            className="relative px-5 py-2 rounded-full border border-accent/40 dark:border-accent/50 bg-accent/[0.08] dark:bg-accent/[0.12]"
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 1.3, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
@@ -93,7 +98,7 @@ const Hero = () => {
           </motion.div>
 
           <motion.div
-            className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-card/60 backdrop-blur-sm border border-border/50"
+            className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-card/60 dark:bg-card/80 backdrop-blur-sm border border-border/50 dark:border-border"
             initial={{ x: 20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ delay: 1.2, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
@@ -106,7 +111,7 @@ const Hero = () => {
         {/* CTA Button */}
         <motion.button
           onClick={() => navigate("/app")}
-          className="mt-12 inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-accent text-accent-foreground font-semibold text-sm tracking-wide shadow-[0_2px_8px_hsl(var(--accent)/0.3)] hover:shadow-[0_4px_16px_hsl(var(--accent)/0.4)] transition-shadow duration-300 active:scale-[0.97]"
+          className="mt-12 inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-accent text-accent-foreground font-semibold text-sm tracking-wide shadow-[0_2px_8px_hsl(var(--accent)/0.3)] hover:shadow-[0_4px_16px_hsl(var(--accent)/0.4)] dark:shadow-[0_2px_12px_hsl(var(--accent)/0.25)] dark:hover:shadow-[0_4px_24px_hsl(var(--accent)/0.35)] transition-shadow duration-300 active:scale-[0.97]"
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.4, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
