@@ -77,7 +77,7 @@ const ViewpointPanel = ({
 
       {/* Negative effects */}
       {data.negativeEffects && (
-        <div className="mt-3 p-3 rounded-lg bg-destructive/5 border border-destructive/15">
+        <div className="mt-3 p-3 rounded-lg bg-destructive/5 dark:bg-destructive/10 border border-destructive/15 dark:border-destructive/25">
           <div className="text-xs font-semibold text-destructive mb-1 uppercase tracking-wide">
             ⚠ Mögliche negative Auswirkungen
           </div>
