@@ -98,7 +98,7 @@ const Hero = () => {
           </motion.div>
 
           <motion.div
-            className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-card/60 backdrop-blur-sm border border-border/50"
+            className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-card/60 dark:bg-card/80 backdrop-blur-sm border border-border/50 dark:border-border"
             initial={{ x: 20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ delay: 1.2, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
