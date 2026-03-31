@@ -97,6 +97,48 @@ MITTE: ${topic.mitte_view}`;
   }
   return { approved: rejectedBy.length === 0, rejectedBy, reasons };
 }
+async function checkRelevance(url: string, apiKey: string): Promise<{ relevant: boolean; reason: string }> {
+  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash-lite",
+      response_format: { type: "json_object" },
+      messages: [
+        {
+          role: "system",
+          content: `Du bist ein strenger Relevanzfilter für "Das Denkt Deutschland" — eine Plattform für POLITISCHE und GESELLSCHAFTLICHE Debatten in Deutschland.
+
+ERLAUBT sind NUR Themen, die:
+- Eine aktuelle POLITISCHE Debatte in Deutschland betreffen
+- Gesellschaftspolitisch kontrovers diskutiert werden (z.B. Migration, Wirtschaft, Soziales, Klima, Sicherheit, Bildung, Gesundheitspolitik)
+- Parteipolitische Relevanz haben
+
+NICHT ERLAUBT sind:
+- Lokale Nachrichten ohne überregionale politische Bedeutung (z.B. Tierrettungen, Unfälle, Kriminalfälle)
+- Sport, Unterhaltung, Promi-News, Klatsch
+- Naturereignisse ohne politische Dimension
+- Rein wissenschaftliche Meldungen ohne politischen Bezug
+- Produktnews, Technik-Reviews
+
+Antworte NUR mit JSON: {"relevant": true/false, "reason": "kurze Begründung"}`
+        },
+        { role: "user", content: `Ist dieser Artikel politisch relevant für eine deutsche Debattenplattform? URL: ${url}` }
+      ],
+    }),
+  });
+
+  if (!res.ok) return { relevant: true, reason: "API error, allowing through" };
+  const data = await res.json();
+  let raw = data.choices?.[0]?.message?.content || "";
+  raw = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+  try {
+    const parsed = JSON.parse(raw);
+    return { relevant: parsed.relevant === true, reason: parsed.reason || "" };
+  } catch {
+    return { relevant: true, reason: "Parse error, allowing through" };
+  }
+}
 
 async function generateTopicFromUrl(url: string, apiKey: string): Promise<any> {
   const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -186,6 +228,22 @@ serve(async (req) => {
 
     // Save suggestion
     await supabase.from("topic_suggestions").insert({ title: url, url });
+
+    // Step 1: Quick relevance check before expensive processing
+    console.log("Running relevance check for:", url);
+    const relevance = await checkRelevance(url, LOVABLE_API_KEY);
+    if (!relevance.relevant) {
+      console.log("Relevance check FAILED:", relevance.reason);
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Dieser Link hat leider keine Relevanz für diese Seite.",
+          details: [relevance.reason],
+        }),
+        { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    console.log("Relevance check PASSED:", relevance.reason);
 
     const maxAttempts = 3;
     let topic: any = null;
