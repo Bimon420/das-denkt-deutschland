@@ -107,7 +107,7 @@ const NotificationBell = () => {
                   <span className="text-xs font-bold tracking-wide uppercase text-muted-foreground">
                     Benachrichtigungen
                   </span>
-                  <PushToggle />
+                  <PushToggle onClose={() => setShowPopup(false)} />
                 </div>
               </div>
 
