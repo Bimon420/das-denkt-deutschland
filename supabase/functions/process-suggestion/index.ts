@@ -229,6 +229,22 @@ serve(async (req) => {
     // Save suggestion
     await supabase.from("topic_suggestions").insert({ title: url, url });
 
+    // Step 1: Quick relevance check before expensive processing
+    console.log("Running relevance check for:", url);
+    const relevance = await checkRelevance(url, LOVABLE_API_KEY);
+    if (!relevance.relevant) {
+      console.log("Relevance check FAILED:", relevance.reason);
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Dieser Link hat leider keine Relevanz für diese Seite.",
+          details: [relevance.reason],
+        }),
+        { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    console.log("Relevance check PASSED:", relevance.reason);
+
     const maxAttempts = 3;
     let topic: any = null;
     let verification: { approved: boolean; rejectedBy: string[]; reasons: string[] } | null = null;
