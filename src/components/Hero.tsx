@@ -81,20 +81,12 @@ const Hero = () => {
           </motion.div>
 
           <motion.div
-            className="justify-self-center relative px-5 py-2 rounded-full border border-accent/40 dark:border-accent/50 bg-accent/[0.08] dark:bg-accent/[0.12]"
+            className="justify-self-center flex items-center gap-2.5 px-4 py-2 rounded-full bg-card/60 dark:bg-card/80 backdrop-blur-sm border border-border/50 dark:border-border"
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 1.3, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           >
-            <motion.div
-              className="absolute inset-0 rounded-full border border-accent/20"
-              animate={{
-                scale: [1, 1.15, 1],
-                opacity: [0.3, 0, 0.3],
-              }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-            />
-            <span className="font-editorial text-sm font-bold tracking-[0.08em] text-mitte-gold relative">Die Mitte</span>
+            <span className="font-body font-bold text-[11px] tracking-[0.15em] uppercase text-foreground/80">Die Mitte</span>
           </motion.div>
 
           <motion.div
