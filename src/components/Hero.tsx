@@ -60,44 +60,46 @@ const Hero = () => {
 
         {/* Left / Right labels */}
         <motion.div
-          className="mt-12 flex justify-between items-center max-w-lg mx-auto"
+          className="mt-12 flex justify-between items-center max-w-md mx-auto"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.1, duration: 0.6 }}
         >
           <motion.div
-            className="flex-1 flex items-center gap-2"
+            className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-card/60 backdrop-blur-sm border border-border/50"
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ delay: 1.2, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="w-3 h-3 rounded-full bg-left ring-2 ring-left/20" />
-            <span className="text-left font-medium text-sm tracking-wide uppercase">Links</span>
+            <div className="w-2 h-2 rounded-full bg-foreground" />
+            <span className="font-body font-bold text-[11px] tracking-[0.15em] uppercase text-foreground/80">Links</span>
           </motion.div>
+
           <motion.div
-            className="relative flex items-center gap-2 px-4 py-1.5 rounded-full bg-mitte-light border border-mitte shadow-sm"
+            className="relative px-5 py-2 rounded-full border border-accent/40 bg-accent/8"
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 1.3, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           >
             <motion.div
-              className="absolute inset-0 rounded-full border border-accent/40"
+              className="absolute inset-0 rounded-full border border-accent/20"
               animate={{
-                scale: [1, 1.3, 1],
-                opacity: [0.4, 0, 0.4],
+                scale: [1, 1.15, 1],
+                opacity: [0.3, 0, 0.3],
               }}
-              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
             />
-            <span className="text-mitte-gold font-semibold text-sm tracking-wide uppercase relative">Die Mitte</span>
+            <span className="font-editorial text-sm font-bold tracking-[0.08em] text-mitte-gold relative">Die Mitte</span>
           </motion.div>
+
           <motion.div
-            className="flex-1 flex items-center gap-2 justify-end"
+            className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-card/60 backdrop-blur-sm border border-border/50"
             initial={{ x: 20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ delay: 1.2, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           >
-            <span className="text-right font-medium text-sm tracking-wide uppercase">Rechts</span>
-            <div className="w-3 h-3 rounded-full bg-right-red ring-2 ring-right/20" />
+            <span className="font-body font-bold text-[11px] tracking-[0.15em] uppercase text-destructive/80">Rechts</span>
+            <div className="w-2 h-2 rounded-full bg-destructive" />
           </motion.div>
         </motion.div>
 
