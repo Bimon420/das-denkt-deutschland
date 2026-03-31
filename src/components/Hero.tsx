@@ -5,7 +5,7 @@ import { ArrowRight } from "lucide-react";
 const Hero = () => {
   const navigate = useNavigate();
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background">
       {/* Split background */}
       <div className="absolute inset-0 flex">
         <motion.div
@@ -22,9 +22,14 @@ const Hero = () => {
         />
       </div>
 
+      {/* Subtle radial glow behind content in dark mode */}
+      <div className="absolute inset-0 hidden dark:block pointer-events-none">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-accent/[0.06] blur-[120px]" />
+      </div>
+
       {/* Center divider line */}
       <motion.div
-        className="absolute left-1/2 top-0 bottom-0 w-px bg-accent"
+        className="absolute left-1/2 top-0 bottom-0 w-px bg-accent/70 dark:bg-accent/40 dark:shadow-[0_0_8px_hsl(var(--accent)/0.2)]"
         initial={{ scaleY: 0, opacity: 0 }}
         animate={{ scaleY: 1, opacity: 1 }}
         transition={{ delay: 0.7, duration: 1, ease: [0.16, 1, 0.3, 1] }}
