@@ -81,7 +81,7 @@ const Hero = () => {
           </motion.div>
 
           <motion.div
-            className="relative px-5 py-2 rounded-full border border-accent/40 dark:border-accent/50 bg-accent/[0.08] dark:bg-accent/[0.12]"
+            className="justify-self-center relative px-5 py-2 rounded-full border border-accent/40 dark:border-accent/50 bg-accent/[0.08] dark:bg-accent/[0.12]"
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 1.3, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
