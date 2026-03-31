@@ -17,7 +17,7 @@ const iconMap: Record<SourceType, React.ReactNode> = {
 
 const SourceBadge = ({ type, label, url }: SourceBadgeProps) => {
   const baseClasses =
-    "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-secondary/80 text-muted-foreground text-[11px] font-medium shadow-sm";
+    "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-secondary/80 dark:bg-secondary/50 text-muted-foreground text-[11px] font-medium shadow-sm dark:shadow-none dark:border dark:border-border/40";
 
   if (url && url.trim() !== "") {
     return (
