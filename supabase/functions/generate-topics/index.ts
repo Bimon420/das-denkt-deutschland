@@ -352,6 +352,14 @@ serve(async (req) => {
 
     console.log(`Successfully saved ${data.length} verified topics`);
 
+    // Log success
+    await supabase.from("generation_logs").insert({
+      success: true,
+      topics_count: data.length,
+      rejected_count: rejected.length,
+      details: { rejectionDetails: rejected },
+    });
+
     return new Response(
       JSON.stringify({ success: true, count: data.length, rejected: rejected.length, rejectionDetails: rejected, topics: data }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -359,6 +367,22 @@ serve(async (req) => {
   } catch (error) {
     console.error("Error generating topics:", error);
     const msg = error instanceof Error ? error.message : "Unknown error";
+
+    // Log failure
+    try {
+      const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+      const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+      if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+        const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+        await sb.from("generation_logs").insert({
+          success: false,
+          error_message: msg,
+        });
+      }
+    } catch (logErr) {
+      console.error("Failed to log generation error:", logErr);
+    }
+
     return new Response(JSON.stringify({ success: false, error: msg }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });
