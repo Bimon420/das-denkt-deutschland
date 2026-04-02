@@ -319,6 +319,12 @@ serve(async (req) => {
     console.log(`Verification done: ${approved.length} approved, ${rejected.length} rejected`);
 
     if (approved.length === 0) {
+      await supabase.from("generation_logs").insert({
+        success: false,
+        error_message: "All topics failed verification.",
+        rejected_count: rejected.length,
+        details: { rejectionDetails: rejected },
+      });
       return new Response(
         JSON.stringify({ success: false, error: "All topics failed verification.", details: rejected }),
         { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
