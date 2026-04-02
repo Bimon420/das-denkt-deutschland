@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      generation_logs: {
+        Row: {
+          created_at: string
+          details: Json | null
+          error_message: string | null
+          id: string
+          rejected_count: number
+          success: boolean
+          topics_count: number
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          error_message?: string | null
+          id?: string
+          rejected_count?: number
+          success: boolean
+          topics_count?: number
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          error_message?: string | null
+          id?: string
+          rejected_count?: number
+          success?: boolean
+          topics_count?: number
+        }
+        Relationships: []
+      }
       page_views: {
         Row: {
           created_at: string
