@@ -69,7 +69,8 @@ export function useTopics() {
     queryFn: async (): Promise<Topic[]> => {
       const today = new Date().toISOString().split("T")[0];
 
-      const { data, error } = await supabase
+      // Try today first
+      let { data, error } = await supabase
         .from("topics")
         .select("*")
         .eq("published_at", today)
@@ -81,8 +82,25 @@ export function useTopics() {
         throw error;
       }
 
+      // If no topics for today, fetch the most recent available date
       if (!data || data.length === 0) {
-        return staticTopics;
+        const { data: latest, error: latestError } = await supabase
+          .from("topics")
+          .select("*")
+          .order("published_at", { ascending: false })
+          .order("created_at", { ascending: false })
+          .limit(10);
+
+        if (latestError) {
+          console.error("Error fetching latest topics:", latestError);
+          throw latestError;
+        }
+
+        if (!latest || latest.length === 0) {
+          return staticTopics;
+        }
+
+        data = latest;
       }
 
       return data.map(mapDbToTopic);
