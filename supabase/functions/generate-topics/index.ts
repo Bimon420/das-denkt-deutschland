@@ -286,6 +286,10 @@ serve(async (req) => {
     }
 
     if (topicsArray.length === 0) {
+      await supabase.from("generation_logs").insert({
+        success: false,
+        error_message: "All generated topics were duplicates of existing ones.",
+      });
       return new Response(
         JSON.stringify({ success: false, error: "All generated topics were duplicates of existing ones." }),
         { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
