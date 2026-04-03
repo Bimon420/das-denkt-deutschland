@@ -32,6 +32,7 @@ const Index = () => {
         </div>
       </section>
 
+      <LiveStats />
       <Footer />
     </div>
   );
