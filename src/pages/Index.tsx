@@ -1,6 +1,7 @@
 import Hero from "@/components/Hero";
 import IntroSection from "@/components/IntroSection";
 import TopicCard from "@/components/TopicCard";
+import LiveStats from "@/components/LiveStats";
 import Footer from "@/components/Footer";
 import ThemeToggle from "@/components/ThemeToggle";
 import { topics } from "@/data/topics";
@@ -31,6 +32,7 @@ const Index = () => {
         </div>
       </section>
 
+      <LiveStats />
       <Footer />
     </div>
   );
