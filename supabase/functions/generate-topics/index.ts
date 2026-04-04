@@ -199,13 +199,28 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+    // ── Guard: Skip if topics were already generated today ──
+    const today = new Date().toISOString().split("T")[0];
+    const { count: todayCount } = await supabase
+      .from("topics")
+      .select("id", { count: "exact", head: true })
+      .eq("published_at", today);
+
+    if ((todayCount ?? 0) >= 5) {
+      console.log(`Already ${todayCount} topics for ${today}, skipping generation.`);
+      return new Response(
+        JSON.stringify({ success: true, skipped: true, message: `Already ${todayCount} topics for today` }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // ── Step 0: Load existing topic titles for deduplication ──
     console.log("Step 0: Loading existing topics for deduplication...");
     const { data: existingTopics } = await supabase
       .from("topics")
       .select("topic")
       .order("created_at", { ascending: false })
-      .limit(200);
+      .limit(100);
 
     const existingTitles = (existingTopics || []).map((t: any) => t.topic);
     const deduplicationNote = existingTitles.length > 0
