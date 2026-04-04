@@ -199,13 +199,28 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+    // ── Guard: Skip if topics were already generated today ──
+    const today = new Date().toISOString().split("T")[0];
+    const { count: todayCount } = await supabase
+      .from("topics")
+      .select("id", { count: "exact", head: true })
+      .eq("published_at", today);
+
+    if ((todayCount ?? 0) >= 5) {
+      console.log(`Already ${todayCount} topics for ${today}, skipping generation.`);
+      return new Response(
+        JSON.stringify({ success: true, skipped: true, message: `Already ${todayCount} topics for today` }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // ── Step 0: Load existing topic titles for deduplication ──
     console.log("Step 0: Loading existing topics for deduplication...");
     const { data: existingTopics } = await supabase
       .from("topics")
       .select("topic")
       .order("created_at", { ascending: false })
-      .limit(200);
+      .limit(100);
 
     const existingTitles = (existingTopics || []).map((t: any) => t.topic);
     const deduplicationNote = existingTitles.length > 0
@@ -277,7 +292,7 @@ serve(async (req) => {
           const exWords = ex.split(" ").filter((w: string) => w.length > 3);
           if (newWords.length === 0 || exWords.length === 0) return false;
           const overlap = newWords.filter((w: string) => exWords.includes(w)).length;
-          return overlap / Math.min(newWords.length, exWords.length) >= 0.8;
+          return overlap / Math.min(newWords.length, exWords.length) >= 0.9;
         });
         if (isDupe) console.warn(`  🔄 Duplicate removed: "${t.topic}"`);
         return !isDupe;
@@ -333,7 +348,6 @@ serve(async (req) => {
 
     // ── Step 3: Save approved topics ──
     console.log("Step 3/3: Saving approved topics...");
-    const today = new Date().toISOString().split("T")[0];
 
     const rows = await Promise.all(
       approved.map(async (t: any) => ({
