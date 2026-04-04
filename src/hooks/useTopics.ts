@@ -74,8 +74,7 @@ export function useTopics() {
         .from("topics")
         .select("*")
         .eq("published_at", today)
-        .order("created_at", { ascending: false })
-        .limit(10);
+        .order("created_at", { ascending: false });
 
       if (error) {
         console.error("Error fetching topics:", error);
@@ -89,7 +88,7 @@ export function useTopics() {
           .select("*")
           .order("published_at", { ascending: false })
           .order("created_at", { ascending: false })
-          .limit(10);
+          .limit(20);
 
         if (latestError) {
           console.error("Error fetching latest topics:", latestError);
