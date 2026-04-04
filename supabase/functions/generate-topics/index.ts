@@ -348,7 +348,6 @@ serve(async (req) => {
 
     // ── Step 3: Save approved topics ──
     console.log("Step 3/3: Saving approved topics...");
-    const today = new Date().toISOString().split("T")[0];
 
     const rows = await Promise.all(
       approved.map(async (t: any) => ({
