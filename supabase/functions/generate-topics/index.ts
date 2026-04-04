@@ -292,7 +292,7 @@ serve(async (req) => {
           const exWords = ex.split(" ").filter((w: string) => w.length > 3);
           if (newWords.length === 0 || exWords.length === 0) return false;
           const overlap = newWords.filter((w: string) => exWords.includes(w)).length;
-          return overlap / Math.min(newWords.length, exWords.length) >= 0.8;
+          return overlap / Math.min(newWords.length, exWords.length) >= 0.9;
         });
         if (isDupe) console.warn(`  🔄 Duplicate removed: "${t.topic}"`);
         return !isDupe;
