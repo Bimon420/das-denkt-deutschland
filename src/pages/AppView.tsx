@@ -13,9 +13,10 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+const BATCH_SIZE = 5;
+
 const AppView = () => {
   const { data: topics = [], isLoading, isFetching } = useTopics();
-  // Re-shuffle on every component mount (navigation back to /app)
   const [shuffleSeed] = useState(() => Math.random());
   const shuffledTopics = useMemo(() => {
     const a = [...topics];
@@ -26,6 +27,34 @@ const AppView = () => {
     return a;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [topics, shuffleSeed]);
+
+  const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  // Infinite scroll observer
+  const loadMoreCallback = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      if (entries[0]?.isIntersecting && visibleCount < shuffledTopics.length) {
+        setVisibleCount((c) => Math.min(c + BATCH_SIZE, shuffledTopics.length));
+      }
+    },
+    [visibleCount, shuffledTopics.length]
+  );
+
+  // Attach observer
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const setLoadMoreNode = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (observerRef.current) observerRef.current.disconnect();
+      if (node) {
+        observerRef.current = new IntersectionObserver(loadMoreCallback, {
+          rootMargin: "600px",
+        });
+        observerRef.current.observe(node);
+      }
+    },
+    [loadMoreCallback]
+  );
   const { data: topicOfTheWeekId } = useTopicOfTheWeek();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
