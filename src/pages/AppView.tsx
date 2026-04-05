@@ -253,7 +253,7 @@ const AppView = () => {
       {/* Scrollable topic list */}
       <section className="py-6 md:py-16 px-3 md:px-6">
         <div className="max-w-5xl mx-auto">
-          {shuffledTopics.map((t, i) => (
+        {shuffledTopics.slice(0, visibleCount).map((t, i) => (
             <TopicCard
               key={t.id || `${t.topic}-${i}`}
               id={t.id}
@@ -267,10 +267,14 @@ const AppView = () => {
               isTopicOfTheWeek={!!t.id && t.id === topicOfTheWeekId}
             />
           ))}
+          {visibleCount < shuffledTopics.length && (
+            <div ref={setLoadMoreNode} className="flex justify-center py-8">
+              <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Track app views silently */}
       <ViewCounter page="app" trackOnly />
     </div>
   );
