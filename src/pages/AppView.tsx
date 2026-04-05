@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo, useCallback } from "react";
+import { useState, useRef, useMemo, useCallback, useEffect } from "react";
 import ViewCounter from "@/components/ViewCounter";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTopics } from "@/hooks/useTopics";
@@ -6,7 +6,7 @@ import TopicCard from "@/components/TopicCard";
 import ShareMenu from "@/components/ShareMenu";
 import ThemeToggle from "@/components/ThemeToggle";
 import NotificationBell from "@/components/NotificationBell";
-import { Info, Archive, Loader2, RefreshCw, Plus, Send, X, BarChart3, Vote, Landmark } from "lucide-react";
+import { Info, Archive, Loader2, RefreshCw, Plus, Send, X, BarChart3, Vote, Landmark, ArrowUp } from "lucide-react";
 import { useTopicOfTheWeek } from "@/hooks/useTopicOfTheWeek";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -55,6 +55,14 @@ const AppView = () => {
     },
     [loadMoreCallback]
   );
+  // Scroll-to-top button
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  useEffect(() => {
+    const handleScroll = () => setShowScrollTop(window.scrollY > 400);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const { data: topicOfTheWeekId } = useTopicOfTheWeek();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -276,6 +284,21 @@ const AppView = () => {
       </section>
 
       <ViewCounter page="app" trackOnly />
+
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            className="fixed bottom-6 right-6 z-50 p-3 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-shadow"
+            aria-label="Nach oben scrollen"
+          >
+            <ArrowUp className="w-5 h-5" />
+          </motion.button>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
