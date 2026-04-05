@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useCallback } from "react";
 import ViewCounter from "@/components/ViewCounter";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTopics } from "@/hooks/useTopics";
@@ -13,9 +13,10 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+const BATCH_SIZE = 5;
+
 const AppView = () => {
   const { data: topics = [], isLoading, isFetching } = useTopics();
-  // Re-shuffle on every component mount (navigation back to /app)
   const [shuffleSeed] = useState(() => Math.random());
   const shuffledTopics = useMemo(() => {
     const a = [...topics];
@@ -26,6 +27,34 @@ const AppView = () => {
     return a;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [topics, shuffleSeed]);
+
+  const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  // Infinite scroll observer
+  const loadMoreCallback = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      if (entries[0]?.isIntersecting && visibleCount < shuffledTopics.length) {
+        setVisibleCount((c) => Math.min(c + BATCH_SIZE, shuffledTopics.length));
+      }
+    },
+    [visibleCount, shuffledTopics.length]
+  );
+
+  // Attach observer
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const setLoadMoreNode = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (observerRef.current) observerRef.current.disconnect();
+      if (node) {
+        observerRef.current = new IntersectionObserver(loadMoreCallback, {
+          rootMargin: "600px",
+        });
+        observerRef.current.observe(node);
+      }
+    },
+    [loadMoreCallback]
+  );
   const { data: topicOfTheWeekId } = useTopicOfTheWeek();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -224,7 +253,7 @@ const AppView = () => {
       {/* Scrollable topic list */}
       <section className="py-6 md:py-16 px-3 md:px-6">
         <div className="max-w-5xl mx-auto">
-          {shuffledTopics.map((t, i) => (
+        {shuffledTopics.slice(0, visibleCount).map((t, i) => (
             <TopicCard
               key={t.id || `${t.topic}-${i}`}
               id={t.id}
@@ -238,10 +267,14 @@ const AppView = () => {
               isTopicOfTheWeek={!!t.id && t.id === topicOfTheWeekId}
             />
           ))}
+          {visibleCount < shuffledTopics.length && (
+            <div ref={setLoadMoreNode} className="flex justify-center py-8">
+              <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Track app views silently */}
       <ViewCounter page="app" trackOnly />
     </div>
   );
