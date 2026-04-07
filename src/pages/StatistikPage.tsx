@@ -46,7 +46,7 @@ const StatistikPage = () => {
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-border px-4 py-3">
         <div className="max-w-3xl mx-auto flex items-center gap-3">
-          <button onClick={() => navigate(-1)} className="p-1.5 rounded-full hover:bg-muted transition-colors">
+          <button onClick={() => window.history.length > 1 ? navigate(-1) : navigate("/")} className="p-1.5 rounded-full hover:bg-muted transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <h1 className="font-bold text-lg tracking-tight">Statistiken</h1>

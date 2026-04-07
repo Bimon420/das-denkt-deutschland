@@ -54,7 +54,7 @@ const TopicDetailPage = () => {
     <div className="min-h-[100dvh] bg-background">
       <header className="sticky top-0 z-30 flex items-center px-3 md:px-5 py-2.5 md:py-3 border-b border-border/40 bg-background/90 backdrop-blur-xl">
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => window.history.length > 1 ? navigate(-1) : navigate("/app")}
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors active:scale-95"
         >
           <ArrowLeft className="w-4 h-4" />
