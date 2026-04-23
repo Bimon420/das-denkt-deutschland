@@ -13,6 +13,7 @@ export interface RedakteurErgebnis {
 }
 
 export interface TopThema {
+  id: string;
   topic: string;
   voteCount: number;
 }
@@ -229,7 +230,8 @@ export function verarbeiteUndPrüfe(
   const topicNameMap: Record<string, string> = {};
   topicsList.forEach((t) => { topicNameMap[t.id] = t.topic; });
   const topThemen: TopThema[] = Object.entries(votesByTopicId)
-    .map(([id, count]) => ({ topic: topicNameMap[id] || id, voteCount: count }))
+    .filter(([id]) => topicNameMap[id])
+    .map(([id, count]) => ({ id, topic: topicNameMap[id], voteCount: count }))
     .sort((a, b) => b.voteCount - a.voteCount)
     .slice(0, 10);
 

@@ -202,7 +202,11 @@ const StatistikPage = () => {
             </h2>
             <div className="bg-card rounded-xl border border-border divide-y divide-border">
               {data.topThemen.map((t, i) => (
-                <div key={t.topic} className="flex items-center gap-3 px-4 py-3">
+                <button
+                  key={t.id}
+                  onClick={() => navigate(`/thema/${t.id}`)}
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors text-left active:scale-[0.99]"
+                >
                   <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
                     i === 0 ? "bg-yellow-500/20 text-yellow-600 dark:text-yellow-400" :
                     i === 1 ? "bg-gray-300/20 text-gray-500 dark:text-gray-400" :
@@ -215,7 +219,7 @@ const StatistikPage = () => {
                   <span className="text-sm tabular-nums text-muted-foreground shrink-0">
                     {t.voteCount} {t.voteCount === 1 ? "Stimme" : "Stimmen"}
                   </span>
-                </div>
+                </button>
               ))}
             </div>
           </motion.section>
