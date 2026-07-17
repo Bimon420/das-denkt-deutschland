@@ -114,7 +114,6 @@ const DatenschutzPage = () => {
               14197 Berlin
             </p>
             <p className="text-xs text-muted-foreground/80 leading-relaxed">
-              Telefon: +49 (0) 1622933343<br />
               E-Mail:{" "}
               <a href="mailto:derbimon@gmail.com" className="text-accent hover:underline">
                 derbimon@gmail.com
