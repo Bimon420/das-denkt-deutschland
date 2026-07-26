@@ -7,89 +7,135 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// ─── LLM: Anthropic direkt (weg von Lovable, Simon 07-10) ────────────────────
+const MODEL_GEN = "claude-opus-5";
+const MODEL_VERIFY = "claude-opus-5";
+
+async function askClaude(opts: { apiKey: string; model: string; system: string; user: string; maxTokens: number }): Promise<string> {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "x-api-key": opts.apiKey,
+      "anthropic-version": "2023-06-01",
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      model: opts.model,
+      max_tokens: opts.maxTokens,
+      // Opus 5: Thinking default-AN zählt gegen max_tokens — hier aus (Paritäts-Migration)
+      thinking: { type: "disabled" },
+      system: opts.system,
+      messages: [{ role: "user", content: opts.user }],
+    }),
+  });
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Anthropic ${res.status}: ${errText.slice(0, 300)}`);
+  }
+  const data = await res.json();
+  return (data.content ?? [])
+    .filter((b: any) => b.type === "text")
+    .map((b: any) => b.text)
+    .join("");
+}
+
+// ─── Artikel wirklich lesen (Grounding — vorher sah das LLM nur die URL!) ────
+function decodeEntities(s: string): string {
+  return s
+    .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"').replace(/&#0?39;|&apos;/g, "'")
+    .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
+    .replace(/&nbsp;/g, " ");
+}
+
+async function fetchArticle(url: string): Promise<{ title: string; description: string; text: string }> {
+  const res = await fetch(url, {
+    headers: { "User-Agent": "Mozilla/5.0 (DasDenktDeutschland-Bot)" },
+    signal: AbortSignal.timeout(12_000),
+    redirect: "follow",
+  });
+  if (!res.ok) throw new Error(`Artikel nicht abrufbar (HTTP ${res.status}).`);
+  const html = await res.text();
+
+  const title = decodeEntities(
+    html.match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)/i)?.[1] ??
+    html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] ?? ""
+  ).trim();
+  const description = decodeEntities(
+    html.match(/<meta[^>]+property=["']og:description["'][^>]+content=["']([^"']+)/i)?.[1] ??
+    html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)/i)?.[1] ?? ""
+  ).trim();
+
+  // Fließtext grob extrahieren: Absätze einsammeln, Skripte/Styles verwerfen
+  const body = html
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ");
+  const paragraphs = [...body.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/gi)]
+    .map((m) => decodeEntities(m[1].replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim())
+    .filter((p) => p.length > 60);
+  const text = paragraphs.join("\n").slice(0, 6000);
+
+  if (!title && !description && text.length < 200) {
+    throw new Error("Artikel-Inhalt konnte nicht extrahiert werden (Paywall/Blocker?).");
+  }
+  return { title, description, text };
+}
+
 const VERIFICATION_PERSPECTIVES = [
-  { name: "Politischer Faktenprüfer", focus: "Titel korrekt? Beschreibt genau EIN Ereignis? Passen Links/Rechts/Mitte zum Titel? WICHTIG: Bei Liveblogs/Eilmeldungen innere Konsistenz prüfen und nicht allein wegen fehlender Echtzeit-Verifizierbarkeit ablehnen." },
-  { name: "Personen-Zuordnungsprüfer", focus: "Zitate zur jeweiligen Position passend? WICHTIG: Generische Sprecher wie 'Politischer Beobachter', 'Experten', 'Kritiker' sind ERLAUBT und kein Ablehnungsgrund. Prüfe nur ob Zitat inhaltlich zur Position (links/rechts) passt." },
+  { name: "Politischer Faktenprüfer", focus: "Titel korrekt? Beschreibt genau EIN Ereignis? Passen Links/Rechts/Mitte zum Titel? Deckt der mitgelieferte Artikeltext das Thema? WICHTIG: Bei Liveblogs/Eilmeldungen innere Konsistenz prüfen und nicht allein wegen fehlender Echtzeit-Verifizierbarkeit ablehnen." },
+  { name: "Personen-Zuordnungsprüfer", focus: "Zitate zur jeweiligen Position passend und vom Artikeltext gedeckt? Generische Sprecher wie 'Politische Beobachter', 'Experten', 'Kritiker' sind ERLAUBT. Konkrete Personen NUR wenn der Artikeltext den Wortlaut hergibt." },
   { name: "Gesellschaftlicher Kohärenzprüfer", focus: "Echte gesellschaftliche Debatte? Links/Rechts/Mitte logisch zum selben Thema?" },
   { name: "Wirtschaftlicher Plausibilitätsprüfer", focus: "Wirtschaftliche Argumente plausibel? Fakten korrekt?" },
   { name: "Gesundheitspolitischer Prüfer", focus: "Gesundheitliche Aussagen korrekt? Keine irreführenden Behauptungen? Wenn kein Gesundheitsthema: automatisch APPROVED." },
   { name: "Historischer Kontextprüfer", focus: "Historische Referenzen korrekt? Mitte-Standpunkt historisch fundiert?" },
-  { name: "Sprachlicher Präzisionsprüfer", focus: "Begriffe korrekt und präzise? Zitate realistisch? Ton sachlich?" },
-  { name: "Quellen-Plausibilitätsprüfer", focus: "Quellen echte existierende Medien/Organisationen? WICHTIG: Wenn keine expliziten Quellen angegeben sind, ist das KEIN Ablehnungsgrund — der Artikel-Link selbst ist die Quelle." },
+  { name: "Sprachlicher Präzisionsprüfer", focus: "Begriffe korrekt und präzise? Ton sachlich?" },
+  { name: "Quellen-Deckungsprüfer", focus: "Wird etwas behauptet, das der mitgelieferte Artikeltext NICHT hergibt? Der Artikel-Link selbst ist die Primärquelle — fehlende Zusatzquellen sind KEIN Ablehnungsgrund." },
   { name: "Bias-Detektor", focus: "Linke Position fair? Rechte Position fair? Mitte ausgewogen? Strohmann-Argumente?" },
   { name: "Abschluss-Integritätsprüfer", focus: "Titel/Links/Rechts/Mitte ZWEIFELSFREI zum selben Thema? Publizierbar?" },
 ];
 
-async function runVerification(topic: any, apiKey: string, sourceUrl: string): Promise<{ approved: boolean; rejectedBy: string[]; reasons: string[] }> {
-  const formatSources = (sources: unknown): string => {
-    if (!Array.isArray(sources) || sources.length === 0) return "keine expliziten Quellen";
-    return sources
-      .map((s: any) => {
-        const label = typeof s?.label === "string" && s.label.trim() ? s.label.trim() : "Unbekannte Quelle";
-        const url = typeof s?.url === "string" && s.url.trim() ? s.url.trim() : "";
-        return url ? `${label} (${url})` : label;
-      })
-      .join("; ");
-  };
+async function runVerification(
+  topic: any,
+  apiKey: string,
+  sourceUrl: string,
+  article: { title: string; description: string; text: string },
+): Promise<{ approved: boolean; rejectedBy: string[]; reasons: string[] }> {
+  const topicText = `ARTIKEL (Primärquelle, ${sourceUrl}):
+TITEL: ${article.title}
+TEASER: ${article.description}
+TEXT (Auszug): ${article.text.slice(0, 2500)}
 
-  const hasExplicitSources =
-    (Array.isArray(topic?.left_sources) && topic.left_sources.length > 0) ||
-    (Array.isArray(topic?.right_sources) && topic.right_sources.length > 0);
-
-  const topicText = `TITEL: ${topic.topic}
-ARTIKEL-QUELLE (verlinkter Einreichungslink): ${sourceUrl}
+--- GENERIERTES THEMA ---
+TITEL: ${topic.topic}
 LINKS: ${topic.left_position}
   Zitat: „${topic.left_quote}" — ${topic.left_speaker}
-  Quellen: ${formatSources(topic.left_sources)}
 RECHTS: ${topic.right_position}
   Zitat: „${topic.right_quote}" — ${topic.right_speaker}
-  Quellen: ${formatSources(topic.right_sources)}
 MITTE: ${topic.mitte_view}`;
 
   const results = await Promise.all(
     VERIFICATION_PERSPECTIVES.map(async (p) => {
       try {
-        const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-          body: JSON.stringify({
-            model: "google/gemini-2.5-flash-lite",
-            messages: [
-              { role: "system", content: `Du bist "${p.name}". Fokus: ${p.focus}\nAntworte NUR mit JSON: {"approved": true/false, "reason": "..."}` },
-              { role: "user", content: `Prüfe dieses Thema:\n\n${topicText}\n\nJSON-Antwort:` },
-            ],
-          }),
+        let raw = await askClaude({
+          apiKey,
+          model: MODEL_VERIFY,
+          maxTokens: 800,
+          system: `Du bist "${p.name}". Fokus: ${p.focus}\nPrüfe gegen den mitgelieferten Artikeltext, nicht gegen Vermutungen.\nAntworte NUR mit JSON: {"approved": true/false, "reason": "..."}`,
+          user: `Prüfe dieses Thema:\n\n${topicText}\n\nJSON-Antwort:`,
         });
-        if (!res.ok) return { name: p.name, approved: false, reason: `API error ${res.status}` };
-        const data = await res.json();
-        let raw = data.choices?.[0]?.message?.content || "";
         raw = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-        const parsed = JSON.parse(raw);
+        const objMatch = raw.match(/\{[\s\S]*\}/);
+        const parsed = JSON.parse(objMatch ? objMatch[0] : raw);
         return { name: p.name, approved: parsed.approved !== false, reason: parsed.reason || "" };
-      } catch (e) {
+      } catch (_e) {
         return { name: p.name, approved: false, reason: "Parse/network error" };
       }
     })
   );
 
-  const normalizedResults = results.map((r) => {
-    const isSourceVerifier = r.name === "Quellen-Plausibilitätsprüfer";
-    const missingExplicitSourcesOnly = /keine\s+(expliziten|konkreten)\s+quellen|keine\s+quellenangaben|rein\s+deskriptiv|hypothetisch/i.test(r.reason || "");
-
-    if (isSourceVerifier && !hasExplicitSources && sourceUrl && missingExplicitSourcesOnly) {
-      return {
-        ...r,
-        approved: true,
-        reason: "Artikel-Link ist als Primärquelle vorhanden.",
-      };
-    }
-
-    return r;
-  });
-
   const rejectedBy: string[] = [];
   const reasons: string[] = [];
-  for (const r of normalizedResults) {
+  for (const r of results) {
     if (!r.approved) {
       rejectedBy.push(r.name);
       if (r.reason) reasons.push(`[${r.name}]: ${r.reason}`);
@@ -97,17 +143,18 @@ MITTE: ${topic.mitte_view}`;
   }
   return { approved: rejectedBy.length === 0, rejectedBy, reasons };
 }
-async function checkRelevance(url: string, apiKey: string): Promise<{ relevant: boolean; reason: string }> {
-  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "google/gemini-2.5-flash-lite",
-      response_format: { type: "json_object" },
-      messages: [
-        {
-          role: "system",
-          content: `Du bist ein strenger Relevanzfilter für "Das Denkt Deutschland" — eine Plattform für POLITISCHE und GESELLSCHAFTLICHE Debatten in Deutschland.
+
+async function checkRelevance(
+  url: string,
+  apiKey: string,
+  article: { title: string; description: string; text: string },
+): Promise<{ relevant: boolean; reason: string }> {
+  try {
+    let raw = await askClaude({
+      apiKey,
+      model: MODEL_VERIFY,
+      maxTokens: 400,
+      system: `Du bist ein strenger Relevanzfilter für "Das Denkt Deutschland" — eine Plattform für POLITISCHE und GESELLSCHAFTLICHE Debatten in Deutschland.
 
 ERLAUBT sind NUR Themen, die:
 - Eine aktuelle POLITISCHE Debatte in Deutschland betreffen
@@ -121,53 +168,48 @@ NICHT ERLAUBT sind:
 - Rein wissenschaftliche Meldungen ohne politischen Bezug
 - Produktnews, Technik-Reviews
 
-Antworte NUR mit JSON: {"relevant": true/false, "reason": "kurze Begründung"}`
-        },
-        { role: "user", content: `Ist dieser Artikel politisch relevant für eine deutsche Debattenplattform? URL: ${url}` }
-      ],
-    }),
-  });
-
-  if (!res.ok) return { relevant: true, reason: "API error, allowing through" };
-  const data = await res.json();
-  let raw = data.choices?.[0]?.message?.content || "";
-  raw = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-  try {
-    const parsed = JSON.parse(raw);
+Antworte NUR mit JSON: {"relevant": true/false, "reason": "kurze Begründung"}`,
+      user: `Ist dieser Artikel politisch relevant für eine deutsche Debattenplattform?
+URL: ${url}
+TITEL: ${article.title}
+TEASER: ${article.description}
+TEXT (Auszug): ${article.text.slice(0, 1500)}`,
+    });
+    raw = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+    const objMatch = raw.match(/\{[\s\S]*\}/);
+    const parsed = JSON.parse(objMatch ? objMatch[0] : raw);
     return { relevant: parsed.relevant === true, reason: parsed.reason || "" };
   } catch {
-    return { relevant: true, reason: "Parse error, allowing through" };
+    return { relevant: true, reason: "Prüfung nicht möglich, durchgelassen" };
   }
 }
 
-async function generateTopicFromUrl(url: string, apiKey: string): Promise<any> {
-  const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
-      response_format: { type: "json_object" },
-      messages: [
-        {
-          role: "system",
-          content: `Du bist ein redaktioneller KI-Assistent für "Das Denkt Deutschland". Du erhältst einen Link zu einem Nachrichtenartikel und musst daraus EIN politisches Thema generieren.
+async function generateTopicFromArticle(
+  url: string,
+  apiKey: string,
+  article: { title: string; description: string; text: string },
+): Promise<any> {
+  let content = await askClaude({
+    apiKey,
+    model: MODEL_GEN,
+    maxTokens: 4000,
+    system: `Du bist ein redaktioneller KI-Assistent für "Das Denkt Deutschland". Du erhältst einen ECHTEN Nachrichtenartikel (Titel, Teaser, Textauszug) und generierst daraus EIN politisches Thema.
 
 REGELN:
-- Das Thema muss sich EXAKT auf den verlinkten Artikel beziehen
-- Links = progressive Position
-- Rechts = konservative Position
+- Das Thema muss sich EXAKT auf den gelieferten Artikel beziehen — nichts hinzuerfinden
+- Links = progressive Position, Rechts = konservative Position
 - Mitte = ausgewogene, historisch bewusste Einordnung (3-5 Sätze)
 - tag_type: "gleich", "gegensaetzlich" oder "teilweise"
 - category: immer "politik"
-- KEINE erfundenen Zitate — wenn unklar, nutze "Politische Beobachter" o.ä.
-- Gib echte URLs zu Nachrichtenartikeln an. Wenn unsicher, "url" leer lassen ("")
-- Quellen: nur echte Medien/Organisationen mit echten Links
+- Wörtliche Zitate NUR wenn der Wortlaut im Artikeltext steht; sonst Gruppen-Sprecher ("Politische Beobachter", "Unionspolitiker") und Kernaussage ohne Wörtlichkeits-Anspruch
+- Quellen erfindest du NICHT — die Primärquelle (der Artikel) wird automatisch gesetzt
 
 WICHTIG: Antworte AUSSCHLIESSLICH mit einem validen JSON-Objekt. Kein Text davor oder danach. Kein Markdown.`,
-        },
-        {
-          role: "user",
-          content: `Analysiere diesen Artikel und generiere ein Thema als JSON: ${url}
+    user: `Artikel:
+URL: ${url}
+TITEL: ${article.title}
+TEASER: ${article.description}
+TEXT: ${article.text}
 
 Exakte JSON-Struktur (keine anderen Felder):
 {
@@ -176,33 +218,18 @@ Exakte JSON-Struktur (keine anderen Felder):
   "category": "politik",
   "left_position": "...", "left_quote": "...", "left_speaker": "...",
   "left_hidden_meaning": "...", "left_negative_effects": "...",
-  "left_sources": [{"type": "article", "label": "Quellenname", "url": "https://echte-url.de/..."}],
   "right_position": "...", "right_quote": "...", "right_speaker": "...",
   "right_hidden_meaning": "...", "right_negative_effects": "...",
-  "right_sources": [{"type": "article", "label": "Quellenname", "url": "https://echte-url.de/..."}],
   "mitte_view": "..."
 }`,
-        },
-      ],
-    }),
   });
 
-  if (!aiRes.ok) {
-    const errText = await aiRes.text();
-    console.error("AI error:", aiRes.status, errText);
-    throw new Error(`AI error: ${aiRes.status}`);
-  }
-
-  const aiData = await aiRes.json();
-  let content = aiData.choices?.[0]?.message?.content || "";
   content = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-
   const jsonMatch = content.match(/\{[\s\S]*\}/);
   if (!jsonMatch) {
     console.error("AI returned non-JSON:", content.substring(0, 200));
     throw new Error("Die AI konnte den Artikel nicht verarbeiten. Bitte versuche einen anderen Link.");
   }
-
   return JSON.parse(jsonMatch[0]);
 }
 
@@ -213,12 +240,12 @@ serve(async (req) => {
 
   try {
     const { url } = await req.json();
-    if (!url || typeof url !== "string" || url.length > 500) {
+    if (!url || typeof url !== "string" || url.length > 500 || !url.startsWith("http")) {
       return new Response(JSON.stringify({ error: "Ungültige URL" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
+    if (!ANTHROPIC_API_KEY) throw new Error("ANTHROPIC_API_KEY not configured");
 
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
@@ -229,9 +256,13 @@ serve(async (req) => {
     // Save suggestion
     await supabase.from("topic_suggestions").insert({ title: url, url });
 
+    // Step 0: Artikel wirklich lesen — ohne Inhalt keine Generierung
+    console.log("Fetching article:", url);
+    const article = await fetchArticle(url);
+    console.log("Article fetched:", article.title);
+
     // Step 1: Quick relevance check before expensive processing
-    console.log("Running relevance check for:", url);
-    const relevance = await checkRelevance(url, LOVABLE_API_KEY);
+    const relevance = await checkRelevance(url, ANTHROPIC_API_KEY, article);
     if (!relevance.relevant) {
       console.log("Relevance check FAILED:", relevance.reason);
       return new Response(
@@ -251,12 +282,12 @@ serve(async (req) => {
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
-        console.log(`Attempt ${attempt}/${maxAttempts}: Generating topic from URL:`, url);
-        topic = await generateTopicFromUrl(url, LOVABLE_API_KEY);
+        console.log(`Attempt ${attempt}/${maxAttempts}: Generating topic from article...`);
+        topic = await generateTopicFromArticle(url, ANTHROPIC_API_KEY, article);
         console.log("Generated topic:", topic.topic);
 
         console.log(`Attempt ${attempt}/${maxAttempts}: Running 10-fold verification...`);
-        verification = await runVerification(topic, LOVABLE_API_KEY, url);
+        verification = await runVerification(topic, ANTHROPIC_API_KEY, url, article);
 
         if (verification.approved) {
           break;
@@ -280,9 +311,11 @@ serve(async (req) => {
       );
     }
 
-    // Step 3: Save approved topic
+    // Step 3: Save approved topic — Primärquelle ist der eingereichte Artikel selbst
     console.log("Topic approved! Saving...");
     const today = new Date().toISOString().split("T")[0];
+    const outlet = new URL(url).hostname.replace(/^www\./, "");
+    const primarySource = [{ type: "article", label: outlet, url, title: article.title }];
 
     const row = {
       topic: topic.topic,
@@ -293,13 +326,13 @@ serve(async (req) => {
       left_speaker: topic.left_speaker,
       left_hidden_meaning: topic.left_hidden_meaning || null,
       left_negative_effects: topic.left_negative_effects || null,
-      left_sources: topic.left_sources || [],
+      left_sources: primarySource,
       right_position: topic.right_position,
       right_quote: topic.right_quote,
       right_speaker: topic.right_speaker,
       right_hidden_meaning: topic.right_hidden_meaning || null,
       right_negative_effects: topic.right_negative_effects || null,
-      right_sources: topic.right_sources || [],
+      right_sources: primarySource,
       mitte_view: topic.mitte_view,
       published_at: today,
     };

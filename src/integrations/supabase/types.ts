@@ -44,6 +44,39 @@ export type Database = {
         }
         Relationships: []
       }
+      canon_snapshots: {
+        Row: {
+          backup_url: string | null
+          content: string
+          created_at: string
+          gdrive_backed_up_at: string | null
+          gdrive_backup_id: string | null
+          hash: string
+          id: number
+          version: string
+        }
+        Insert: {
+          backup_url?: string | null
+          content: string
+          created_at?: string
+          gdrive_backed_up_at?: string | null
+          gdrive_backup_id?: string | null
+          hash: string
+          id?: number
+          version: string
+        }
+        Update: {
+          backup_url?: string | null
+          content?: string
+          created_at?: string
+          gdrive_backed_up_at?: string | null
+          gdrive_backup_id?: string | null
+          hash?: string
+          id?: number
+          version?: string
+        }
+        Relationships: []
+      }
       page_views: {
         Row: {
           created_at: string

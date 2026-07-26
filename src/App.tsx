@@ -14,6 +14,8 @@ import StatistikPage from "./pages/StatistikPage";
 import BuergervotingPage from "./pages/BuergervotingPage";
 import ParteienPage from "./pages/ParteienPage";
 import TransparenzPage from "./pages/TransparenzPage";
+import { AuthGoogleCallback } from "./pages/AuthGoogleCallback";
+import { AuthError } from "./pages/AuthError";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +38,8 @@ const App = () => (
           <Route path="/buergervoting" element={<BuergervotingPage />} />
           <Route path="/parteien" element={<ParteienPage />} />
           <Route path="/transparenz" element={<TransparenzPage />} />
+          <Route path="/auth/google/callback" element={<AuthGoogleCallback />} />
+          <Route path="/auth/error" element={<AuthError />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

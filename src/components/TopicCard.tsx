@@ -60,7 +60,7 @@ const ViewpointPanel = ({
       {/* Sources */}
       <div className="flex flex-wrap gap-1.5 mb-4">
         {data.sources.map((s, i) => (
-          <SourceBadge key={i} type={s.type} label={s.label} url={s.url} />
+          <SourceBadge key={i} type={s.type} label={s.label} url={s.url} title={(s as any).title} />
         ))}
       </div>
 

@@ -7,151 +7,265 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// ─── LLM: Anthropic direkt (weg von Lovable, Simon 07-10) ────────────────────
+const MODEL_GEN = "claude-opus-5";
+const MODEL_VERIFY = "claude-opus-5";
+
+async function askClaude(opts: { apiKey: string; model: string; system: string; user: string; maxTokens: number }): Promise<string> {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "x-api-key": opts.apiKey,
+      "anthropic-version": "2023-06-01",
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      model: opts.model,
+      max_tokens: opts.maxTokens,
+      // Opus 5: Thinking default-AN zählt gegen max_tokens — hier aus (Paritäts-Migration)
+      thinking: { type: "disabled" },
+      system: opts.system,
+      messages: [{ role: "user", content: opts.user }],
+    }),
+  });
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Anthropic ${res.status}: ${errText.slice(0, 300)}`);
+  }
+  const data = await res.json();
+  return (data.content ?? [])
+    .filter((b: any) => b.type === "text")
+    .map((b: any) => b.text)
+    .join("");
+}
+
+// ─── ECHTE Nachrichten als Fundament ─────────────────────────────────────────
+// Der Kernumbau (2026-07-10): Das LLM erfindet keine Themen/Quellen mehr aus dem
+// Kopf. Stattdessen: RSS der großen Häuser fetchen → LLM clustert die ECHTEN
+// Schlagzeilen zu Debatten und zitiert AUSSCHLIESSLICH Artikel aus dem Katalog.
+// Jede Quelle auf der Seite ist damit klickbar und existierte vor dem Text.
+
+const FEEDS = [
+  { outlet: "tagesschau", lean: "öffentlich-rechtlich", url: "https://www.tagesschau.de/xml/rss2/" },
+  { outlet: "Deutschlandfunk", lean: "öffentlich-rechtlich", url: "https://www.deutschlandfunk.de/politikportal-100.rss" },
+  { outlet: "Spiegel", lean: "eher links-liberal", url: "https://www.spiegel.de/politik/index.rss" },
+  { outlet: "Zeit", lean: "eher links-liberal", url: "https://newsfeed.zeit.de/politik/index" },
+  { outlet: "Süddeutsche", lean: "eher links-liberal", url: "https://rss.sueddeutsche.de/rss/Politik" },
+  { outlet: "taz", lean: "links", url: "https://taz.de/Politik/!p4615;rss/" },
+  { outlet: "FAZ", lean: "konservativ-liberal", url: "https://www.faz.net/rss/aktuell/politik/" },
+  { outlet: "Welt", lean: "konservativ", url: "https://www.welt.de/feeds/section/politik.rss" },
+];
+
+const MAX_PER_FEED = 20;
+const MAX_AGE_HOURS = 72;
+
+type Article = {
+  id: number;
+  outlet: string;
+  lean: string;
+  title: string;
+  url: string;
+  teaser: string;
+  pubDate: string;
+};
+
+function decodeEntities(s: string): string {
+  return s
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#0?39;|&apos;/g, "'")
+    .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
+    .replace(/&nbsp;/g, " ");
+}
+
+function extractTag(block: string, tag: string): string {
+  const m = block.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`, "i"));
+  let v = m?.[1] ?? "";
+  v = v.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1");
+  v = v.replace(/<[^>]+>/g, " ");
+  return decodeEntities(v).replace(/\s+/g, " ").trim();
+}
+
+function parseRss(xml: string, outlet: string, lean: string): Omit<Article, "id">[] {
+  const out: Omit<Article, "id">[] = [];
+  const blocks = xml.split(/<item[\s>]/).slice(1);
+  for (const block of blocks.slice(0, MAX_PER_FEED)) {
+    const title = extractTag(block, "title");
+    const url = extractTag(block, "link");
+    const teaser = extractTag(block, "description").slice(0, 220);
+    const pubDate = extractTag(block, "pubDate");
+    if (!title || !url.startsWith("http")) continue;
+    // Nur frische Artikel (unparsbare Daten lassen wir durch)
+    const ts = Date.parse(pubDate);
+    if (!Number.isNaN(ts) && Date.now() - ts > MAX_AGE_HOURS * 3600_000) continue;
+    out.push({ outlet, lean, title, url, teaser, pubDate });
+  }
+  return out;
+}
+
+async function fetchCatalog(): Promise<Article[]> {
+  const results = await Promise.allSettled(
+    FEEDS.map(async (f) => {
+      const res = await fetch(f.url, {
+        headers: { "User-Agent": "Mozilla/5.0 (DasDenktDeutschland-Bot)" },
+        signal: AbortSignal.timeout(10_000),
+      });
+      if (!res.ok) throw new Error(`${f.outlet}: HTTP ${res.status}`);
+      return parseRss(await res.text(), f.outlet, f.lean);
+    })
+  );
+  const articles: Article[] = [];
+  const seenUrls = new Set<string>();
+  results.forEach((r, i) => {
+    if (r.status === "rejected") {
+      console.warn(`Feed ${FEEDS[i].outlet} failed:`, r.reason?.message ?? r.reason);
+      return;
+    }
+    for (const a of r.value) {
+      if (seenUrls.has(a.url)) continue;
+      seenUrls.add(a.url);
+      articles.push({ ...a, id: articles.length + 1 });
+    }
+  });
+  return articles;
+}
+
+function catalogText(articles: Article[]): string {
+  return articles
+    .map((a) => `[${a.id}] (${a.outlet} · ${a.lean}) ${a.title} :: ${a.teaser}`)
+    .join("\n");
+}
+
+// ─── Prompts ─────────────────────────────────────────────────────────────────
 const SYSTEM_PROMPT = `Du bist ein redaktioneller KI-Assistent für "Das Denkt Deutschland" — eine Plattform, die aktuelle politische Themen aus drei Perspektiven darstellt: Links, Rechts und Die Mitte.
 
-AUFGABE: Generiere genau 10 aktuelle deutsche politische Nachrichtenthemen mit folgender Struktur für jedes Thema.
+Du bekommst einen KATALOG ECHTER, HEUTE GEFETCHTER Nachrichtenartikel (nummeriert). Deine gesamte Arbeit gründet AUSSCHLIESSLICH auf diesem Katalog.
 
-REGELN:
-- Jedes Thema muss ein aktuelles, relevantes Thema der deutschen Politik/Gesellschaft sein
+AUFGABE: Identifiziere die wichtigsten politischen Debatten des Tages (maximal 10) und stelle jede aus drei Perspektiven dar.
+
+HARTE REGELN:
+- Jedes Thema muss durch MINDESTENS ZWEI Katalog-Artikel belegt sein. Kein Thema ohne Beleg.
+- Jedes Thema behandelt GENAU EIN konkretes Ereignis / EINE konkrete Debatte. Keine Vermischung.
+- left_source_ids / right_source_ids: 1-3 Katalog-Nummern pro Seite, die diese Perspektive belegen oder das Ereignis berichten. NUR Nummern aus dem Katalog. Beide Seiten brauchen mindestens 1.
 - Links = progressive, egalitäre, ökologische, kollektivistische Position
 - Rechts = konservative, nationale, marktwirtschaftliche, traditionsbewahrende Position
-- Mitte = informiert, historisch bewusst, realistisch, weder zynisch noch naiv
-- tag_type: "gleich" wenn beide Seiten ähnlich denken, "gegensaetzlich" bei starkem Gegensatz, "teilweise" bei Teilüberschneidungen
-- category: immer "politik"
-- Alle 10 Themen müssen category "politik" haben — KEIN Boulevard
-- Zitate müssen realistisch klingen und einer benannten Person/Organisation zugeordnet sein
-- hidden_meaning und negative_effects sollen ehrlich und kritisch beide Seiten beleuchten
-- Die Mitte-Perspektive soll 3-5 Sätze lang sein, historisch verankert und ausgewogen
+- Mitte = informiert, historisch bewusst, realistisch, weder zynisch noch naiv (3-5 Sätze)
+- tag_type: "gleich" | "gegensaetzlich" | "teilweise"
+- category: immer "politik", KEIN Boulevard
 
-THEMEN-INTEGRITÄT — EXTREM WICHTIG:
-- Jedes Thema muss GENAU EIN konkretes Ereignis oder EINE konkrete Debatte behandeln
-- NIEMALS verschiedene Nachrichten, Personen oder Debatten in einem Thema vermischen
-- Wenn eine Person zitiert wird, muss das Zitat nachweislich von dieser Person stammen — KEINE erfundenen oder zugeschriebenen Zitate
-- Zitate die nicht eindeutig einer konkreten Person zugeordnet werden können, MÜSSEN als "Konservative Kommentatoren" o.ä. gekennzeichnet werden, NIEMALS einer konkreten Person in den Mund gelegt werden
-- Verwechsle NICHT Personen die ein Thema kommentieren mit Personen die vom Thema betroffen sind
-
-QUELLEN — EXTREM WICHTIG:
-- Gib für jede Quelle eine ECHTE, funktionierende URL an (z.B. "https://www.spiegel.de/politik/...", "https://www.tagesschau.de/...")
-- Nutze nur URLs von echten, existierenden Nachrichtenartikeln oder Studien
-- Wenn du dir bei einer URL nicht 100% sicher bist, setze "url" auf "" — eine fehlende URL ist besser als eine falsche
-- Quellen müssen echte, existierende Organisationen, Medien oder Studien sein
-- Erfinde KEINE Quellen oder URLs. Lieber weniger Quellen mit echten Links als viele ohne.
-- Es darf NICHTS Erfundenes oder Falsches generiert werden.
+ZITAT-REGELN (EXTREM WICHTIG):
+- Ein WÖRTLICHES Zitat ist NUR erlaubt, wenn der Wortlaut 1:1 in Titel oder Teaser eines zitierten Katalog-Artikels steht.
+- Sonst: formuliere die Kernposition des Lagers und setze als Sprecher eine GRUPPE ("Unionspolitiker", "Gewerkschaften", "Klimaaktivisten") — NIEMALS eine konkrete Person, der der Wortlaut nicht nachweislich gehört.
+- Es darf NICHTS Erfundenes generiert werden. Was nicht im Katalog steht, behauptest du nicht.
 
 Antworte NUR mit dem JSON-Array, keine weiteren Erklärungen.`;
 
-const USER_PROMPT = `Generiere 10 aktuelle deutsche politische Nachrichtenthemen für heute. Beziehe dich auf reale aktuelle Ereignisse und Debatten in Deutschland. NUR Politik, KEIN Boulevard.
+function buildUserPrompt(catalog: string, deduplicationNote: string): string {
+  return `Hier der Katalog echter Artikel von heute:
 
-Jedes Thema als JSON-Objekt mit dieser Struktur:
+${catalog}
+
+Identifiziere daraus die wichtigsten politischen Debatten (maximal 10) und liefere jedes Thema als JSON-Objekt:
 {
   "topic": "Thementitel",
   "tag_type": "gleich" | "gegensaetzlich" | "teilweise",
   "category": "politik",
   "left_position": "Position Links",
-  "left_quote": "Zitat",
-  "left_speaker": "Sprecher/Organisation",
+  "left_quote": "Kernaussage (wörtlich NUR wenn 1:1 im Katalog)",
+  "left_speaker": "Gruppe/Lager (konkrete Person NUR bei wörtlichem Katalog-Zitat)",
   "left_hidden_meaning": "Versteckte Bedeutung",
   "left_negative_effects": "Mögliche negative Auswirkungen",
-  "left_sources": [{"type": "article"|"document"|"video"|"quote", "label": "Quellenname (z.B. Spiegel Online)", "url": "https://echte-url-zum-artikel.de/..."}],
+  "left_source_ids": [Katalog-Nummern, 1-3],
   "right_position": "Position Rechts",
-  "right_quote": "Zitat",
-  "right_speaker": "Sprecher/Organisation",
+  "right_quote": "Kernaussage (wörtlich NUR wenn 1:1 im Katalog)",
+  "right_speaker": "Gruppe/Lager (konkrete Person NUR bei wörtlichem Katalog-Zitat)",
   "right_hidden_meaning": "Versteckte Bedeutung",
   "right_negative_effects": "Mögliche negative Auswirkungen",
-  "right_sources": [{"type": "article"|"document"|"video"|"quote", "label": "Quellenname", "url": "https://echte-url-zum-artikel.de/..."}],
+  "right_source_ids": [Katalog-Nummern, 1-3],
   "mitte_view": "Die Mitte-Perspektive (3-5 Sätze)"
 }
-
-WICHTIG:
-- Alle 10 Themen mit category "politik" — KEIN Boulevard
-- Gib echte URLs zu Nachrichtenartikeln an. Wenn du dir unsicher bist, lass "url" leer ("").
-- Es darf NICHTS Erfundenes auf der Seite landen.
-- Jedes Thema = EIN Ereignis. Keine Vermischung verschiedener Nachrichten oder Personen.
-
-Antworte NUR mit einem JSON-Array von 10 Objekten.`;
+${deduplicationNote}
+Antworte NUR mit einem JSON-Array.`;
+}
 
 // ─── 10 verification perspectives (batched: all topics in one call per perspective) ──
 const VERIFICATION_PERSPECTIVES = [
-  { name: "Politischer Faktenprüfer", focus: "Titel korrekt? Beschreibt genau EIN Ereignis? Passen Links/Rechts/Mitte zum Titel? Werden verschiedene Ereignisse vermischt?" },
-  { name: "Personen-Zuordnungsprüfer", focus: "Zitate richtig zugeordnet? Kommentator vs. Betroffener verwechselt? Aussagen fälschlicherweise konkreten Personen zugeschrieben?" },
+  { name: "Politischer Faktenprüfer", focus: "Titel korrekt? Beschreibt genau EIN Ereignis? Passen Links/Rechts/Mitte zum Titel? Wird das Thema von den zitierten Artikeln gedeckt?" },
+  { name: "Quellen-Deckungsprüfer", focus: "Belegen die zitierten Artikel (Titel/Teaser mitgeliefert) tatsächlich das Thema und die jeweilige Perspektive? Wird etwas behauptet, das KEIN zitierter Artikel hergibt?" },
+  { name: "Personen-Zuordnungsprüfer", focus: "Wörtliche Zitate nur mit Katalog-Beleg? Sprecher korrekt als Gruppe benannt, wenn kein Beleg? Keine konkrete Person ohne nachweisbaren Wortlaut?" },
   { name: "Gesellschaftlicher Kohärenzprüfer", focus: "Echte gesellschaftliche Debatte? Links/Rechts/Mitte logisch zum selben Thema? Fair und nicht irreführend?" },
-  { name: "Wirtschaftlicher Plausibilitätsprüfer", focus: "Wirtschaftliche Argumente plausibel? Fakten korrekt? Links/Rechts wirtschaftlich korrekt eingeordnet?" },
-  { name: "Gesundheitspolitischer Prüfer", focus: "Gesundheitliche Aussagen korrekt? Keine irreführenden medizinischen Behauptungen?" },
+  { name: "Wirtschaftlicher Plausibilitätsprüfer", focus: "Wirtschaftliche Argumente plausibel und von den Artikeln gedeckt? Links/Rechts wirtschaftlich korrekt eingeordnet?" },
   { name: "Historischer Kontextprüfer", focus: "Historische Referenzen korrekt? Mitte-Standpunkt historisch fundiert? Keine falschen Parallelen?" },
-  { name: "Sprachlicher Präzisionsprüfer", focus: "Begriffe korrekt und präzise? Nicht aufgebauscht? Zitate realistisch? Ton sachlich und fair?" },
-  { name: "Quellen-Plausibilitätsprüfer", focus: "Quellen echte existierende Medien/Organisationen? Passen zum Thema? Keine erfundenen Studien?" },
+  { name: "Sprachlicher Präzisionsprüfer", focus: "Begriffe korrekt und präzise? Nicht aufgebauscht? Ton sachlich und fair?" },
   { name: "Bias-Detektor", focus: "Linke Position fair (nicht karikiert)? Rechte Position fair? Mitte wirklich ausgewogen? Strohmann-Argumente?" },
-  { name: "Abschluss-Integritätsprüfer", focus: "Titel/Links/Rechts/Mitte ZWEIFELSFREI zum selben Thema? Irgendein Widerspruch? Publizierbar ohne Fehlinformationsrisiko?" },
+  { name: "Aktualitätsprüfer", focus: "Ist das Thema wirklich die aktuelle Debatte aus den zitierten Artikeln — oder ein generisches Dauerthema, das nur angeklebt wurde?" },
+  { name: "Abschluss-Integritätsprüfer", focus: "Titel/Links/Rechts/Mitte ZWEIFELSFREI zum selben Thema? Quellen beider Seiten vorhanden? Publizierbar ohne Fehlinformationsrisiko?" },
 ];
 
-function formatTopicForReview(topic: any, idx: number): string {
+function formatTopicForReview(topic: any, idx: number, articleById: Map<number, Article>): string {
+  const cite = (ids: number[] | undefined) =>
+    (ids || [])
+      .map((id) => {
+        const a = articleById.get(id);
+        return a ? `    [${id}] (${a.outlet}) ${a.title} :: ${a.teaser.slice(0, 120)}` : `    [${id}] UNBEKANNT`;
+      })
+      .join("\n");
   return `--- THEMA ${idx + 1} ---
 TITEL: ${topic.topic}
 LINKS: ${topic.left_position}
-  Zitat: „${topic.left_quote}" — ${topic.left_speaker}
+  Aussage: „${topic.left_quote}" — ${topic.left_speaker}
+  Quellen:
+${cite(topic.left_source_ids)}
 RECHTS: ${topic.right_position}
-  Zitat: „${topic.right_quote}" — ${topic.right_speaker}
+  Aussage: „${topic.right_quote}" — ${topic.right_speaker}
+  Quellen:
+${cite(topic.right_source_ids)}
 MITTE: ${topic.mitte_view}`;
 }
 
-// One AI call per perspective, checking ALL topics at once
+// One AI call per perspective, checking ALL topics at once.
+// Fail-closed: bricht ein Prüfer ab, enthält er sich; brechen ≥3 ab, wird der ganze Lauf abgebrochen.
 async function runBatchVerification(
   topics: any[],
+  articleById: Map<number, Article>,
   apiKey: string,
-): Promise<Map<number, { rejectedBy: string[]; reasons: string[] }>> {
+): Promise<{ rejections: Map<number, { rejectedBy: string[]; reasons: string[] }>; failedPerspectives: string[] }> {
   const rejections = new Map<number, { rejectedBy: string[]; reasons: string[] }>();
   for (let i = 0; i < topics.length; i++) {
     rejections.set(i, { rejectedBy: [], reasons: [] });
   }
 
-  const allTopicsText = topics.map((t, i) => formatTopicForReview(t, i)).join("\n\n");
+  const allTopicsText = topics.map((t, i) => formatTopicForReview(t, i, articleById)).join("\n\n");
+  const failedPerspectives: string[] = [];
 
-  // Run all 10 perspectives in parallel (10 calls total, not 100)
   const results = await Promise.all(
     VERIFICATION_PERSPECTIVES.map(async (perspective) => {
       try {
-        const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "google/gemini-2.5-flash-lite",
-            messages: [
-              {
-                role: "system",
-                content: `Du bist "${perspective.name}". Dein Fokus: ${perspective.focus}\n\nAntworte NUR mit einem JSON-Array. Für jedes Thema ein Objekt: {"thema_nr": 1, "approved": true/false, "reason": "..."}`,
-              },
-              {
-                role: "user",
-                content: `Prüfe ALLE folgenden Themen aus deiner Perspektive.\n\n${allTopicsText}\n\nAntworte NUR mit einem JSON-Array von ${topics.length} Objekten.`,
-              },
-            ],
-          }),
+        let raw = await askClaude({
+          apiKey,
+          model: MODEL_VERIFY,
+          maxTokens: 4000,
+          system: `Du bist "${perspective.name}". Dein Fokus: ${perspective.focus}\n\nDie Themen wurden aus ECHTEN Artikeln generiert; die zitierten Artikel (Titel+Teaser) stehen bei jedem Thema. Prüfe gegen diese Belege, nicht gegen Vermutungen.\n\nAntworte NUR mit einem JSON-Array. Für jedes Thema ein Objekt: {"thema_nr": 1, "approved": true/false, "reason": "..."}`,
+          user: `Prüfe ALLE folgenden Themen aus deiner Perspektive.\n\n${allTopicsText}\n\nAntworte NUR mit einem JSON-Array von ${topics.length} Objekten.`,
         });
-
-        if (!res.ok) {
-          const errText = await res.text();
-          console.error(`${perspective.name} API error: ${res.status}`, errText);
-          return { name: perspective.name, results: topics.map((_, i) => ({ thema_nr: i + 1, approved: false, reason: `API error ${res.status}` })) };
-        }
-
-        const data = await res.json();
-        let raw = data.choices?.[0]?.message?.content || "";
         raw = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-        const parsed = JSON.parse(raw);
-        return { name: perspective.name, results: Array.isArray(parsed) ? parsed : [] };
+        const arrMatch = raw.match(/\[[\s\S]*\]/);
+        const parsed = JSON.parse(arrMatch ? arrMatch[0] : raw);
+        return { name: perspective.name, failed: false, results: Array.isArray(parsed) ? parsed : [] };
       } catch (e) {
         console.error(`${perspective.name} failed:`, e);
-        // On error, APPROVE all topics (don't let one broken verifier reject everything)
-        return { name: perspective.name, results: topics.map((_, i) => ({ thema_nr: i + 1, approved: true, reason: "" })) };
+        return { name: perspective.name, failed: true, results: [] as any[] };
       }
     })
   );
 
-  // Aggregate rejections
-  for (const { name, results: perspectiveResults } of results) {
+  for (const { name, failed, results: perspectiveResults } of results) {
+    if (failed) {
+      failedPerspectives.push(name);
+      continue;
+    }
     for (const r of perspectiveResults) {
       const idx = (r.thema_nr || 1) - 1;
       if (idx >= 0 && idx < topics.length && r.approved === false) {
@@ -162,60 +276,92 @@ async function runBatchVerification(
     }
   }
 
-  return rejections;
+  return { rejections, failedPerspectives };
 }
 
-// ─── URL validation ─────────────────────────────────────────────────────────
-async function sanitizeSources(sources: any[]): Promise<any[]> {
-  if (!Array.isArray(sources)) return [];
-  return Promise.all(
-    sources.map(async (s: any) => {
-      const url = s.url?.trim() || "";
-      let reachable = false;
-      if (url) {
-        try {
-          const res = await fetch(url, { method: "HEAD", redirect: "follow", signal: AbortSignal.timeout(5000) });
-          reachable = res.ok;
-        } catch { /* unreachable */ }
-      }
-      return { type: s.type || "article", label: s.label || "", url: reachable ? url : "" };
-    })
-  );
+// ─── Quellen aus Katalog-IDs bauen (URLs sind konstruktionsbedingt echt) ─────
+function sourcesFromIds(ids: unknown, articleById: Map<number, Article>): any[] {
+  if (!Array.isArray(ids)) return [];
+  const seen = new Set<string>();
+  const out: any[] = [];
+  for (const rawId of ids.slice(0, 4)) {
+    const a = articleById.get(Number(rawId));
+    if (!a || seen.has(a.url)) continue;
+    seen.add(a.url);
+    out.push({ type: "article", label: a.outlet, url: a.url, title: a.title });
+  }
+  return out;
 }
 
-// ─── Main handler ───────────────────────────────────────────────────────────
+// ─── Main handler: antwortet sofort, Pipeline läuft im Hintergrund ──────────
+// Sonnet braucht für 10 gründliche Themen länger als das ~150s-Response-Limit
+// des Function-Gateways → EdgeRuntime.waitUntil; Ergebnis in topics/generation_logs.
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
+    if (!ANTHROPIC_API_KEY) throw new Error("ANTHROPIC_API_KEY is not configured");
 
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) throw new Error("Supabase credentials not configured");
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    const force = new URL(req.url).searchParams.get("force") === "1";
 
     // ── Guard: Skip if topics were already generated today ──
     const today = new Date().toISOString().split("T")[0];
-    const { count: todayCount } = await supabase
-      .from("topics")
-      .select("id", { count: "exact", head: true })
-      .eq("published_at", today);
+    if (!force) {
+      const { count: todayCount } = await supabase
+        .from("topics")
+        .select("id", { count: "exact", head: true })
+        .eq("published_at", today);
 
-    if ((todayCount ?? 0) >= 5) {
-      console.log(`Already ${todayCount} topics for ${today}, skipping generation.`);
-      return new Response(
-        JSON.stringify({ success: true, skipped: true, message: `Already ${todayCount} topics for today` }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      if ((todayCount ?? 0) >= 5) {
+        console.log(`Already ${todayCount} topics for ${today}, skipping generation.`);
+        return new Response(
+          JSON.stringify({ success: true, skipped: true, message: `Already ${todayCount} topics for today` }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
     }
 
-    // ── Step 0: Load existing topic titles for deduplication ──
-    console.log("Step 0: Loading existing topics for deduplication...");
+    const job = runPipeline(supabase, ANTHROPIC_API_KEY, today).catch(async (error) => {
+      console.error("Pipeline error:", error);
+      const msg = error instanceof Error ? error.message : "Unknown error";
+      try {
+        await supabase.from("generation_logs").insert({ success: false, error_message: msg });
+      } catch (_e) { /* Logging darf den Fehler nicht verschlucken lassen */ }
+    });
+    // @ts-ignore — EdgeRuntime existiert in Supabase Edge Functions
+    EdgeRuntime.waitUntil(job);
+
+    return new Response(
+      JSON.stringify({ success: true, started: true, message: "Generierung läuft im Hintergrund — Ergebnis in topics/generation_logs." }),
+      { status: 202, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  } catch (error) {
+    console.error("Error starting generation:", error);
+    const msg = error instanceof Error ? error.message : "Unknown error";
+    return new Response(JSON.stringify({ success: false, error: msg }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  }
+});
+
+async function runPipeline(supabase: any, ANTHROPIC_API_KEY: string, today: string): Promise<void> {
+    // ── Step 0a: ECHTE Artikel holen ──
+    console.log("Step 0a: Fetching real articles from RSS...");
+    const articles = await fetchCatalog();
+    console.log(`Fetched ${articles.length} real articles from ${FEEDS.length} feeds.`);
+    if (articles.length < 20) {
+      throw new Error(`Only ${articles.length} articles fetched — refusing to generate without solid grounding.`);
+    }
+    const articleById = new Map(articles.map((a) => [a.id, a]));
+
+    // ── Step 0b: Load existing topic titles for deduplication ──
+    console.log("Step 0b: Loading existing topics for deduplication...");
     const { data: existingTopics } = await supabase
       .from("topics")
       .select("topic")
@@ -224,35 +370,22 @@ serve(async (req) => {
 
     const existingTitles = (existingTopics || []).map((t: any) => t.topic);
     const deduplicationNote = existingTitles.length > 0
-      ? `\n\nBEREITS BEHANDELTE THEMEN (NICHT ERNEUT GENERIEREN!):\n${existingTitles.map((t: string, i: number) => `${i + 1}. ${t}`).join("\n")}\n\nGeneriere NUR neue Themen, die KEINES der oben genannten Themen wiederholen oder nur leicht umformulieren. Ein Thema gilt als Duplikat wenn es dasselbe Kernthema behandelt, auch wenn der Titel anders formuliert ist.`
+      ? `\nBEREITS BEHANDELTE THEMEN (NICHT ERNEUT GENERIEREN!):\n${existingTitles.map((t: string, i: number) => `${i + 1}. ${t}`).join("\n")}\n\nGeneriere NUR neue Themen, die KEINES der oben genannten Themen wiederholen oder nur leicht umformulieren.\n`
       : "";
 
-    // ── Step 1: Generate topics ──
-    console.log(`Step 1/3: Generating topics via AI... (${existingTitles.length} existing topics to avoid)`);
+    // ── Step 1: Generate topics from the real catalog ──
+    console.log(`Step 1/3: Generating topics grounded in ${articles.length} articles...`);
 
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: USER_PROMPT + deduplicationNote },
-        ],
-      }),
+    let content = await askClaude({
+      apiKey: ANTHROPIC_API_KEY,
+      model: MODEL_GEN,
+      maxTokens: 16000,
+      system: SYSTEM_PROMPT,
+      user: buildUserPrompt(catalogText(articles), deduplicationNote),
     });
-
-    if (!aiResponse.ok) {
-      const errorText = await aiResponse.text();
-      console.error("AI gateway error:", aiResponse.status, errorText);
-      if (aiResponse.status === 429) return new Response(JSON.stringify({ error: "Rate limited" }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      if (aiResponse.status === 402) return new Response(JSON.stringify({ error: "Credits exhausted" }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      throw new Error(`AI gateway error: ${aiResponse.status}`);
-    }
-
-    const aiData = await aiResponse.json();
-    let content = aiData.choices?.[0]?.message?.content || "";
     content = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+    const arrStart = content.indexOf("[");
+    if (arrStart > 0) content = content.slice(arrStart);
 
     // Robust JSON parsing with truncation recovery
     let topicsArray: any[];
@@ -260,11 +393,9 @@ serve(async (req) => {
       topicsArray = JSON.parse(content);
     } catch (parseErr) {
       console.warn("JSON parse failed, attempting repair...");
-      // Try to fix truncated JSON: find the last complete object "}" before the error
       const lastCompleteObj = content.lastIndexOf("}");
       if (lastCompleteObj > 0) {
         let trimmed = content.substring(0, lastCompleteObj + 1);
-        // Ensure array closure
         if (!trimmed.trimEnd().endsWith("]")) trimmed += "]";
         try {
           topicsArray = JSON.parse(trimmed);
@@ -278,7 +409,29 @@ serve(async (req) => {
     }
     if (!Array.isArray(topicsArray) || topicsArray.length === 0) throw new Error("AI returned invalid topics format");
 
-    // ── Deduplication safety net: remove topics too similar to existing ones ──
+    // ── Grounding-Gate: Pflichtfelder + gültige Quellen beider Seiten, sonst raus ──
+    const REQUIRED_FIELDS = ["topic", "left_position", "left_quote", "left_speaker", "right_position", "right_quote", "right_speaker", "mitte_view"];
+    const beforeGrounding = topicsArray.length;
+    topicsArray = topicsArray.filter((t: any) => {
+      const missing = REQUIRED_FIELDS.filter((f) => typeof t[f] !== "string" || !t[f].trim());
+      if (missing.length > 0) {
+        console.warn(`  ⛔ Missing fields for "${t.topic ?? "?"}": ${missing.join(", ")}`);
+        return false;
+      }
+      if (!["gleich", "gegensaetzlich", "teilweise"].includes(t.tag_type)) t.tag_type = "teilweise";
+      const left = sourcesFromIds(t.left_source_ids, articleById);
+      const right = sourcesFromIds(t.right_source_ids, articleById);
+      if (left.length === 0 || right.length === 0) {
+        console.warn(`  ⛔ Grounding failed for "${t.topic}" (left: ${left.length}, right: ${right.length})`);
+        return false;
+      }
+      t._left_sources = left;
+      t._right_sources = right;
+      return true;
+    });
+    console.log(`Grounding gate: ${beforeGrounding} → ${topicsArray.length} topics`);
+
+    // ── Deduplication safety net ──
     if (existingTitles.length > 0) {
       const normalise = (s: string) => s.toLowerCase().replace(/[^a-zäöüß0-9]/g, " ").replace(/\s+/g, " ").trim();
       const existingNorm = existingTitles.map(normalise);
@@ -287,7 +440,6 @@ serve(async (req) => {
       topicsArray = topicsArray.filter((t: any) => {
         const norm = normalise(t.topic);
         const isDupe = existingNorm.some((ex: string) => {
-          // Check if titles share 80%+ of significant words (loosened from 60%)
           const newWords = norm.split(" ").filter((w: string) => w.length > 3);
           const exWords = ex.split(" ").filter((w: string) => w.length > 3);
           if (newWords.length === 0 || exWords.length === 0) return false;
@@ -303,19 +455,23 @@ serve(async (req) => {
     if (topicsArray.length === 0) {
       await supabase.from("generation_logs").insert({
         success: false,
-        error_message: "All generated topics were duplicates of existing ones.",
+        error_message: "No topics survived grounding gate + deduplication.",
       });
-      return new Response(
-        JSON.stringify({ success: false, error: "All generated topics were duplicates of existing ones." }),
-        { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return;
     }
 
-    console.log(`${topicsArray.length} unique topics. Starting 10-pass batch verification...`);
-
-    // ── Step 2: Batched 10-pass verification (10 AI calls total) ──
+    // ── Step 2: Batched 10-pass verification ──
     console.log("Step 2/3: Running 10-pass batch verification...");
-    const rejections = await runBatchVerification(topicsArray, LOVABLE_API_KEY);
+    const { rejections, failedPerspectives } = await runBatchVerification(topicsArray, articleById, ANTHROPIC_API_KEY);
+
+    // Fail-closed: zu viele kaputte Prüfer = kein Publish
+    if (failedPerspectives.length >= 3) {
+      await supabase.from("generation_logs").insert({
+        success: false,
+        error_message: `Verification unavailable: ${failedPerspectives.length}/10 perspectives failed (${failedPerspectives.join(", ")}).`,
+      });
+      return;
+    }
 
     const approved: any[] = [];
     const rejected: { topic: string; rejectedBy: string[]; reasons: string[] }[] = [];
@@ -323,7 +479,7 @@ serve(async (req) => {
     topicsArray.forEach((topic: any, idx: number) => {
       const entry = rejections.get(idx)!;
       if (entry.rejectedBy.length === 0) {
-        console.log(`  ✅ Topic ${idx + 1} "${topic.topic}" — ALL 10 checks passed`);
+        console.log(`  ✅ Topic ${idx + 1} "${topic.topic}" — all checks passed`);
         approved.push(topic);
       } else {
         console.warn(`  ❌ Topic ${idx + 1} "${topic.topic}" — REJECTED by: ${entry.rejectedBy.join(", ")}`);
@@ -340,73 +496,41 @@ serve(async (req) => {
         rejected_count: rejected.length,
         details: { rejectionDetails: rejected },
       });
-      return new Response(
-        JSON.stringify({ success: false, error: "All topics failed verification.", details: rejected }),
-        { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return;
     }
 
     // ── Step 3: Save approved topics ──
     console.log("Step 3/3: Saving approved topics...");
 
-    const rows = await Promise.all(
-      approved.map(async (t: any) => ({
-        topic: t.topic,
-        tag_type: t.tag_type,
-        category: t.category || "politik",
-        left_position: t.left_position,
-        left_quote: t.left_quote,
-        left_speaker: t.left_speaker,
-        left_hidden_meaning: t.left_hidden_meaning || null,
-        left_negative_effects: t.left_negative_effects || null,
-        left_sources: await sanitizeSources(t.left_sources),
-        right_position: t.right_position,
-        right_quote: t.right_quote,
-        right_speaker: t.right_speaker,
-        right_hidden_meaning: t.right_hidden_meaning || null,
-        right_negative_effects: t.right_negative_effects || null,
-        right_sources: await sanitizeSources(t.right_sources),
-        mitte_view: t.mitte_view,
-        published_at: today,
-      }))
-    );
+    const rows = approved.map((t: any) => ({
+      topic: t.topic,
+      tag_type: t.tag_type,
+      category: t.category || "politik",
+      left_position: t.left_position,
+      left_quote: t.left_quote,
+      left_speaker: t.left_speaker,
+      left_hidden_meaning: t.left_hidden_meaning || null,
+      left_negative_effects: t.left_negative_effects || null,
+      left_sources: t._left_sources,
+      right_position: t.right_position,
+      right_quote: t.right_quote,
+      right_speaker: t.right_speaker,
+      right_hidden_meaning: t.right_hidden_meaning || null,
+      right_negative_effects: t.right_negative_effects || null,
+      right_sources: t._right_sources,
+      mitte_view: t.mitte_view,
+      published_at: today,
+    }));
 
     const { data, error } = await supabase.from("topics").insert(rows).select();
     if (error) throw new Error(`Failed to save topics: ${error.message}`);
 
-    console.log(`Successfully saved ${data.length} verified topics`);
+    console.log(`Successfully saved ${data.length} grounded topics`);
 
-    // Log success
     await supabase.from("generation_logs").insert({
       success: true,
       topics_count: data.length,
       rejected_count: rejected.length,
-      details: { rejectionDetails: rejected },
+      details: { rejectionDetails: rejected, articleCount: articles.length, failedPerspectives },
     });
-
-    return new Response(
-      JSON.stringify({ success: true, count: data.length, rejected: rejected.length, rejectionDetails: rejected, topics: data }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
-  } catch (error) {
-    console.error("Error generating topics:", error);
-    const msg = error instanceof Error ? error.message : "Unknown error";
-
-    // Log failure
-    try {
-      const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-      const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-      if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
-        const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-        await sb.from("generation_logs").insert({
-          success: false,
-          error_message: msg,
-        });
-      }
-    } catch (logErr) {
-      console.error("Failed to log generation error:", logErr);
-    }
-
-    return new Response(JSON.stringify({ success: false, error: msg }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-  }
-});
+}
