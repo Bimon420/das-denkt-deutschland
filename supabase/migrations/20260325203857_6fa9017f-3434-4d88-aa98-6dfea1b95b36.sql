@@ -1,0 +1,1 @@
+ALTER TABLE public.topics ADD COLUMN category text NOT NULL DEFAULT 'politik';

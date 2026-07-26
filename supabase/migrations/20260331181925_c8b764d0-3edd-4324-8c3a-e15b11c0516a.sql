@@ -1,0 +1,1 @@
+DELETE FROM topics WHERE id = '4dbbbfa4-9be4-4750-966a-d977ce062f61';

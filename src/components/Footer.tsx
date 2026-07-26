@@ -1,0 +1,53 @@
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import ViewCounter from "./ViewCounter";
+
+const Footer = () => {
+  return (
+    <footer className="py-16 px-6 border-t border-border bg-card/30 dark:bg-card/50">
+      <motion.div
+        className="max-w-3xl mx-auto text-center"
+        initial={{ opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <h2 className="font-editorial text-2xl md:text-3xl font-bold mb-4">
+          Die lauteste Stimme hat nicht immer recht.
+        </h2>
+        <p className="text-muted-foreground text-sm mb-8 max-w-lg mx-auto">
+          DAS DENKT DEUTSCHLAND ist ein unabhängiges Projekt für politische Transparenz. 
+          Keine Partei, keine Lobby, keine versteckte Agenda.
+        </p>
+        <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+          <div className="w-2 h-2 rounded-full bg-left" />
+          <span>—</span>
+          <div className="w-2 h-2 rounded-full bg-mitte" />
+          <span>—</span>
+          <div className="w-2 h-2 rounded-full bg-right-red" />
+        </div>
+        <p className="mt-4 text-xs text-muted-foreground/60">
+          © 2026 DAS DENKT DEUTSCHLAND. Alle Quellen öffentlich zugänglich.
+        </p>
+        <div className="mt-2 flex items-center justify-center gap-3">
+          <Link to="/impressum" className="text-xs text-muted-foreground/40 hover:text-muted-foreground transition-colors">
+            Impressum
+          </Link>
+          <span className="text-xs text-muted-foreground/20">|</span>
+          <Link to="/datenschutz" className="text-xs text-muted-foreground/40 hover:text-muted-foreground transition-colors">
+            Datenschutz
+          </Link>
+          <span className="text-xs text-muted-foreground/20">|</span>
+          <Link to="/transparenz" className="text-xs text-muted-foreground/40 hover:text-muted-foreground transition-colors font-mono">
+            Rohdaten
+          </Link>
+        </div>
+        <div className="mt-4">
+          <ViewCounter page="intro" />
+        </div>
+      </motion.div>
+    </footer>
+  );
+};
+
+export default Footer;
