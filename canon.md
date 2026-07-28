@@ -570,7 +570,22 @@ supabase functions deploy auth-google-callback
 - ✅ Created canon_snapshots table for version control
 - ✅ Set up Google Drive backup integration (UI-based linking)
 - ✅ Wrote complete documentation (5 guides)
-- ✅ Removed lovable-tagger dependency
+- ⚠️ „Removed lovable-tagger dependency" — **war falsch, siehe 2026-07-28**
+
+### 2026-07-28 (Lovable raus — diesmal wirklich)
+Beim Aufräumen fiel auf, dass der Haken vom 06-04 nie eingelöst war: `lovable-tagger` stand
+weiter in `package.json` und wurde in `vite.config.ts` importiert. Jetzt entfernt:
+- `lovable-tagger` aus `package.json` + `vite.config.ts` (lief nur im Entwicklungsmodus —
+  der Produktions-Build ist danach **bit-identisch**, geprüft am Bundle-Hash `index-CPqH9q3N.js`)
+- `playwright.config.ts` + `playwright-fixture.ts` gelöscht: importierten
+  `lovable-agent-playwright-config`, das **gar nicht installiert war**, und es gab keinen einzigen
+  Test. Reines Lovable-Gerüst.
+- `@playwright/test` mit entfernt — der einzige Abnehmer war die gelöschte Lovable-Konfiguration.
+- `bun.lock` + `bun.lockb` gelöscht: Vercel baut nachweislich mit **npm** (Build-Log: „changed 30
+  packages", `npm run build`). Zwei tote Lockfiles daneben sind eine Falle, keine Reserve.
+
+**Lehre für Haken in dieser Datei:** „Removed X" gehört erst gesetzt, wenn `grep -rn X` im Repo
+leer ist. Der alte Haken hat sieben Wochen lang die Suche verhindert.
 
 ### 2026-06-04 (Initial Setup)
 - ✅ Created canon.md as project single source of truth

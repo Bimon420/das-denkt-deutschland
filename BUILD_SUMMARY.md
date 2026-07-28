@@ -163,7 +163,7 @@ canon-2026-06-04-a1b2c3d4.md
 - [x] Admin panel component
 - [x] API client for HTTP calls
 - [x] Complete documentation
-- [x] Removed lovable-tagger dependency
+- [x] Removed lovable-tagger dependency — ⚠️ dieser Haken war bis 2026-07-28 **falsch gesetzt**
 - [x] Created canon.md
 
 ### 🚧 Still Needed (Your Team)
@@ -309,7 +309,7 @@ Documentation/
 
 | Item | Before | After |
 |------|--------|-------|
-| Lovable | `lovable-tagger` dependency | ❌ Removed |
+| Lovable | `lovable-tagger`, Playwright-Gerüst, bun-Lockfiles | ❌ Entfernt am 2026-07-28 (vorher nur behauptet) |
 | Canon | No documentation | `canon.md` + auto-generation |
 | APIs | None | 6 core services |
 | Google Drive | Not integrated | UI-based linking |
