@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { ladeAlleZeilen } from "@/lib/alleZeilen";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Loader2, Vote, TrendingUp, TrendingDown, Minus, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -47,12 +48,25 @@ const BuergervotingPage = () => {
   const { data: topics = [], isLoading } = useQuery({
     queryKey: ["buergervoting-topics"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("topics")
-        .select("id, topic, tag_type, category, published_at")
-        .order("published_at", { ascending: false });
-      if (error) throw error;
-      const filtered = (data as VoteTopic[]).filter(t => t.category === "politik");
+      // Vorher: ALLE Themen holen und im Browser auf category === "politik" filtern.
+      // Zwei Fehler in einem: PostgREST deckelt still bei 1000 Zeilen, und von den
+      // geholten Zeilen wurde der grosse Teil sofort weggeworfen. Wenn mehr als 1000
+      // Themen existieren, entscheidet dann der Zufall des Deckels darueber, wie viele
+      // politische Themen uebrig bleiben — die Seite waere still leerer geworden.
+      // Richtig ist, die Frage der Datenbank zu stellen: sie kennt die Kategorie.
+      // (Fehlerklasse: buch 04.08. an celebrity-stonks.)
+      const { zeilen, vollstaendig } = await ladeAlleZeilen<VoteTopic>(
+        (von, bis) => supabase
+          .from("topics")
+          .select("id, topic, tag_type, category, published_at")
+          .eq("category", "politik")
+          .order("published_at", { ascending: false })
+          .range(von, bis),
+      );
+      if (!vollstaendig) {
+        console.warn("[Buergervoting] Themen unvollstaendig geladen — es fehlen Eintraege.");
+      }
+      const filtered = zeilen;
       // Randomize for objectivity
       for (let i = filtered.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));

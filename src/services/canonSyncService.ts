@@ -5,6 +5,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import { ladeAlleZeilen } from '@/lib/alleZeilen';
 import { canonApi } from '@/integrations/canonApiService';
 import type { Topic } from './topicService';
 
@@ -65,12 +66,20 @@ class CanonSyncService {
    */
   private async topicToCanonSection(topic: Topic): Promise<CanonSection> {
     // Get vote stats for this topic
-    const { data: votes, error } = await supabase
-      .from('topic_votes')
-      .select('value')
-      .eq('topic_id', topic.id);
-
-    if (error) throw error;
+    // Seitenweise: PostgREST deckelt still bei 1000 Zeilen. Ausgerechnet beim
+    // meistdiskutierten Thema waere die Stimmenverteilung im Canon zu niedrig
+    // gewesen — und der Canon ist die Fassung, die spaeter als Wahrheit gilt.
+    const { zeilen: votes, vollstaendig } = await ladeAlleZeilen<{ value: number }>(
+      (von, bis) => supabase
+        .from('topic_votes')
+        .select('value')
+        .eq('topic_id', topic.id)
+        .range(von, bis),
+    );
+    if (!vollstaendig) {
+      console.warn(`[canonSync] Stimmen zu Thema ${topic.id} unvollstaendig — ` +
+        `die Zahlen im Canon waeren zu niedrig.`);
+    }
 
     const voteStats = {
       left: votes?.filter(v => v.value === -1).length || 0,

@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { ladeAlleZeilen } from "@/lib/alleZeilen";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -49,11 +50,19 @@ const ParteienPage = () => {
   const { data: topics = [], isLoading } = useQuery({
     queryKey: ["parteien-positions"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("topics")
-        .select("id, topic, left_position, left_quote, left_speaker, right_position, right_quote, right_speaker");
-      if (error) throw error;
-      return data ?? [];
+      // Ohne Obergrenze deckelt PostgREST still bei 1000 Zeilen — die Parteien-Uebersicht
+      // haette ab dem 1001. Thema lautlos Positionen unterschlagen, ohne dass etwas
+      // kaputt aussieht. (Fehlerklasse: buch 04.08. an celebrity-stonks.)
+      const { zeilen, vollstaendig } = await ladeAlleZeilen<Record<string, unknown>>(
+        (von, bis) => supabase
+          .from("topics")
+          .select("id, topic, left_position, left_quote, left_speaker, right_position, right_quote, right_speaker")
+          .range(von, bis),
+      );
+      if (!vollstaendig) {
+        console.warn("[Parteien] Themen unvollstaendig geladen — es fehlen Positionen.");
+      }
+      return zeilen;
     },
   });
 
