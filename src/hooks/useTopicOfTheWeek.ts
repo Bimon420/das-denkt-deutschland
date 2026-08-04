@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { ladeAlleZeilen } from "@/lib/alleZeilen";
 
 export function useTopicOfTheWeek() {
   return useQuery({
@@ -9,12 +10,22 @@ export function useTopicOfTheWeek() {
       weekAgo.setDate(weekAgo.getDate() - 7);
       const since = weekAgo.toISOString();
 
-      const { data, error } = await supabase
-        .from("topic_votes")
-        .select("topic_id")
-        .gte("created_at", since);
+      // Hier wird das Thema der Woche BESTIMMT — aus allen Stimmen der letzten sieben
+      // Tage. Ohne Limit liefert PostgREST still hoechstens 1000, und in einer aktiven
+      // Woche waere damit schlicht das falsche Thema gekroent worden, ohne dass
+      // irgendetwas kaputt aussieht.
+      const { zeilen: data, vollstaendig } = await ladeAlleZeilen<{ topic_id: string }>(
+        (von, bis) => supabase
+          .from("topic_votes")
+          .select("topic_id")
+          .gte("created_at", since)
+          .range(von, bis),
+      );
+      if (!vollstaendig) {
+        console.warn("[TopicOfTheWeek] Stimmen unvollstaendig — das Wochenthema kann falsch sein.");
+      }
 
-      if (error || !data || data.length === 0) return null;
+      if (!data || data.length === 0) return null;
 
       // Count votes per topic
       const counts: Record<string, number> = {};

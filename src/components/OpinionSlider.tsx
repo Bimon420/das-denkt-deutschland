@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
+import { ladeAlleZeilen } from "@/lib/alleZeilen";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 interface OpinionSliderProps {
@@ -25,10 +26,21 @@ const OpinionSlider = ({ topicId }: OpinionSliderProps) => {
   }, [topicId]);
 
   const loadResults = useCallback(async () => {
-    const { data } = await supabase
-      .from("topic_votes")
-      .select("value, created_at")
-      .eq("topic_id", topicId);
+    // Ohne Limit deckelt PostgREST still bei 1000 Zeilen. Genau beim meistdiskutierten
+    // Thema — also dem, das am meisten Leute ansehen — waeren Gesamtzahl UND
+    // Verteilung ueber die ersten 1000 Stimmen gerechnet worden. Die Prozentbalken
+    // haetten trotzdem ausgesehen wie richtige Prozentbalken.
+    // (Fehlerklasse: buch 04.08. an celebrity-stonks, Flottendurchlauf orga.)
+    const { zeilen: data, vollstaendig } = await ladeAlleZeilen<{ value: number; created_at: string }>(
+      (von, bis) => supabase
+        .from("topic_votes")
+        .select("value, created_at")
+        .eq("topic_id", topicId)
+        .range(von, bis),
+    );
+    if (!vollstaendig) {
+      console.warn("[OpinionSlider] Stimmen unvollstaendig geladen — die Verteilung stimmt nicht.");
+    }
 
     if (data && data.length > 0) {
       setTotalVotes(data.length);
