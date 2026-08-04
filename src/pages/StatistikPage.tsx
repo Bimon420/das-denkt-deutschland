@@ -8,6 +8,7 @@ import {
   PieChart, Pie, Cell, CartesianGrid,
 } from "recharts";
 import { verarbeiteUndPrüfe, type GeprüfteDaten } from "@/lib/statistikRedakteure";
+import { ladeAlleZeilen } from "@/lib/alleZeilen";
 
 const StatistikPage = () => {
   const navigate = useNavigate();
@@ -16,16 +17,31 @@ const StatistikPage = () => {
 
   useEffect(() => {
     const load = async () => {
+      // Alle drei Abfragen liefen ohne Limit — und PostgREST deckelt still bei 1000
+      // Zeilen. Bei `topics` aufsteigend sortiert waren es die ÄLTESTEN 1000, bei
+      // `topic_votes` eine beliebige Teilmenge. Eine Seite, die „Statistik" heißt, hat
+      // genau eine Aufgabe: richtig zusammenzurechnen. Ein leerer Chart fällt auf, ein
+      // falscher Prozentwert nicht — deshalb war das hier besonders teuer.
+      // (Befund buch 04.08. an celebrity-stonks, Flottendurchlauf orga.)
       const [topicsRes, suggestionsRes, votesRes] = await Promise.all([
-        supabase.from("topics").select("published_at, id, topic").order("published_at", { ascending: true }),
-        supabase.from("topic_suggestions").select("created_at"),
-        supabase.from("topic_votes").select("value, topic_id"),
+        ladeAlleZeilen((von, bis) =>
+          supabase.from("topics").select("published_at, id, topic")
+            .order("published_at", { ascending: true }).range(von, bis)),
+        ladeAlleZeilen((von, bis) =>
+          supabase.from("topic_suggestions").select("created_at").range(von, bis)),
+        ladeAlleZeilen((von, bis) =>
+          supabase.from("topic_votes").select("value, topic_id").range(von, bis)),
       ]);
 
+      if (!topicsRes.vollstaendig || !suggestionsRes.vollstaendig || !votesRes.vollstaendig) {
+        // Lieber eine sichtbare Warnung als stumm falsche Zahlen.
+        console.warn("[Statistik] Daten unvollständig geladen — die Zahlen unten sind zu niedrig.");
+      }
+
       const geprüft = verarbeiteUndPrüfe(
-        topicsRes.data,
-        suggestionsRes.data,
-        votesRes.data,
+        topicsRes.zeilen,
+        suggestionsRes.zeilen,
+        votesRes.zeilen,
       );
 
       setData(geprüft);
