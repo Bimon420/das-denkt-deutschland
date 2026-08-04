@@ -90,28 +90,46 @@ class VotingService {
    * Get overall statistics across all topics
    */
   async getGlobalStats() {
-    const { data: allVotes, error: votesError } = await supabase
-      .from('topic_votes')
-      .select('topic_id, value');
+    // Vorher wurde JEDE Stimme in den Browser geholt, nur um sie zu zählen — und
+    // PostgREST deckelt still bei 1000 Zeilen. `total_votes` konnte also nie mehr als
+    // 1000 sein, egal wie oft abgestimmt wurde, und die Verteilung war entsprechend
+    // falsch. Eine falsche Zahl sieht aus wie eine richtige; das ist der Grund, warum
+    // so etwas jahrelang unbemerkt bleibt.
+    //
+    // Die richtige Frage war nicht „wie hole ich alle Zeilen", sondern „wofür brauche
+    // ich sie überhaupt" — hier ausschliesslich zum Zählen. Das kann die Datenbank
+    // selbst, exakt und ohne eine einzige Zeile zu übertragen.
+    // (Fehlerklasse: buch 04.08. an celebrity-stonks, Flottendurchlauf orga.)
+    const zaehle = async (
+      abfrage: PromiseLike<{ count: number | null; error: { message: string } | null }>,
+    ) => {
+      const { count, error } = await abfrage;
+      if (error) throw error;
+      return count ?? 0;
+    };
 
-    if (votesError) throw votesError;
-
-    const { data: topicsCount, error: topicsError } = await supabase
-      .from('topics')
-      .select('id')
-      .not('published_at', 'is', null);
-
-    if (topicsError) throw topicsError;
-
-    const totalVotes = allVotes?.length || 0;
-    const totalTopics = topicsCount?.length || 0;
+    const [totalVotes, totalTopics, linke, neutrale, rechte] = await Promise.all([
+      zaehle(supabase.from('topic_votes').select('*', { count: 'exact', head: true })),
+      zaehle(supabase.from('topics').select('*', { count: 'exact', head: true })
+        .not('published_at', 'is', null)),
+      zaehle(supabase.from('topic_votes').select('*', { count: 'exact', head: true }).eq('value', -1)),
+      zaehle(supabase.from('topic_votes').select('*', { count: 'exact', head: true }).eq('value', 0)),
+      zaehle(supabase.from('topic_votes').select('*', { count: 'exact', head: true }).eq('value', 1)),
+    ]);
 
     const avgVotesPerTopic = totalTopics > 0 ? totalVotes / totalTopics : 0;
 
-    const distribution: Record<number, number> = { '-1': 0, '0': 0, '1': 0 };
-    allVotes?.forEach(v => {
-      distribution[v.value] = (distribution[v.value] || 0) + 1;
-    });
+    const distribution: Record<number, number> = { '-1': linke, '0': neutrale, '1': rechte };
+    // Die drei bekannten Werte MÜSSEN die Gesamtzahl ergeben. Tun sie es nicht, liegen
+    // Stimmen mit einem unerwarteten Wert in der Tabelle — das ist ein Datenbefund und
+    // gehört gemeldet, statt in einer Verteilung zu verschwinden, die nicht aufgeht.
+    const summe = linke + neutrale + rechte;
+    if (summe !== totalVotes) {
+      console.warn(
+        `[votingService] ${totalVotes - summe} Stimmen mit unerwartetem Wert ` +
+        `(weder -1, 0 noch 1) — die Verteilung unten geht nicht auf.`,
+      );
+    }
 
     return {
       total_votes: totalVotes,

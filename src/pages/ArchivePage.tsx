@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { ladeAlleZeilen } from "@/lib/alleZeilen";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Loader2, Search, X } from "lucide-react";
 import TransparencyTag from "@/components/TransparencyTag";
@@ -56,11 +57,20 @@ const ArchivePage = () => {
   const { data: topics = [], isLoading } = useQuery({
     queryKey: ["archive-topics"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("topics")
-        .select("id, topic, tag_type, published_at");
-      if (error) throw error;
-      return data as ArchiveTopic[];
+      // Ein ARCHIV ist per Definition vollständig — genau deshalb war das stille
+      // 1000er-Limit hier besonders unpassend: Ältere Themen wären lautlos
+      // verschwunden, und niemand sucht nach etwas, von dem er nicht weiß, dass es
+      // fehlt. (Fehlerklasse: buch 04.08. an celebrity-stonks.)
+      const { zeilen, vollstaendig } = await ladeAlleZeilen<ArchiveTopic>(
+        (von, bis) => supabase
+          .from("topics")
+          .select("id, topic, tag_type, published_at")
+          .range(von, bis),
+      );
+      if (!vollstaendig) {
+        console.warn("[Archiv] Themen unvollständig geladen — es fehlen Einträge.");
+      }
+      return zeilen;
     },
   });
 

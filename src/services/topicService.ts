@@ -4,6 +4,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import { ladeAlleZeilen } from '@/lib/alleZeilen';
 import type { Database } from '@/integrations/supabase/types';
 
 export type Topic = Database['public']['Tables']['topics']['Row'];
@@ -48,7 +49,13 @@ class TopicService {
    * Get all unpublished topics (for admin)
    */
   async getPendingTopics() {
-    const { data, error } = supabase
+    // `await` fehlte hier (Befund orga, 04.08., beim Decke-Durchgang nebenbei gefunden).
+    // Ohne await wird nicht das ERGEBNIS zerlegt, sondern der noch laufende Abfrage-Bau:
+    // `data` und `error` sind beide undefined, die Fehlerprüfung greift nie, und die
+    // Funktion liefert `undefined as Topic[]`. Das Admin-Panel bekam also IMMER eine
+    // leere Liste unveroeffentlichter Themen — und zwar ohne Fehlermeldung, weshalb es
+    // aussah, als gaebe es einfach keine.
+    const { data, error } = await supabase
       .from('topics')
       .select('*')
       .is('published_at', null)
@@ -149,12 +156,26 @@ class TopicService {
   async getTopicWithStats(id: string) {
     const topic = await this.getTopic(id);
 
-    const { data: votes, error: votesError } = await supabase
-      .from('topic_votes')
-      .select('value')
-      .eq('topic_id', id);
-
-    if (votesError) throw votesError;
+    // Seitenweise statt in einem Rutsch: PostgREST deckelt still bei 1000 Zeilen.
+    // Ein Thema mit mehr als 1000 Stimmen — also ausgerechnet das erfolgreichste —
+    // haette einen Durchschnitt und eine Verteilung ueber die ersten 1000 gezeigt,
+    // ohne dass irgendetwas kaputt aussieht.
+    //
+    // Hier wird die ganze Menge wirklich gebraucht: `average_vote` ist eine Summe, und
+    // `votes_by_value` zaehlt je Wert — anders als bei getGlobalStats laesst sich das
+    // nicht auf ein paar Zaehl-Abfragen zurueckfuehren, ohne den Wertebereich
+    // vorauszusetzen. Also blaettern.
+    const { zeilen: votes, vollstaendig } = await ladeAlleZeilen<{ value: number }>(
+      (von, bis) => supabase
+        .from('topic_votes')
+        .select('value')
+        .eq('topic_id', id)
+        .range(von, bis),
+    );
+    if (!vollstaendig) {
+      console.warn(`[topicService] Stimmen zu Thema ${id} unvollstaendig geladen — ` +
+        `die Werte unten sind zu niedrig.`);
+    }
 
     const stats = {
       total_votes: votes?.length || 0,
