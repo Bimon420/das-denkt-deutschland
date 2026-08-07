@@ -17,6 +17,7 @@ import TransparenzPage from "./pages/TransparenzPage";
 import { AuthGoogleCallback } from "./pages/AuthGoogleCallback";
 import { AuthError } from "./pages/AuthError";
 import NotFound from "./pages/NotFound";
+import BugReport from "./components/BugReport";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <BugReport />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
