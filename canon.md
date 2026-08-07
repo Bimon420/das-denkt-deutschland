@@ -562,6 +562,23 @@ supabase functions deploy auth-google-callback
 
 ## 📝 Changelog
 
+### 2026-08-07 (Fehler-Melden-Weg + On-Brand-Belohnung — LIVE)
+Simons Dauerregel 07.08.: jedes Projekt braucht einen niederschwelligen Weg, einen Fehler
+zu melden — gern mit Belohnung. Umgesetzt:
+- **`src/components/BugReport.tsx`** — dezenter „🐛 Fehler melden"-Knopf unten links, auf JEDER
+  Seite (global in `App.tsx` gemountet). Kein Login. Panel mit Textfeld → sendet an `/api/fehler`.
+- **`api/fehler.js`** — Vercel-Function. Schreibt in UNSERE geteilte, projektübergreifende
+  Tabelle **`bug_reports`** der Supabase **monverse-talks** (`dubsxqeuxhhyrtfovvjn`), Spalte
+  **`site='das-denkt'`**. ⚠️ Die FREMDE Lovable-Supabase der App (`buukvmcrtzzryyzmmjmk`) bleibt
+  bewusst **unangetastet** — dort keine Tabellen/Rechte. Secrets `SB_URL` + `SB_SERVICE_KEY`
+  nur als Vercel-Env (Production), nie im Repo.
+- **On-Brand-Belohnung** (KEIN Geld): seltene „Stimme des Volkes"-**Fehlerspäher-Plakette** mit
+  fortlaufender Nummer (echt = DB-id) + amtlichem Stempel `DDD-JJJJ-NNNNNN`, poetisch-ziviler
+  Dank im Ton des Hauses. „Eine Stimme, die wirklich gezählt wird."
+- **E2E grün** (Playwright, 0 €): Knopf → Meldung → Plakette im DOM; DB-Zeile **site-gefiltert**
+  bewiesen (nicht aus dem DOM). Umlaute live korrekt. Testzeilen danach wieder gelöscht.
+- **Deploy LIVE** auf dasdenktdeutschland.de (Commit `408be4b`, gepusht nach Bimon420).
+
 ### 2026-06-04 (Complete System)
 - ✅ Created 6 core services (topics, voting, canon-sync, admin, realtime, gdrive)
 - ✅ Built AdminPanel component with 4 tabs
