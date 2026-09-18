@@ -34,7 +34,10 @@ const NotificationBell = () => {
       .channel("new-topics")
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "topics" },
+        // 18.09.2026: Das Echtzeit-Abo lauschte auf `public`. Seit dem 16.08. liegen
+        // die Tabellen im Schema `app_ddd` — dort kam also nie wieder ein Ereignis an,
+        // und die Glocke blieb fuer neue Themen stumm.
+        { event: "INSERT", schema: "app_ddd", table: "topics" },
         (payload) => {
           setNewCount((prev) => prev + 1);
           setNewTopics((prev) => [

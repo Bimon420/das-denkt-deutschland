@@ -8,7 +8,13 @@ const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
+// ⚠️ EIGENES SCHEMA IN DER GEMEINSAMEN DATENBANK (16.08.2026).
+// Diese App hatte ein eigenes Supabase-Projekt — 10 $ im Monat für 8.048 Zeilen und
+// eine Handvoll Nutzer. Jetzt liegen ihre Tabellen als Schema `app_ddd` in der
+// zentralen Datenbank; getrennt bleiben sie trotzdem (eigenes Schema, eigene
+// RLS-Regeln). Ohne diese eine Zeile sucht der Client in `public` und findet nichts.
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  db: { schema: 'app_ddd' },
   auth: {
     storage: localStorage,
     persistSession: true,
