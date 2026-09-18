@@ -81,11 +81,21 @@ const OpinionSlider = ({ topicId }: OpinionSliderProps) => {
     setSubmitting(true);
 
     try {
-      const res = await supabase.functions.invoke("submit-vote", {
-        body: { topic_id: topicId, value },
+      // 18.09.2026: lief ueber die Edge-Funktion `submit-vote`. Die lag im
+      // Supabase-Projekt, das am 16.08. geloescht wurde — seitdem konnte
+      // NIEMAND mehr abstimmen. Jetzt ueber die eigene Serverfunktion
+      // /api/vote, die den Dienstschluessel benutzt (anon darf wegen RLS
+      // nicht in topic_votes schreiben, gemessen: 42501).
+      const res = await fetch("/api/vote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic_id: topicId, value }),
       });
 
-      if (res.error) throw res.error;
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.error || `HTTP ${res.status}`);
+      }
 
       localStorage.setItem(`vote-${topicId}`, String(value));
       setHasVoted(true);
