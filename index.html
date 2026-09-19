@@ -26,7 +26,15 @@
   </head>
 
   <body>
-    <div id="root"></div>
+    <!-- VORSCHAU-ANFANG: statisch fuer Suchmaschinen und Linkvorschauen.
+     React ersetzt diesen Inhalt beim Start (createRoot). Er ist nur da,
+     damit ein Crawler und eine Linkvorschau nicht ein leeres Geruest sehen. -->
+<div id="root"><div style="max-width:42rem;margin:14vh auto;padding:0 1.5rem;font:16px/1.6 system-ui,sans-serif;color:#6b6b73">
+  <h1 style="font-size:1.9rem;line-height:1.15;margin:0 0 .5rem;color:#2b2b31">DDD — Das Denkt Deutschland</h1>
+  <p style="margin:0 0 1.1rem">Was denkt Deutschland wirklich? Links, Rechts — und die Perspektive dazwischen.</p>
+  <ul style="margin:0;padding-left:1.1rem"><li>Zu jedem Thema beide Seiten: Position, Zitat, Quelle — und was dabei ungesagt bleibt.</li><li>Stimm ab, wo du selbst stehst, und sieh, wie die anderen abgestimmt haben.</li><li>Ohne Konto, ohne Anmeldung.</li></ul>
+</div></div>
+<!-- VORSCHAU-ENDE -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
