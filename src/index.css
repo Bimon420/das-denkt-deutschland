@@ -216,3 +216,37 @@
     background: linear-gradient(to right, hsl(var(--left)), hsl(var(--muted-foreground) / 0.3) 50%, hsl(var(--right)));
   }
 }
+
+/* ── Finger und Schrift am Telefon ─────────────────────────────────────────
+   Live gemessen am 23.09. auf www.dasdenktdeutschland.de, im iPhone-13-Profil,
+   als erreichbare Hoehe unter dem Daumen: zwei Ziele bei 38px und 32px
+   ("Fehler melden"); 44px ist das uebliche Mindestmass. Dazu sieben Sorten
+   Schrift unter 12px.
+
+   Der Selektor nennt ABSICHTLICH alle Bedienelemente und nicht footer/header/nav:
+   genau diese Einschraenkung liess dieselbe Regel bei PRIME TIME PANIC wirkungslos
+   ausliefern - die dortige Bedienung sitzt in keinem der drei.
+
+   Gehoben wird nur, was man LIEST. Knoepfe und Links bleiben ausgenommen; bei
+   STYLEDECK hat die undifferenzierte Variante die Kopfzeile zerlegt. Die Bedienung
+   waechst stattdessen ueber ihre Trefferflaeche - ein unsichtbares ::after, damit
+   sich das Layout um kein Pixel verschiebt. */
+@media (pointer: coarse) {
+  [class*="text-[10px]"]:not(button):not(a):not(button *):not(a *),
+  [class*="text-[11px]"]:not(button):not(a):not(button *):not(a *) {
+    font-size: 12px !important;
+  }
+
+  a[href], button { position: relative; }
+  a[href]::after, button::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 44px;
+    transform: translateY(-50%);
+  }
+
+  input, textarea, select { font-size: max(16px, 1em) !important; }
+}
