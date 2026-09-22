@@ -51,7 +51,7 @@ const StatItem = ({
 
 const Dot = ({ delay }: { delay: number }) => (
   <motion.span
-    className="w-[3px] h-[3px] rounded-full bg-muted-foreground/20"
+    className="hidden md:block w-[3px] h-[3px] rounded-full bg-muted-foreground/20"
     initial={{ opacity: 0, scale: 0 }}
     whileInView={{ opacity: 1, scale: 1 }}
     viewport={{ once: true }}
@@ -70,7 +70,8 @@ const LiveStats = () => {
 
   return (
     <section className="py-20 md:py-28 px-6">
-      <div className="max-w-3xl mx-auto flex items-end justify-center gap-8 md:gap-14">
+      {/* Mobil 2x2: vier Zahlen plus Punkte in einer Zeile waren auf 360 px breiter als der Schirm. */}
+      <div className="max-w-3xl mx-auto grid grid-cols-2 gap-y-8 gap-x-6 justify-items-center md:flex md:items-end md:justify-center md:gap-14">
         <StatItem value={String(data.topics)} label="Themen" delay={0} />
         <Dot delay={0.15} />
         <StatItem value={String(data.days)} label="Tage" delay={0.1} />

@@ -38,11 +38,17 @@ const ViewpointPanel = ({
   delay: number;
 }) => {
   const isLeft = side === "left";
+  // Mobil stehen die Karten untereinander: ein seitlicher Versatz von 30 px liess
+  // jede noch nicht eingeblendete rechte Karte ueber den Schirmrand ragen, die ganze
+  // Seite wurde seitwaerts verschiebbar. Dort kommen sie deshalb von unten.
+  // Synchron gelesen: useIsMobile() ist beim ersten Rendern noch false, und framer
+  // uebernimmt den Startversatz genau aus diesem ersten Rendern.
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
   return (
     <motion.div
       className={`flex-1 p-4 md:p-8 rounded-xl ${isLeft ? "bg-left-light dark:bg-left-light/80 border-l-4 border-left" : "bg-right-light dark:bg-right-light/80 border-r-4 border-right-red"}`}
-      initial={{ opacity: 0, x: isLeft ? -30 : 30, filter: "blur(4px)" }}
-      whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+      initial={{ opacity: 0, x: isMobile ? 0 : isLeft ? -30 : 30, y: isMobile ? 16 : 0, filter: "blur(4px)" }}
+      whileInView={{ opacity: 1, x: 0, y: 0, filter: "blur(0px)" }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ delay, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
     >
