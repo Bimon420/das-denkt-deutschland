@@ -274,6 +274,9 @@
     min-width: 44px;
     justify-content: center;
   }
+  /* Rechtsseiten (23.09., d102): der runde Zurueck-Knopf auf /impressum und /datenschutz
+     (button.p-2.rounded-full, 32x32) war 32px breit erreichbar. */
+  button.rounded-full.p-2 { min-width: 44px; min-height: 44px; }
 
   input, textarea, select { font-size: max(16px, 1em) !important; }
 }
