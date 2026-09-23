@@ -232,8 +232,11 @@
    waechst stattdessen ueber ihre Trefferflaeche - ein unsichtbares ::after, damit
    sich das Layout um kein Pixel verschiebt. */
 @media (pointer: coarse) {
-  [class*="text-[10px]"]:not(button):not(a):not(button *):not(a *),
-  [class*="text-[11px]"]:not(button):not(a):not(button *):not(a *) {
+  /* 23.09. (e1cb9251): jetzt auch in Knoepfen und Links — Simon: „mindestens 12 px“, ohne
+     Ausnahme. Live uebrig waren die Quellen-Links (11 px) und das Zaehlabzeichen der Glocke
+     (9 px); mit eingespritztem Stil auf 320/360/390 geprueft und am Bild angesehen. */
+  [class*="text-[8px]"], [class*="text-[9px]"],
+  [class*="text-[10px]"], [class*="text-[11px]"] {
     font-size: 12px !important;
   }
 
