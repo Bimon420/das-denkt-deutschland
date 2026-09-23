@@ -217,6 +217,23 @@
   }
 }
 
+/* Schrift unter 12px anheben - AUCH AM BILDSCHIRM.
+   Simon im Blatt, 23.09.: "Auch auf dem Desktop anheben". Bisher galt die Regel nur
+   unter @media (pointer: coarse); auf 1440px waren live noch 9 Stellen darunter.
+
+   Vor dem Ausliefern an der ECHTEN Seite mit eingespritztem Stil geprueft:
+   9 -> 0, kein seitlicher Ueberlauf, nichts abgeschnitten.
+
+   Die Regel im coarse-Block bleibt absichtlich stehen: sie ist identisch und stoert
+   nicht, aber ihr Kommentar haelt fest, warum es dort ueberhaupt anfing. */
+[class*="text-[7px]"], [class*="text-[8px]"], [class*="text-[9px]"],
+[class*="text-[10px]"], [class*="text-[11px]"],
+[style*="font-size: 9px"], [style*="font-size:9px"],
+[style*="font-size: 10px"], [style*="font-size:10px"],
+[style*="font-size: 11px"], [style*="font-size:11px"] {
+  font-size: 12px !important;
+}
+
 /* ── Finger und Schrift am Telefon ─────────────────────────────────────────
    Live gemessen am 23.09. auf www.dasdenktdeutschland.de, im iPhone-13-Profil,
    als erreichbare Hoehe unter dem Daumen: zwei Ziele bei 38px und 32px
