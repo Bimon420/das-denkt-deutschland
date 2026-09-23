@@ -74,7 +74,7 @@ const NotificationBell = () => {
     <div className="relative">
       <button
         onClick={handleOpen}
-        className="p-2.5 md:p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95 touch-manipulation relative"
+        className="p-1.5 md:p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95 touch-manipulation relative"
         aria-label="Benachrichtigungen"
       >
         <Bell className="w-[18px] h-[18px] md:w-4 md:h-4 text-muted-foreground" />

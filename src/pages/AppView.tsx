@@ -149,7 +149,10 @@ const AppView = () => {
     );
   }
 
-  const btnClass = "p-2.5 md:p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95 touch-manipulation";
+  // p-1.5 unter md (23.09.): zehn Knoepfe à 38 px ergaben 380 px Kopfzeile — auf 360 px lief
+  // /app 28 px seitwaerts, selbst auf 412 px war die Reihe verdeckt. 30 px Breite; die 44 px
+  // Trefferhoehe legt index.css per ::after darueber.
+  const btnClass = "p-1.5 md:p-2 rounded-full hover:bg-secondary transition-all duration-200 active:scale-95 touch-manipulation";
   const iconClass = "w-[18px] h-[18px] md:w-4 md:h-4 text-muted-foreground";
 
   return (
@@ -157,11 +160,14 @@ const AppView = () => {
       {/* Sticky header */}
       <header className="sticky top-0 z-30 border-b border-border/40 dark:border-border/60 bg-background/90 dark:bg-background/95 backdrop-blur-xl safe-area-top">
         <div className="flex items-center justify-between px-2 md:px-5 py-1.5 md:py-3">
-          <div className="flex items-center gap-1.5 md:gap-2 min-w-0">
+          <div className="flex flex-1 items-center gap-1.5 md:gap-2 min-w-[28px]">
             <img src="/logo.png" alt="DDD" className="w-auto flex-shrink-0 h-6 md:h-7" />
             <span className="font-body text-[12px] md:text-base font-extrabold tracking-tight uppercase truncate hidden xs:inline">Das Denkt Deutschland</span>
           </div>
-          <div className="flex items-center gap-0">
+          {/* Symbole zuerst, das Logo gibt nach. Wird es auf 320 px doch zu eng, scrollt die
+              Reihe in sich statt der Seite; py-1/-my-1, weil ein Scroll-Container auch oben
+              abschneidet und sonst das Zaehlabzeichen der Glocke kappt. */}
+          <div className="flex items-center gap-0 min-w-0 overflow-x-auto py-1 -my-1">
             <NotificationBell />
             <motion.button
               onClick={handleRefresh}
