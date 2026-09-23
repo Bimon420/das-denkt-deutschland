@@ -277,6 +277,6 @@
    Gerechnet gegen den jeweils ungueltigsten echten Grund, mit Reserve auf 4.75:1 —
    genau 4.50 faellt beim Nachmessen durch die Rundung wieder durch.
    An der ausgelieferten Seite ausprobiert, bevor es hier stand: 16 -> 0. */
-.text-destructive                { color: #c82424 !important; }
+.text-destructive                { color: #b92020 !important; } /* 23.09. 831c: auf #ece3e3 nur 4.47 -> eine Stufe dunkler */
 .text-emerald-600                { color: #047e58 !important; }
 [class*="text-muted-foreground/"] { color: #6b6b68 !important; }
