@@ -268,6 +268,13 @@
     transform: translateY(-50%);
   }
 
+  /* BREITE (23.09., Simon im Blatt: "Alle neun ausliefern"): live blieben der Hell/Dunkel-
+     Schalter 38px und "Fehler melden" (nur Symbol auf dem Telefon) 40px breit. */
+  [aria-label="Dark Mode"], [aria-label="Light Mode"], [aria-label="Fehler melden"] {
+    min-width: 44px;
+    justify-content: center;
+  }
+
   input, textarea, select { font-size: max(16px, 1em) !important; }
 }
 
