@@ -253,6 +253,29 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+    // ── Grenzen (23.09.2026, Simons Video-Welle ~20.000 Menschen am Tag) ──
+    // Ein Vorschlag kostet bis zu 34 Opus-Aufrufe (Relevanz + 3 × (Erzeugen + 10 Prüfer)),
+    // und jeder durfte beliebig viele schicken. Jetzt: jede Adresse nur einmal, und über
+    // alle Besucher höchstens DECKEL_VORSCHLAEGE_TAG (Standard 30) je Tag. Gezählt wird in
+    // topic_suggestions selbst — keine neue Tabelle. Antwortet die Datenbank nicht, wird
+    // nichts erzeugt: ein klemmender Zähler darf nicht zur offenen Kasse werden.
+    const heute = new Date().toISOString().slice(0, 10) + "T00:00:00Z";
+    const grenze = Number(Deno.env.get("DECKEL_VORSCHLAEGE_TAG")) || 30;
+    const [schonDa, heuteDa] = await Promise.all([
+      supabase.from("topic_suggestions").select("id", { count: "exact", head: true }).eq("url", url),
+      supabase.from("topic_suggestions").select("id", { count: "exact", head: true }).gte("created_at", heute),
+    ]);
+    if (schonDa.error || heuteDa.error || schonDa.count === null || heuteDa.count === null) {
+      console.error("Zähler:", schonDa.error?.message, heuteDa.error?.message);
+      return new Response(JSON.stringify({ error: "Gerade nicht möglich — bitte später erneut versuchen." }), { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    if (schonDa.count > 0) {
+      return new Response(JSON.stringify({ error: "Dieser Link wurde schon vorgeschlagen." }), { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    if (heuteDa.count >= grenze) {
+      return new Response(JSON.stringify({ error: "Heute sind schon genug Vorschläge eingegangen — morgen wieder." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     // Save suggestion
     await supabase.from("topic_suggestions").insert({ title: url, url });
 

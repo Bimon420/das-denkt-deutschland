@@ -112,13 +112,12 @@ const AppView = () => {
         toast.error("Dieser Link hat leider keine Relevanz für diese Seite.");
       }
     } catch (error: any) {
-      // 422 = quality check failed → show friendly rejection message
-      const body = error?.context?.body || error?.context;
-      if (body?.success === false) {
-        toast.error("Dieser Link hat leider keine Relevanz für diese Seite.");
-      } else {
-        toast.error(error?.message || "Fehler bei der Verarbeitung.");
-      }
+      // Nicht-2xx (422 nicht relevant, 409 schon vorgeschlagen, 429 Tagesgrenze): der Server
+      // sagt in einem Satz, warum. error.context ist die Response — ihr Text war nie gelesen
+      // worden, daher kam bisher fast immer die allgemeine Meldung.
+      let grund: string | null = null;
+      try { grund = (await error?.context?.json?.())?.error ?? null; } catch { /* kein JSON */ }
+      toast.error(grund || "Fehler bei der Verarbeitung.");
     } finally {
       setSubmitting(false);
     }

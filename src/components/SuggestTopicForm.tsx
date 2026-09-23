@@ -62,7 +62,9 @@ const SuggestTopicForm = ({ open: externalOpen, onOpenChange }: SuggestTopicForm
       }
     } catch (err: any) {
       setStatus("error");
-      setErrorMsg("Fehler bei der Verarbeitung. Bitte versuche es erneut.");
+      let grund: string | null = null;
+      try { grund = (await err?.context?.json?.())?.error ?? null; } catch { /* kein JSON */ }
+      setErrorMsg(grund || "Fehler bei der Verarbeitung. Bitte versuche es erneut.");
       console.error(err);
     }
   };

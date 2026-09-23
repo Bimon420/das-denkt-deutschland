@@ -310,7 +310,10 @@ serve(async (req) => {
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) throw new Error("Supabase credentials not configured");
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-    const force = new URL(req.url).searchParams.get("force") === "1";
+    // ?force=1 überspringt die Tagessperre (3 Opus-Aufrufe à 1,5–2,5 €). Das durfte jeder mit
+    // dem öffentlichen Schlüssel — jetzt nur noch mit dem Service-Schlüssel.
+    const mitgebracht = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");
+    const force = new URL(req.url).searchParams.get("force") === "1" && mitgebracht === SUPABASE_SERVICE_ROLE_KEY;
 
     // ── Guard: Skip if topics were already generated today ──
     const today = new Date().toISOString().split("T")[0];
