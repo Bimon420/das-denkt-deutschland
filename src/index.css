@@ -270,3 +270,13 @@
 
   input, textarea, select { font-size: max(16px, 1em) !important; }
 }
+
+/* ── Kontrast (Simon im Blatt, 23.09.: "Anheben, wo es zu blass ist") ──
+   Live gemessen auf 1440px: Rot 4.1:1, Gruen 3.5:1, und die Fusszeile mit /40 und /20
+   Deckkraft bei 1.3-1.8:1. Dort war nicht die Farbe das Problem, sondern die Deckkraft.
+   Gerechnet gegen den jeweils ungueltigsten echten Grund, mit Reserve auf 4.75:1 —
+   genau 4.50 faellt beim Nachmessen durch die Rundung wieder durch.
+   An der ausgelieferten Seite ausprobiert, bevor es hier stand: 16 -> 0. */
+.text-destructive                { color: #c82424 !important; }
+.text-emerald-600                { color: #047e58 !important; }
+[class*="text-muted-foreground/"] { color: #6b6b68 !important; }
