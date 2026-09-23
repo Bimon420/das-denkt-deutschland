@@ -19,7 +19,7 @@ const principles = [
 const buttons = [
   { icon: Bell, label: "Benachrichtigungen", desc: "Neue Themen sofort sehen — optional mit Push-Benachrichtigung." },
   { icon: RefreshCw, label: "Aktualisieren", desc: "Themen neu laden und Reihenfolge zufällig mischen." },
-  { icon: Plus, label: "Thema einreichen", desc: "Einen Artikel-Link vorschlagen — wird automatisch geprüft und aufbereitet." },
+  { icon: Plus, label: "Thema einreichen", desc: "Einen Artikel-Link vorschlagen — gerade pausiert." },
   { icon: Share2, label: "Teilen", desc: "Das aktuelle Thema per Link, WhatsApp oder Social Media teilen." },
   { icon: Sun, label: "Dark/Light Mode", desc: "Zwischen hellem und dunklem Design wechseln." },
   { icon: Archive, label: "Archiv", desc: "Alle bisherigen Themen thematisch gruppiert durchsuchen." },

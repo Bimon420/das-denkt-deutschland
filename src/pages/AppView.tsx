@@ -68,6 +68,10 @@ const AppView = () => {
   const queryClient = useQueryClient();
   const [spinning, setSpinning] = useState(false);
   const [suggestOpen, setSuggestOpen] = useState(false);
+  // Die Prüf-Funktion (process-suggestion) ist seit dem Umzug am 15.08. nicht ausgeliefert —
+  // ob sie zurückkommt, ist Simons Kostenentscheidung (MONVERSE_DURCHGANG, 19.09.). Bis dahin
+  // sagt das Feld das ehrlich, statt jeden Link mit „Fehler bei der Verarbeitung“ zu beantworten.
+  const VORSCHLAEGE_AKTIV = false;
   const [suggestUrl, setSuggestUrl] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -228,6 +232,11 @@ const AppView = () => {
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
             >
+              {!VORSCHLAEGE_AKTIV ? (
+                <p className="text-sm text-muted-foreground text-center py-1.5">
+                  Themenvorschläge sind gerade pausiert. Abstimmen geht weiter.
+                </p>
+              ) : (
               <div className="flex items-center gap-2">
                 <input
                   ref={inputRef}
@@ -247,6 +256,7 @@ const AppView = () => {
                   {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                 </button>
               </div>
+              )}
               {submitting && (
                 <p className="text-[10px] text-muted-foreground mt-1.5 text-center">
                   Wird analysiert & geprüft…
