@@ -31,7 +31,7 @@ async function askClaude(opts: { apiKey: string; model: string; system: string; 
       model: opts.model,
       max_tokens: opts.maxTokens,
       // Opus 5: Thinking default-AN zählt gegen max_tokens — hier aus (Paritäts-Migration)
-      thinking: { type: "disabled" },
+      output_config: { effort: "low" },
       system: opts.system,
       messages: [{ role: "user", content: opts.user }],
     }),
