@@ -642,5 +642,7 @@ Prod-Aufrufe setzen deshalb `thinking: {type: "disabled"}`, Tool-Use-Aufrufe beh
 adaptives Thinking mit erhöhtem `max_tokens`. `temperature`/`top_p`/`top_k` sind bei
 Opus 5 **verboten** (400) und wurden entfernt.
 
+> **Nachtrag 01.10.2026:** Gilt NICHT für `claude-opus-5-5` — Opus 5.5 lehnt `thinking:{type:"disabled"}` mit 400 ab (weltenfenster-Traum war 30.09./01.10. deshalb 502). Stattdessen `output_config: { effort: "low" }`; Sonnet 5/Haiku nehmen `disabled` weiter. Nie zwei `output_config`-Schlüssel (der zweite gewinnt still).
+
 **Vollständige Begründung, Fallenliste und Kostenhinweis:
 [`../MODELL_MIGRATION_2026-07-25.md`](../MODELL_MIGRATION_2026-07-25.md)** (Commit afd06d0f).
