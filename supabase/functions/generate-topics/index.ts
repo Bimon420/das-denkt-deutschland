@@ -65,6 +65,10 @@ const FEEDS = [
   { outlet: "Welt", lean: "konservativ", url: "https://www.welt.de/feeds/section/politik.rss" },
 ];
 
+// Themenbereiche fuer das sortierte Mitglieder-Feld (Simon 30.09.: „wer monverse mitglied ist kann themenbereiche
+// angeben und bekommt ein sortiertes feld") — dieselbe Liste steht in src/lib/bereiche.ts.
+const BEREICHE = ["innenpolitik", "aussenpolitik", "europa", "wirtschaft", "soziales", "migration", "klima", "sicherheit", "digitales", "bildung"];
+
 const MAX_PER_FEED = 20;
 const MAX_AGE_HOURS = 72;
 
@@ -163,6 +167,7 @@ HARTE REGELN:
 - Mitte = informiert, historisch bewusst, realistisch, weder zynisch noch naiv (3-5 Sätze)
 - tag_type: "gleich" | "gegensaetzlich" | "teilweise"
 - category: immer "politik", KEIN Boulevard
+- bereich: GENAU EINER von: innenpolitik | aussenpolitik | europa | wirtschaft | soziales | migration | klima | sicherheit | digitales | bildung (der Bereich, in den die Debatte im Kern gehört)
 
 ZITAT-REGELN (EXTREM WICHTIG):
 - Ein WÖRTLICHES Zitat ist NUR erlaubt, wenn der Wortlaut 1:1 in Titel oder Teaser eines zitierten Katalog-Artikels steht.
@@ -181,6 +186,7 @@ Identifiziere daraus die wichtigsten politischen Debatten (maximal 10) und liefe
   "topic": "Thementitel",
   "tag_type": "gleich" | "gegensaetzlich" | "teilweise",
   "category": "politik",
+  "bereich": "innenpolitik" | "aussenpolitik" | "europa" | "wirtschaft" | "soziales" | "migration" | "klima" | "sicherheit" | "digitales" | "bildung",
   "left_position": "Position Links",
   "left_quote": "Kernaussage (wörtlich NUR wenn 1:1 im Katalog)",
   "left_speaker": "Gruppe/Lager (konkrete Person NUR bei wörtlichem Katalog-Zitat)",
@@ -433,6 +439,7 @@ async function runPipeline(supabase: any, ANTHROPIC_API_KEY: string, today: stri
         return false;
       }
       if (!["gleich", "gegensaetzlich", "teilweise"].includes(t.tag_type)) t.tag_type = "teilweise";
+      if (!BEREICHE.includes(t.bereich)) t.bereich = "innenpolitik";
       const left = sourcesFromIds(t.left_source_ids, articleById);
       const right = sourcesFromIds(t.right_source_ids, articleById);
       if (left.length === 0 || right.length === 0) {
@@ -522,6 +529,7 @@ async function runPipeline(supabase: any, ANTHROPIC_API_KEY: string, today: stri
       topic: t.topic,
       tag_type: t.tag_type,
       category: t.category || "politik",
+      bereich: t.bereich,
       left_position: t.left_position,
       left_quote: t.left_quote,
       left_speaker: t.left_speaker,

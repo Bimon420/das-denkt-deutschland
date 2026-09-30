@@ -12,6 +12,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+import MeinFeld from "@/components/MeinFeld";
+import { useMitglied } from "@/hooks/useMitglied";
+import { mapDbToTopic } from "@/hooks/useTopics";
+import { nachBereichenSortiert } from "@/lib/bereiche";
 
 const BATCH_SIZE = 5;
 
@@ -28,17 +33,34 @@ const AppView = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [topics, shuffleSeed]);
 
+  // MONVERSE-Mitglieder: Themen des Tages nach ihren Bereichen sortiert, darunter mehr aus diesen Bereichen
+  const mitglied = useMitglied();
+  const wahl = mitglied.mitgliedBis ? mitglied.bereiche : [];
+  const feld = useMemo(() => nachBereichenSortiert(shuffledTopics, wahl), [shuffledTopics, wahl]);
+  const { data: mehr = [] } = useQuery({
+    queryKey: ["mehr-aus-bereichen", wahl.join(","), topics.map((t) => t.id).join(",")],
+    enabled: wahl.length > 0,
+    queryFn: async () => {
+      const seit = new Date(Date.now() - 14 * 86_400_000).toISOString().split("T")[0];
+      const { data } = await (supabase as any).from("topics").select("*")
+        .in("bereich", wahl).gte("published_at", seit)
+        .order("published_at", { ascending: false }).limit(20);
+      const heute = new Set(topics.map((t) => t.id));
+      return nachBereichenSortiert((data ?? []).map(mapDbToTopic).filter((t: any) => !heute.has(t.id)), wahl).slice(0, 10);
+    },
+  });
+
   const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
   // Infinite scroll observer
   const loadMoreCallback = useCallback(
     (entries: IntersectionObserverEntry[]) => {
-      if (entries[0]?.isIntersecting && visibleCount < shuffledTopics.length) {
-        setVisibleCount((c) => Math.min(c + BATCH_SIZE, shuffledTopics.length));
+      if (entries[0]?.isIntersecting && visibleCount < feld.length) {
+        setVisibleCount((c) => Math.min(c + BATCH_SIZE, feld.length));
       }
     },
-    [visibleCount, shuffledTopics.length]
+    [visibleCount, feld.length]
   );
 
   // Attach observer
@@ -189,7 +211,7 @@ const AppView = () => {
             >
               {suggestOpen ? <X className={iconClass} /> : <Plus className={iconClass} />}
             </button>
-            <ShareMenu topic={shuffledTopics[0]?.topic || ""} />
+            <ShareMenu topic={feld[0]?.topic || ""} />
             <ThemeToggle />
             <button
               onClick={() => navigate("/archiv")}
@@ -275,8 +297,11 @@ const AppView = () => {
 
       {/* Scrollable topic list */}
       <section className="py-6 md:py-16 px-3 md:px-6">
+        <MeinFeld angemeldet={!!mitglied.session} mitgliedBis={mitglied.mitgliedBis} bereiche={mitglied.bereiche}
+                  laedt={mitglied.laedt} onSpeichern={mitglied.bereicheSpeichern} onAnmelden={mitglied.anmelden}
+                  onAbmelden={mitglied.abmelden} />
         <div className="max-w-5xl mx-auto">
-        {shuffledTopics.slice(0, visibleCount).map((t, i) => (
+        {feld.slice(0, visibleCount).map((t, i) => (
             <TopicCard
               key={t.id || `${t.topic}-${i}`}
               id={t.id}
@@ -290,10 +315,19 @@ const AppView = () => {
               isTopicOfTheWeek={!!t.id && t.id === topicOfTheWeekId}
             />
           ))}
-          {visibleCount < shuffledTopics.length && (
+          {visibleCount < feld.length && (
             <div ref={setLoadMoreNode} className="flex justify-center py-8">
               <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
             </div>
+          )}
+          {mehr.length > 0 && visibleCount >= feld.length && (
+            <>
+              <h2 className="font-body text-sm font-extrabold uppercase tracking-wide text-muted-foreground mt-10 mb-4">Mehr aus deinen Bereichen</h2>
+              {mehr.map((t: any, i: number) => (
+                <TopicCard key={`mehr-${t.id}`} id={t.id} topic={t.topic} tagType={t.tagType} category={t.category}
+                           leftView={t.leftView} rightView={t.rightView} mitteView={t.mitteView} index={feld.length + i} />
+              ))}
+            </>
           )}
         </div>
       </section>
