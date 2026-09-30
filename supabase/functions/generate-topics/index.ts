@@ -10,6 +10,14 @@ const corsHeaders = {
 // ─── LLM: Anthropic direkt (weg von Lovable, Simon 07-10) ────────────────────
 const MODEL_GEN = "claude-opus-5";
 const MODEL_VERIFY = "claude-opus-5";
+// Echter Verbrauch je Lauf landet in generation_logs.details — der Kommentar „1,5–2,5 € je Aufruf"
+// stammte aus der Opus-4-Preisliste; gezahlt wird, was usage sagt (claude-opus-5: 5 $/25 $ je Mio. Tokens).
+const PREIS_EIN = 5 / 1e6, PREIS_AUS = 25 / 1e6;
+const VERBRAUCH: { input: number; output: number }[] = [];
+function verbrauchSumme() {
+  const ein = VERBRAUCH.reduce((s, v) => s + v.input, 0), aus = VERBRAUCH.reduce((s, v) => s + v.output, 0);
+  return { aufrufe: VERBRAUCH.length, input_tokens: ein, output_tokens: aus, dollar: +(ein * PREIS_EIN + aus * PREIS_AUS).toFixed(4) };
+}
 
 async function askClaude(opts: { apiKey: string; model: string; system: string; user: string; maxTokens: number }): Promise<string> {
   const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -33,6 +41,7 @@ async function askClaude(opts: { apiKey: string; model: string; system: string; 
     throw new Error(`Anthropic ${res.status}: ${errText.slice(0, 300)}`);
   }
   const data = await res.json();
+  VERBRAUCH.push({ input: data.usage?.input_tokens ?? 0, output: data.usage?.output_tokens ?? 0 });
   return (data.content ?? [])
     .filter((b: any) => b.type === "text")
     .map((b: any) => b.text)
@@ -309,7 +318,9 @@ serve(async (req) => {
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) throw new Error("Supabase credentials not configured");
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    // Seit dem Umzug in die gemeinsame Datenbank (16.08.) liegen die Tabellen im Schema app_ddd —
+    // ohne diese Angabe schrieb die Funktion ins Leere (letztes Thema: 15.08.).
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { db: { schema: "app_ddd" } });
     // ?force=1 überspringt die Tagessperre (3 Opus-Aufrufe à 1,5–2,5 €). Das durfte jeder mit
     // dem öffentlichen Schlüssel — jetzt nur noch mit dem Service-Schlüssel.
     const mitgebracht = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");
@@ -336,7 +347,7 @@ serve(async (req) => {
       console.error("Pipeline error:", error);
       const msg = error instanceof Error ? error.message : "Unknown error";
       try {
-        await supabase.from("generation_logs").insert({ success: false, error_message: msg });
+        await supabase.from("generation_logs").insert({ success: false, error_message: msg, details: { verbrauch: verbrauchSumme() } });
       } catch (_e) { /* Logging darf den Fehler nicht verschlucken lassen */ }
     });
     // @ts-ignore — EdgeRuntime existiert in Supabase Edge Functions
@@ -459,6 +470,7 @@ async function runPipeline(supabase: any, ANTHROPIC_API_KEY: string, today: stri
       await supabase.from("generation_logs").insert({
         success: false,
         error_message: "No topics survived grounding gate + deduplication.",
+        details: { verbrauch: verbrauchSumme() },
       });
       return;
     }
@@ -472,6 +484,7 @@ async function runPipeline(supabase: any, ANTHROPIC_API_KEY: string, today: stri
       await supabase.from("generation_logs").insert({
         success: false,
         error_message: `Verification unavailable: ${failedPerspectives.length}/10 perspectives failed (${failedPerspectives.join(", ")}).`,
+        details: { verbrauch: verbrauchSumme() },
       });
       return;
     }
@@ -497,7 +510,7 @@ async function runPipeline(supabase: any, ANTHROPIC_API_KEY: string, today: stri
         success: false,
         error_message: "All topics failed verification.",
         rejected_count: rejected.length,
-        details: { rejectionDetails: rejected },
+        details: { rejectionDetails: rejected, verbrauch: verbrauchSumme() },
       });
       return;
     }
@@ -534,6 +547,6 @@ async function runPipeline(supabase: any, ANTHROPIC_API_KEY: string, today: stri
       success: true,
       topics_count: data.length,
       rejected_count: rejected.length,
-      details: { rejectionDetails: rejected, articleCount: articles.length, failedPerspectives },
+      details: { rejectionDetails: rejected, articleCount: articles.length, failedPerspectives, verbrauch: verbrauchSumme() },
     });
 }
