@@ -8,8 +8,8 @@ const corsHeaders = {
 };
 
 // ─── LLM: Anthropic direkt (weg von Lovable, Simon 07-10) ────────────────────
-const MODEL_GEN = "claude-opus-5";
-const MODEL_VERIFY = "claude-opus-5";
+const MODEL_GEN = "claude-opus-5-5";
+const MODEL_VERIFY = "claude-opus-5-5";
 
 async function askClaude(opts: { apiKey: string; model: string; system: string; user: string; maxTokens: number }): Promise<string> {
   const res = await fetch("https://api.anthropic.com/v1/messages", {

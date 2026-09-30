@@ -8,10 +8,10 @@ const corsHeaders = {
 };
 
 // ─── LLM: Anthropic direkt (weg von Lovable, Simon 07-10) ────────────────────
-const MODEL_GEN = "claude-opus-5";
-const MODEL_VERIFY = "claude-opus-5";
+const MODEL_GEN = "claude-opus-5-5";
+const MODEL_VERIFY = "claude-opus-5-5";
 // Echter Verbrauch je Lauf landet in generation_logs.details — der Kommentar „1,5–2,5 € je Aufruf"
-// stammte aus der Opus-4-Preisliste; gezahlt wird, was usage sagt (claude-opus-5: 5 $/25 $ je Mio. Tokens).
+// stammte aus der Opus-4-Preisliste; gezahlt wird, was usage sagt (claude-opus-5-5: 5 $/25 $ je Mio. Tokens).
 const PREIS_EIN = 5 / 1e6, PREIS_AUS = 25 / 1e6;
 const VERBRAUCH: { input: number; output: number }[] = [];
 function verbrauchSumme() {
