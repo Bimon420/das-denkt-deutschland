@@ -15,6 +15,11 @@
 // Kein Login noetig (niederschwellig). Rate-Limit best-effort ueber die im
 // geteilten Projekt vorhandene generische Zaehl-RPC.
 
+// 30.09.2026 (ab80): Seit der Supabase-Zusammenlegung (16.08.) liegt die geteilte Tabelle
+// `bug_reports` samt `wf_rate_hit` im Schema app_monverse_talks der zentralen Datenbank.
+// Ohne diese Header suchte PostgREST in `public` -> jede Meldung scheiterte mit 500.
+const GETEILT = process.env.SB_SCHEMA || 'app_monverse_talks';
+
 // ---- Belohnungs-Bausteine (im Ton der Buerger-/Meinungsplattform) ----
 const DANK = [
   { de: "Ihre Meldung wurde zu Protokoll genommen. In einem Land, das gern aneinander vorbeiredet, ist ein genauer Hinweis eine seltene Stimme.",
@@ -63,7 +68,7 @@ async function rateOk(req, limit){
     const key = 'ddd-fehler:' + h + ':' + new Date().toISOString().slice(0, 13);
     const r = await fetch(process.env.SB_URL + '/rest/v1/rpc/wf_rate_hit', {
       method: 'POST',
-      headers: { 'content-type': 'application/json', apikey: process.env.SB_SERVICE_KEY, Authorization: 'Bearer ' + process.env.SB_SERVICE_KEY, 'User-Agent': 'Mozilla/5.0' },
+      headers: { 'content-type': 'application/json', apikey: process.env.SB_SERVICE_KEY, Authorization: 'Bearer ' + process.env.SB_SERVICE_KEY, 'User-Agent': 'Mozilla/5.0', 'Accept-Profile': GETEILT, 'Content-Profile': GETEILT },
       body: JSON.stringify({ p_key: key })
     });
     const n = await r.json();
@@ -87,6 +92,8 @@ export default async function handler(req, res){
         'content-type': 'application/json',
         apikey: process.env.SB_SERVICE_KEY,
         Authorization: 'Bearer ' + process.env.SB_SERVICE_KEY,
+        'Accept-Profile': GETEILT,
+        'Content-Profile': GETEILT,
         'User-Agent': 'Mozilla/5.0',
         Prefer: 'return=representation'
       },
