@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Loader2, Vote, TrendingUp, TrendingDown, Minus, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useCallback, useMemo } from "react";
+import WofuerStimme from "@/components/WofuerStimme";
 
 interface VoteTopic {
   id: string;
@@ -12,6 +13,10 @@ interface VoteTopic {
   tag_type: string;
   category: string;
   published_at: string;
+  // 01.10. (Simon: „ich muss genau wissen, wofür ich entscheide"): die Positionen mitladen
+  left_position: string | null;
+  right_position: string | null;
+  mitte_view: string | null;
 }
 
 interface VoteData {
@@ -58,7 +63,7 @@ const BuergervotingPage = () => {
       const { zeilen, vollstaendig } = await ladeAlleZeilen<VoteTopic>(
         (von, bis) => supabase
           .from("topics")
-          .select("id, topic, tag_type, category, published_at")
+          .select("id, topic, tag_type, category, published_at, left_position, right_position, mitte_view")
           .eq("category", "politik")
           .order("published_at", { ascending: false })
           .range(von, bis),
@@ -340,6 +345,8 @@ const BuergervotingPage = () => {
                           }
                           className="w-full h-2 rounded-full appearance-none cursor-pointer slider-gradient [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-foreground [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-background [&::-webkit-slider-thumb]:cursor-grab [&::-webkit-slider-thumb]:active:cursor-grabbing [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-foreground [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-background [&::-moz-range-thumb]:cursor-grab"
                         />
+
+                        <WofuerStimme wert={currentValue} links={topic.left_position} rechts={topic.right_position} mitte={topic.mitte_view} />
 
                         {/* Vote button */}
                         <div className="flex justify-end mt-2">

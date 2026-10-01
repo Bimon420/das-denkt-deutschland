@@ -3,12 +3,17 @@ import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { ladeAlleZeilen } from "@/lib/alleZeilen";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import WofuerStimme from "./WofuerStimme";
 
 interface OpinionSliderProps {
   topicId: string;
+  // 01.10.: die Positionen des Themas — beim Abstimmen steht da, wofuer die Reglerstellung steht
+  links?: string;
+  rechts?: string;
+  mitte?: string;
 }
 
-const OpinionSlider = ({ topicId }: OpinionSliderProps) => {
+const OpinionSlider = ({ topicId, links, rechts, mitte }: OpinionSliderProps) => {
   const [value, setValue] = useState(50);
   const [hasVoted, setHasVoted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -152,6 +157,8 @@ const OpinionSlider = ({ topicId }: OpinionSliderProps) => {
               onChange={(e) => setValue(Number(e.target.value))}
               className="w-full h-2.5 md:h-2 rounded-full appearance-none cursor-pointer slider-gradient [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-7 [&::-webkit-slider-thumb]:h-7 md:[&::-webkit-slider-thumb]:w-5 md:[&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-foreground [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-background [&::-webkit-slider-thumb]:cursor-grab [&::-webkit-slider-thumb]:active:cursor-grabbing [&::-moz-range-thumb]:w-7 [&::-moz-range-thumb]:h-7 md:[&::-moz-range-thumb]:w-5 md:[&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-foreground [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-background [&::-moz-range-thumb]:cursor-grab"
             />
+
+            <WofuerStimme wert={value} links={links} rechts={rechts} mitte={mitte} />
 
             {/* Submit */}
             <div className="flex justify-center mt-4">

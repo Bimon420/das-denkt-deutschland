@@ -167,7 +167,7 @@ const TopicCard = ({ id, topic, tagType, category = "politik", leftView, rightVi
       <FaktencheckScore leftSources={leftView.sources} rightSources={rightView.sources} />
 
       {/* Opinion slider */}
-      {id && <OpinionSlider topicId={id} />}
+      {id && <OpinionSlider topicId={id} links={leftView.position} rechts={rightView.position} mitte={mitteView} />}
     </div>
   );
 };
