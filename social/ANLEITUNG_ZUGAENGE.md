@@ -130,8 +130,10 @@ Diese Datei wird nie committet.
 
 **Kosten** (belegt: https://docs.x.com/x-api/getting-started/pricing, „prices are subject to change“):
 - Ein Post kostet **0,015 $**, ein Post **mit Link 0,20 $**.
-- Jeder unserer X-Posts enthält den Abstimm-Link. Bei 3–10 Themen am Tag sind das 0,60–2,00 $ am Tag, also **~18–60 $ im Monat**.
-- Ohne Link wären es ~1,50–4,50 $ im Monat, aber dann fehlt der Weg zum Abstimmen.
+- **Simons Entscheidung 01.10.:** X bekommt nur Bild + Text, KEINEN Link und auch keine Adresse im Text
+  (X verlinkt „dasdenktdeutschland.de" selbst → 0,20 $). Das Bild zeigt Thema, Positionen und Adresse.
+  Die Textprüfung sperrt einen X-Text mit Link oder Adresse. Bei 3–10 Themen am Tag: **~1,50–4,50 $ im Monat**.
+- Gilt genauso für die anderen Plattformen: nirgends ein Link, nur Bild/Video + Text.
 - Ob der Bild-Upload extra kostet, ist *ungeprüft*.
 - `X_OHNE_BILD=ja` schaltet das Bild ab.
 

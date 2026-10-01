@@ -71,16 +71,21 @@ export function erfundeneZitate(text, thema) {
   return funde;
 }
 
+// Simon 01.10.: „für X einfach ein Bild zum text ohne link posten, im bild ist alles zum thema bereits
+// enthalten - so stelle ich es mir bei den anderen posts auch vor". Also: KEIN Link in keinem Text.
+// Auf X zusaetzlich auch keine nackte Adresse (dasdenktdeutschland.de) — X verlinkt sie selbst, und
+// ein Post mit URL kostet 0,20 $ statt 0,015 $ (docs.x.com/x-api/getting-started/pricing, 01.10.).
+const HAT_LINK = /https?:\/\/|www\./i;
+const HAT_ADRESSE = /\b[a-z0-9-]+\.(de|com|fun|world|app|net|org)\b/i;
+
 export function pruefeTexte(t, thema) {
-  const link = themenLink(thema.id);
   const fehler = {};
   const merke = (feld, grund) => { (fehler[feld] ||= []).push(grund); };
   if (xLaenge(t.x) > GRENZEN.x) merke("x", `zu lang (${xLaenge(t.x)} > 280)`);
-  if (!t.x.includes(link)) merke("x", "Abstimm-Link fehlt");
+  if (HAT_LINK.test(t.x) || HAT_ADRESSE.test(t.x)) merke("x", "Link/Adresse im X-Text (kostet 0,20 $)");
   if (grapheme(t.bluesky) > GRENZEN.bluesky) merke("bluesky", `zu lang (${grapheme(t.bluesky)} > 300 Grapheme)`);
-  if (!t.bluesky.includes(link)) merke("bluesky", "Abstimm-Link fehlt");
   if (t.facebook.length > GRENZEN.facebook) merke("facebook", "zu lang");
-  if (!t.facebook.includes(link)) merke("facebook", "Abstimm-Link fehlt");
+  for (const f of ["bluesky", "facebook", "instagram", "tiktok"]) if (HAT_LINK.test(t[f])) merke(f, "Link im Text (Simon: nur Bild + Text)");
   if (t.instagram.length > GRENZEN.instagram) merke("instagram", "zu lang");
   if (t.tiktok.length > GRENZEN.tiktok) merke("tiktok", "zu lang");
   for (const f of ["instagram", "tiktok"]) if (!/dasdenktdeutschland\.de/i.test(t[f])) merke(f, "Adresse fehlt");
@@ -101,27 +106,26 @@ export function pruefeTexte(t, thema) {
 // ── Vorlage ohne KI ───────────────────────────────────────────────────────────
 
 export function vorlage(thema) {
-  const link = themenLink(thema.id);
-  const ruf = "Links, Mitte oder Rechts – wo stehst du? Stimm ab:";
+  const ruf = "Links, Mitte oder Rechts – wo stehst du?";
   const bereich = BEREICH_NAME[thema.bereich] ? `#${BEREICH_NAME[thema.bereich].replace(/[^\p{L}]/gu, "")}` : "";
 
   let topicX = thema.topic;
-  let x = `${topicX}\n\n${ruf}\n${link}`;
-  while (xLaenge(x) > GRENZEN.x) { topicX = kuerze(topicX, topicX.length - 10); x = `${topicX}\n\n${ruf}\n${link}`; }
+  let x = `${topicX}\n\n${ruf}`;
+  while (xLaenge(x) > GRENZEN.x) { topicX = kuerze(topicX, topicX.length - 10); x = `${topicX}\n\n${ruf}`; }
 
   // Beide Seiten nur, wenn ihr erster Satz GANZ hineinpasst — ein abgehackter Halbsatz
   // („…") liest sich wie Parteinahme. Sonst nur Frage + Aufruf.
   const ersterSatz = (s) => (s.replace(/\s+/g, " ").trim().match(/^(.+?[.!?])(\s|$)/) || [, null])[1];
   const ls = ersterSatz(thema.left_position), rs = ersterSatz(thema.right_position);
-  let bluesky = ls && rs ? `${thema.topic}\n\nLinks: ${ls}\nRechts: ${rs}\n\nStimm ab: ${link}` : "";
-  if (!bluesky || grapheme(bluesky) > GRENZEN.bluesky) bluesky = `${kuerze(thema.topic, 200)}\n\n${ruf}\n${link}`;
+  let bluesky = ls && rs ? `${thema.topic}\n\nLinks: ${ls}\nRechts: ${rs}\n\nWo stehst du? Stimm ab auf dasdenktdeutschland.de` : "";
+  if (!bluesky || grapheme(bluesky) > GRENZEN.bluesky) bluesky = `${kuerze(thema.topic, 200)}\n\n${ruf}`;
 
   const facebook = [
     thema.topic, "",
     `⬅ Links: ${thema.left_position}`, "",
     `➡ Rechts: ${thema.right_position}`, "",
     `⚖ Die Mitte: ${kuerze(thema.mitte_view, 600)}`, "",
-    `Was denkst du? Stimm ab – Links, Mitte oder Rechts:`, link,
+    `Was denkst du? Stimm ab auf dasdenktdeutschland.de – Links, Mitte oder Rechts.`,
   ].join("\n");
 
   const instagram = [
@@ -173,15 +177,16 @@ Regeln:
 - Streng neutral. Links und Rechts gleich lang, gleich fair, gleich respektvoll. Keine Wertung, keine eigene Meinung, kein Spott.
 - Nur Inhalte aus dem gelieferten Thema. Nichts hinzuerfinden: keine Zahlen, Namen, Ereignisse oder Zitate, die nicht drinstehen.
 - Setze NICHTS in Anführungszeichen, außer es steht wörtlich so im Thema.
-- Schreibe {LINK} genau dort, wo der Abstimm-Link stehen soll (wird ersetzt).
+- Jeder Beitrag erscheint ZUSAMMEN mit einem Bild, das Thema, Links, Mitte, Rechts und die Adresse schon zeigt. Der Text begleitet das Bild, er muss es nicht wiederholen.
+- KEINE Links und keine URLs, in keinem Feld.
 - Deutsch, klar, ohne Floskeln. Höchstens ein Emoji pro Beitrag, gern keins.
 
 Felder:
-- x: höchstens 170 Zeichen OHNE den {LINK} gezählt. Frage zuspitzen, endet mit „Stimm ab:" und dann {LINK}. Keine Hashtags.
-- bluesky: höchstens 190 Zeichen OHNE den {LINK} gezählt (der Link ist lang!). Thema in einem Satz, dann „Links:" und „Rechts:" mit je einem sehr kurzen Halbsatz, endet mit „Stimm ab:" und dann {LINK}.
-- facebook: 600–1200 Zeichen. Thema, Absatz „Links:", Absatz „Rechts:", Absatz „Die Mitte:", Aufruf zum Abstimmen, {LINK} am Ende.
-- instagram: 400–900 Zeichen Bildunterschrift für ein Reel. Absätze beginnen mit „Links:", „Rechts:", „Die Mitte:". KEIN {LINK} (Links sind dort nicht klickbar), stattdessen „Stimm ab auf dasdenktdeutschland.de (Link in der Bio)". Am Ende 3–5 sachliche Hashtags, darunter #DasDenktDeutschland.
-- tiktok: höchstens 300 Zeichen. KEIN {LINK}; endet mit „Stimm ab auf dasdenktdeutschland.de" und 2–4 Hashtags, darunter #DasDenktDeutschland.
+- x: höchstens 200 Zeichen. Frage zuspitzen, endet mit einer Frage an den Leser (z. B. „Wo stehst du?"). KEINE Webadresse, auch nicht „dasdenktdeutschland.de" (X macht daraus einen Link). Keine Hashtags.
+- bluesky: höchstens 280 Zeichen. Thema in einem Satz, dann „Links:" und „Rechts:" mit je einem sehr kurzen Halbsatz, endet mit „Stimm ab auf dasdenktdeutschland.de".
+- facebook: 400–900 Zeichen. Thema, Absatz „Links:", Absatz „Rechts:", Absatz „Die Mitte:", endet mit „Stimm ab auf dasdenktdeutschland.de".
+- instagram: 400–900 Zeichen Bildunterschrift für ein Reel. Absätze beginnen mit „Links:", „Rechts:", „Die Mitte:". Endet mit „Stimm ab auf dasdenktdeutschland.de (Link in der Bio)". Am Ende 3–5 sachliche Hashtags, darunter #DasDenktDeutschland.
+- tiktok: höchstens 300 Zeichen; endet mit „Stimm ab auf dasdenktdeutschland.de" und 2–4 Hashtags, darunter #DasDenktDeutschland.
 - video.links / video.rechts / video.mitte: je EIN Satz, höchstens 150 Zeichen, die Kernaussage der jeweiligen Seite für eine Videotafel. Ohne Vorsilbe wie „Links:".`;
 
 async function claudeFassung(thema, schluessel, hinweis = "") {
@@ -209,8 +214,7 @@ async function claudeFassung(thema, schluessel, hinweis = "") {
   if (antwort.stop_reason === "max_tokens") throw new Error("Claude-Antwort abgeschnitten (max_tokens)");
   const text = antwort.content.filter((b) => b.type === "text").map((b) => b.text).join("");
   const roh = JSON.parse(text);
-  const link = themenLink(thema.id);
-  const ersetze = (s) => s.replaceAll("{LINK}", link).trim();
+  const ersetze = (s) => s.replaceAll("{LINK}", "").trim();   // Sicherheitsnetz: falls doch ein Platzhalter kommt
   return {
     x: ersetze(roh.x), bluesky: ersetze(roh.bluesky), facebook: ersetze(roh.facebook),
     instagram: ersetze(roh.instagram), tiktok: ersetze(roh.tiktok),
