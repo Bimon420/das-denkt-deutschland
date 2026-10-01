@@ -27,3 +27,9 @@ desktop.ini
 
 .vercel
 .env*
+
+# DDD-Social (social/): Zugangsdaten, Token und erzeugte Beiträge nie committen.
+social/.env.social
+social/.tiktok_token.json
+social/ausgabe/
+!social/.env.social.BEISPIEL
