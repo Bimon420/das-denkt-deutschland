@@ -118,8 +118,18 @@ const ParteienPage = () => {
       .sort((a, b) => a.sortOrder - b.sortOrder);
   }, [topics]);
 
-  const toggle = (label: string) =>
+  // Eine Gruppe hat bis zu ~350 Positionen: offen ist sie zehntausende Pixel lang. Beim Einklappen
+  // springt die Seite deshalb zum Kopf der Gruppe zurück, sonst steht man im Leeren.
+  const toggle = (label: string) => {
+    const warOffen = expanded[label] ?? false;
     setExpanded((prev) => ({ ...prev, [label]: !prev[label] }));
+    if (warOffen) {
+      requestAnimationFrame(() => {
+        const kopf = document.getElementById(`gruppe-${label}`);
+        if (kopf && kopf.getBoundingClientRect().top < 0) kopf.scrollIntoView({ block: "start" });
+      });
+    }
+  };
 
   return (
     <div className="min-h-[100dvh] bg-background px-5 py-8 max-w-2xl mx-auto">
@@ -153,15 +163,21 @@ const ParteienPage = () => {
             return (
               <motion.div
                 key={group.label}
+                id={`gruppe-${group.label}`}
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: Math.min(gi * 0.04, 0.3), duration: 0.35 }}
-                className="rounded-xl border border-border bg-card overflow-hidden"
+                className="rounded-xl border border-border bg-card scroll-mt-2"
               >
-                {/* Header */}
+                {/* Header: bleibt oben kleben, solange die Gruppe offen ist, damit der Pfeil erreichbar bleibt */}
                 <button
                   onClick={() => toggle(group.label)}
-                  className="w-full flex items-center gap-3 p-4 hover:bg-secondary/30 transition-colors text-left"
+                  aria-expanded={isOpen}
+                  className={`w-full flex items-center gap-3 p-4 transition-colors text-left rounded-t-xl ${
+                    isOpen
+                      ? "sticky top-0 z-10 bg-card hover:bg-secondary border-b border-border"
+                      : "hover:bg-secondary/30"
+                  }`}
                 >
                   {group.isParty && (
                     <span className={`w-3 h-3 rounded-full ${group.color} flex-shrink-0`} />
@@ -206,12 +222,12 @@ const ParteienPage = () => {
                   )}
                 </AnimatePresence>
 
-                {!isOpen && rest.length > 0 && (
+                {rest.length > 0 && (
                   <button
                     onClick={() => toggle(group.label)}
-                    className="w-full text-[11px] text-accent font-semibold py-2 hover:bg-secondary/20 transition-colors"
+                    className="w-full text-[11px] text-accent font-semibold py-2 hover:bg-secondary/20 transition-colors rounded-b-xl"
                   >
-                    + {rest.length} weitere anzeigen
+                    {isOpen ? "Einklappen" : `+ ${rest.length} weitere anzeigen`}
                   </button>
                 )}
               </motion.div>
