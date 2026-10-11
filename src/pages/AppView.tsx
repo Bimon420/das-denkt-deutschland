@@ -183,7 +183,9 @@ const AppView = () => {
       <header className="sticky top-0 z-30 border-b border-border/40 dark:border-border/60 bg-background/90 dark:bg-background/95 backdrop-blur-xl safe-area-top">
         <div className="flex items-center justify-between px-2 md:px-5 py-1.5 md:py-3">
           <div className="flex flex-1 items-center gap-1.5 md:gap-2 min-w-[28px]">
-            <img src="/logo.png" alt="DDD" className="w-auto flex-shrink-0 h-6 md:h-7" />
+            {/* Logo „drei D“ (12.10.2026): hell mit weißen Fugen, dunkel mit ausgeschnittenen Fugen */}
+            <img src="/logo.svg" alt="DDD" className="w-auto flex-shrink-0 h-6 md:h-7 dark:hidden" />
+            <img src="/logo-dunkel.svg" alt="DDD" className="w-auto flex-shrink-0 h-6 md:h-7 hidden dark:block" />
             <span className="font-body text-[12px] md:text-base font-extrabold tracking-tight uppercase truncate hidden xs:inline">Das Denkt Deutschland</span>
           </div>
           {/* Symbole zuerst, das Logo gibt nach. Wird es auf 320 px doch zu eng, scrollt die

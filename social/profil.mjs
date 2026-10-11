@@ -24,19 +24,21 @@ body{background:hsl(45 25% 97%);color:hsl(0 0% 8%);font-family:'Nunito Sans',san
 .drei span{padding:.35em .9em;border-radius:.35em;color:#fff}
 .l{background:hsl(0 0% 12%)}.m{background:hsl(46 100% 50%);color:hsl(0 0% 8%)!important}.r{background:hsl(0 80% 45%)}
 </style>`;
-const LOGO = `data:image/png;base64,${b64("logo.png")}`;
+// Seit 12.10.2026 das Zeichen „drei D“ (public/logo.svg) und der Schriftzug (public/logo-schriftzug.svg).
+const LOGO = `data:image/svg+xml;base64,${b64("logo.svg")}`;
+const SCHRIFTZUG = `data:image/svg+xml;base64,${b64("logo-schriftzug.svg")}`;
 
 const BILDER = {
   // Rund zugeschnitten auf allen Plattformen → Logo mit Rand, nichts in den Ecken
-  "profilbild.png": [1000, 1000, `<img class="logo" src="${LOGO}" style="width:86%">`],   // Ecken bei 86 % ~440 px vom Mittelpunkt < 500 = bleibt im Kreis
+  "profilbild.png": [1000, 1000, `<div style="position:fixed;inset:0;background:#fff;display:flex;align-items:center;justify-content:center"><img class="logo" src="${LOGO}" style="width:64%"></div>`],  // weißer Grund: die weißen Fugen verschwinden darin   // 640x499 → Ecken ~406 px vom Mittelpunkt < 500 = bleibt im Kreis
   // X 1500x500 · Bluesky 3000x1000 (gleiches Verhältnis, doppelte Auflösung über deviceScaleFactor)
   "banner_x_bluesky.png": [1500, 500, `<div style="display:flex;flex-direction:column;align-items:center;gap:22px;font-size:26px;padding-left:120px">
-     <div style="display:flex;align-items:center;gap:26px"><img class="logo" src="${LOGO}" style="height:78px"><div class="marke" style="font-size:30px">DAS DENKT<br>DEUTSCHLAND</div></div>
+     <img class="logo" src="${SCHRIFTZUG}" style="height:104px">
      <div class="spruch" style="font-size:48px">Jeden Tag die Themen, über die Deutschland streitet.</div>
      <div class="drei"><span class="l">← Links</span><span class="m">Mitte</span><span class="r">Rechts →</span><span style="color:hsl(0 0% 8%);padding-left:.3em">– und du stimmst ab.</span></div></div>`],
   // Facebook-Titelbild 1640x624 (Handy schneidet seitlich) → alles schmal in die Mitte
   "banner_facebook.png": [1640, 624, `<div style="display:flex;flex-direction:column;align-items:center;gap:26px;font-size:28px">
-     <div style="display:flex;align-items:center;gap:28px"><img class="logo" src="${LOGO}" style="height:86px"><div class="marke" style="font-size:32px">DAS DENKT<br>DEUTSCHLAND</div></div>
+     <img class="logo" src="${SCHRIFTZUG}" style="height:112px">
      <div class="spruch" style="font-size:50px;text-align:center">Jeden Tag die Themen,<br>über die Deutschland streitet.</div>
      <div class="drei"><span class="l">← Links</span><span class="m">Mitte</span><span class="r">Rechts →</span></div></div>`],
 };

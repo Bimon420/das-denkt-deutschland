@@ -1,5 +1,10 @@
 # DDD-Profile — zum Kopieren beim Anlegen
 
+> **Neues Logo seit 12.10.2026** („drei D“, Schwarz/Rot/Gold, von Simon abgenommen): Die drei Bilder
+> unten sind damit neu gerendert (`node social/profil.mjs`). Die alten Fassungen mit dem
+> Kästchen-Logo liegen daneben als `*.vor_logo_1011.png`. Wer ein Konto schon mit dem alten Bild
+> angelegt hat: dort Profilbild und Banner gegen die neuen tauschen (nichts wurde automatisch hochgeladen).
+
 Bilder in diesem Ordner:
 - `profilbild.png` (1000×1000) — überall als Profilbild, wird rund zugeschnitten
 - `banner_x_bluesky.png` (3000×1000) — Banner für X und Bluesky
