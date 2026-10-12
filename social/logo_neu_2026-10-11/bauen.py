@@ -67,7 +67,7 @@ def text_pfad(fontdatei, text, x, y, groesse, sperrung=0.0):
 PF = os.path.join(PROJ, "public", "fonts", "PlayfairDisplay-Bold.woff2")
 NU = os.path.join(PROJ, "public", "fonts", "NunitoSans-Bold.woff2")
 FS = 56            # Schriftgröße in Zeichen-Einheiten (Zeichen ist 112 hoch)
-TX = 150 + 30      # Text beginnt rechts vom Zeichen
+TX = 190 + 30      # Text beginnt rechts vom Zeichen (Zeichen seit Variante B 190 breit)
 cap = TTFont(PF)["OS/2"].sCapHeight / TTFont(PF)["head"].unitsPerEm * FS
 oben = -6
 b1 = oben + cap
@@ -99,8 +99,8 @@ JOBS = [
     ["icon-192.png", "favicon.svg", 192, 192, "#FFFFFF", 0.12],
     ["icon-512.png", "favicon.svg", 512, 512, "#FFFFFF", 0.12],
     ["favicon.png", "favicon.svg", 512, 512, None, 0.0],   # ersetzt das alte 1024er favicon.png
-    ["logo.png", "logo.svg", 257, 200, None, 0.0],
-    ["logo-dunkel.png", "logo-dunkel.svg", 257, 200, None, 0.0],
+    ["logo.png", "logo.svg", 0, 200, None, 0.0],
+    ["logo-dunkel.png", "logo-dunkel.svg", 0, 200, None, 0.0],
     ["logo-schriftzug.png", "logo-schriftzug.svg", 0, 200, None, 0.0],
 ]
 json.dump(JOBS, open(os.path.join(AUS, "_jobs.json"), "w"))

@@ -1,12 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-4 -4 154 120" role="img" aria-label="DDD — Das Denkt Deutschland">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-4 -4 194 120" role="img" aria-label="DDD — Das Denkt Deutschland">
   <!-- Drei D hintereinander, Flaggenfolge von vorn nach hinten: Schwarz, Rot, Gold.
-       Seit 12.10.2026 (Simon: „wieso nicht weiße Ränder für jeden Buchstaben?" → „nimm das Muster"):
-       jedes D ist ein echter Buchstabe mit Loch (evenodd) und hat einen weißen Rand (6) außen UND innen;
-       durch das Loch sieht man das D dahinter. Vorher weiß gefüllte Innenräume: ddd_marke.vor_raender_1210.svg -->
+       Seit 12.10.2026 Variante B (Simon: weiße Ränder je Buchstabe → „der rote innere Kern ist größer als der gelbe" → „b"):
+       jedes D echter Buchstabe mit Loch (evenodd) und weißem Rand (6) außen und innen; Versatz 52, damit jedes Loch
+       ganz und gleich groß zu sehen ist; die D dahinter sind im Loch des vorderen ausgeschnitten (Löcher zeigen nur den Grund).
+       Vorgänger: ddd_marke.vor_b_1210.svg (Löcher mit Farbe), ddd_marke.vor_raender_1210.svg (weiße Innenräume). -->
   <defs>
     <path id="d" fill-rule="evenodd" d="M0 0 H34 A44 56 0 0 1 34 112 H0 Z M22 24 V88 H34 A24 32 0 0 0 34 24 Z"/>
+    <path id="loch" d="M22 24 V88 H34 A24 32 0 0 0 34 24 Z"/>
+    <mask id="mr" maskUnits="userSpaceOnUse" x="-10" y="-10" width="210" height="135"><rect x="-10" y="-10" width="210" height="135" fill="#fff"/><use href="#loch" fill="#000" stroke="#000" stroke-width="6"/></mask>
+    <mask id="mg" maskUnits="userSpaceOnUse" x="-10" y="-10" width="210" height="135"><rect x="-10" y="-10" width="210" height="135" fill="#fff"/><use href="#loch" fill="#000" stroke="#000" stroke-width="6"/><use href="#loch" transform="translate(52 0)" fill="#000" stroke="#000" stroke-width="6"/></mask>
   </defs>
-  <use href="#d" transform="translate(64 0)" fill="#FFCC00" stroke="#FFFFFF" stroke-width="6" paint-order="stroke"/>
-  <use href="#d" transform="translate(32 0)" fill="#DD0000" stroke="#FFFFFF" stroke-width="6" paint-order="stroke"/>
+  <g mask="url(#mg)"><use href="#d" transform="translate(104 0)" fill="#FFCC00" stroke="#FFFFFF" stroke-width="6" paint-order="stroke"/></g>
+  <g mask="url(#mr)"><use href="#d" transform="translate(52 0)" fill="#DD0000" stroke="#FFFFFF" stroke-width="6" paint-order="stroke"/></g>
   <use href="#d" fill="#000000" stroke="#FFFFFF" stroke-width="6" paint-order="stroke"/>
 </svg>
