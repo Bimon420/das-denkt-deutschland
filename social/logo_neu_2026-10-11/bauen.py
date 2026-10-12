@@ -1,4 +1,4 @@
-# Baut aus ddd_marke.svg (abgenommen 11.10.2026, Zeichen NICHT verändern) alle Logo-/Icon-Dateien.
+# Baut aus ddd_marke.svg (abgenommen 11.10.2026, weiße Ränder je Buchstabe seit 12.10.; Zeichen NICHT ohne Simon verändern) alle Logo-/Icon-Dateien.
 #   python -X utf8 social/logo_neu_2026-10-11/bauen.py   → social/logo_neu_2026-10-11/aus/
 # SVGs entstehen hier, PNGs rendert Chromium headless (render.cjs), die ICO packt dieses Skript.
 import json, os, re, struct, subprocess, sys
@@ -44,12 +44,10 @@ def d_dunkel(praefix=""):
   <g mask="url(#{p}mg)"><g transform="translate(64 0)"><use href="#{p}a" fill="#FFCC00"/><use href="#{p}i" fill="#FFFFFF"/></g></g>
   <g mask="url(#{p}mr)"><g transform="translate(32 0)"><use href="#{p}a" fill="#DD0000"/><use href="#{p}i" fill="#FFFFFF"/></g></g>
   <g><use href="#{p}a" fill="#000000"/><use href="#{p}i" fill="#FFFFFF"/></g>"""
-schreib("logo-dunkel.svg", f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="-4 -4 154 120" role="img" aria-label="DDD — Das Denkt Deutschland">
-  <!-- Fassung für dunkle Gründe: Geometrie wie ddd_marke.svg, aber die Fugen (6) sind ausgeschnitten
-       statt weiß gemalt, damit der Grund durchscheint (kein weißer Aufkleber-Rand). Innenräume bleiben weiß. -->
-  {d_dunkel()}
-</svg>
-""")
+# Seit 12.10.2026 (weiße Ränder um jeden Buchstaben, Simon) ist der weiße Rand Teil des Zeichens — er hält
+# auch das schwarze D auf dunklem Grund sichtbar. Die dunkle Fassung ist deshalb dasselbe Zeichen;
+# d_dunkel() bleibt nur für bauen.vor_raender_1210.py-Vergleiche stehen.
+schreib("logo-dunkel.svg", MARKE)
 
 # 3) Schriftzug: Zeichen + „Das Denkt / Deutschland“ (Playfair Display Bold, OFL, liegt in public/fonts)
 #    + kleines „DDD“ (Nunito Sans Bold) — Text als Pfade, keine Schrift nötig.
@@ -90,7 +88,7 @@ def schriftzug(textfarbe, kleinfarbe, zeichen):
 """
 innen_hell = re.search(r"<defs>.*</svg>", MARKE, re.S).group(0).replace("</svg>", "").strip()
 schreib("logo-schriftzug.svg", schriftzug("#111111", "#6e6e73", innen_hell))
-schreib("logo-schriftzug-dunkel.svg", schriftzug("#F2F2F0", "#9a9aa0", d_dunkel("s")))
+schreib("logo-schriftzug-dunkel.svg", schriftzug("#F2F2F0", "#9a9aa0", innen_hell))
 
 # 4) PNG-Aufträge für Chromium: [datei, svg, breite, höhe, grund|None, rand_anteil]
 JOBS = [
