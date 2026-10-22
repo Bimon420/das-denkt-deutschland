@@ -110,8 +110,8 @@ const DatenschutzPage = () => {
             </p>
             <p className="text-xs text-muted-foreground/80 leading-relaxed">
               Simon Krätschmer<br />
-              Spessartstraße 20<br />
-              14197 Berlin
+              c/o MDC#1899, Welserstraße 3<br />
+              87463 Dietmannsried
             </p>
             <p className="text-xs text-muted-foreground/80 leading-relaxed">
               E-Mail:{" "}

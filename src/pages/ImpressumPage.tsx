@@ -32,8 +32,8 @@ const ImpressumPage = () => {
         <section className="space-y-1">
           <h2 className="text-sm font-semibold">Verantwortlich</h2>
           <p className="text-sm text-muted-foreground">Simon Krätschmer</p>
-          <p className="text-sm text-muted-foreground">Spessartstraße 20</p>
-          <p className="text-sm text-muted-foreground">14197 Berlin</p>
+          <p className="text-sm text-muted-foreground">c/o MDC#1899, Welserstraße 3</p>
+          <p className="text-sm text-muted-foreground">87463 Dietmannsried</p>
         </section>
 
         <section className="space-y-1">
