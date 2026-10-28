@@ -26,7 +26,12 @@ export interface Topic {
   leftView: ViewpointData;
   rightView: ViewpointData;
   mitteView: string;
+  publishedAt?: string;
 }
+
+// Simon 28.10.: „wenn ich auf diese Seite gehe müssen da mehr Themen sein" — am 27.10. gab es
+// nur ein Thema des Tages; nach dieser einen Stimme war das Feld leer. Darunter wird aufgefüllt.
+const MINDESTENS = 10;
 
 export function mapDbToTopic(row: any): Topic {
   return {
@@ -52,6 +57,7 @@ export function mapDbToTopic(row: any): Topic {
       sources: (row.right_sources as TopicSource[]) || [],
     },
     mitteView: row.mitte_view,
+    publishedAt: row.published_at ?? undefined,
   };
 }
 
@@ -72,7 +78,7 @@ export function useTopics() {
       const today = new Date().toISOString().split("T")[0];
 
       // Try today first
-      let { data, error } = await supabase
+      const { data, error } = await supabase
         .from("topics")
         .select("*")
         .eq("published_at", today)
@@ -83,28 +89,26 @@ export function useTopics() {
         throw error;
       }
 
-      // If no topics for today, fetch the most recent available date
-      if (!data || data.length === 0) {
-        const { data: latest, error: latestError } = await supabase
-          .from("topics")
-          .select("*")
-          .order("published_at", { ascending: false })
-          .order("created_at", { ascending: false })
-          .limit(20);
+      const heute = data ?? [];
+      if (heute.length >= MINDESTENS) return heute.map(mapDbToTopic);
 
-        if (latestError) {
-          console.error("Error fetching latest topics:", latestError);
-          throw latestError;
-        }
+      const { data: latest, error: latestError } = await supabase
+        .from("topics")
+        .select("*")
+        .lt("published_at", today)
+        .order("published_at", { ascending: false })
+        .order("created_at", { ascending: false })
+        .limit(MINDESTENS - heute.length);
 
-        if (!latest || latest.length === 0) {
-          return staticTopics;
-        }
-
-        data = latest;
+      if (latestError) {
+        console.error("Error fetching latest topics:", latestError);
+        if (heute.length > 0) return heute.map(mapDbToTopic);
+        throw latestError;
       }
 
-      return data.map(mapDbToTopic);
+      const alle = [...heute, ...(latest ?? [])];
+      if (alle.length === 0) return staticTopics;
+      return alle.map(mapDbToTopic);
     },
     staleTime: 5 * 60 * 1000, // 5 min
   });

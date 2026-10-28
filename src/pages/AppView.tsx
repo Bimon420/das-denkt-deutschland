@@ -24,19 +24,29 @@ const AppView = () => {
   const { data: topics = [], isLoading, isFetching } = useTopics();
   const [shuffleSeed] = useState(() => Math.random());
   const shuffledTopics = useMemo(() => {
-    const a = [...topics];
+    // Nur die neuesten (Themen des Tages) mischen; aufgefuellte aeltere bleiben dahinter, nach Datum.
+    const neuestes = topics[0]?.publishedAt;
+    const a = topics.filter((t) => t.publishedAt === neuestes);
+    const rest = topics.filter((t) => t.publishedAt !== neuestes);
     for (let i = a.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [a[i], a[j]] = [a[j], a[i]];
     }
-    return a;
+    return [...a, ...rest];
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [topics, shuffleSeed]);
 
   // MONVERSE-Mitglieder: Themen des Tages nach ihren Bereichen sortiert, darunter mehr aus diesen Bereichen
   const mitglied = useMitglied();
   const wahl = mitglied.mitgliedBis ? mitglied.bereiche : [];
-  const feld = useMemo(() => nachBereichenSortiert(shuffledTopics, wahl), [shuffledTopics, wahl]);
+  // Je Gruppe sortieren: die Bereichswahl darf aufgefuellte aeltere Themen nicht vor die des Tages ziehen.
+  const feld = useMemo(() => {
+    const neuestes = shuffledTopics[0]?.publishedAt;
+    return [
+      ...nachBereichenSortiert(shuffledTopics.filter((t) => t.publishedAt === neuestes), wahl),
+      ...nachBereichenSortiert(shuffledTopics.filter((t) => t.publishedAt !== neuestes), wahl),
+    ];
+  }, [shuffledTopics, wahl]);
   const { data: mehr = [] } = useQuery({
     queryKey: ["mehr-aus-bereichen", wahl.join(","), topics.map((t) => t.id).join(",")],
     enabled: wahl.length > 0,
